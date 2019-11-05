@@ -11,10 +11,37 @@ layui.use(['form','layer','jquery'],function(){
 
     //登录按钮
     form.on("submit(login)",function(data){
+        // 获取前端页面输入的信息
+        var loginData = data.field;
         $(this).text("登录中...").attr("disabled","disabled").addClass("layui-disabled");
-        setTimeout(function(){
-            window.location.href = "/layuicms2.0";
-        },1000);
+        $.ajax({
+            url:rootUrl+'/Login/checkLogin',
+            data:{
+                username:loginData.username,
+                password:loginData.password
+            },
+            type:'post',
+            dataType:'json',
+            success:function (res) {
+                if(res.code == 0)
+                {
+                    layer.msg(res.msg);
+                    setTimeout(function(){
+                        window.location.href = 'http://127.0.0.1/107/SCIManage/view/';
+                    },1000);
+                }
+                else
+                {
+                    layer.msg(res.msg);
+                    $(this).text("登录").attr("disabled","").removeClass("layui-disabled");
+                }
+            },
+            error:function()
+            {
+                layer.msg('服务器出现错误，请联系系统管理员！')
+            }
+        });
+
         return false;
     })
 
@@ -34,4 +61,5 @@ layui.use(['form','layer','jquery'],function(){
             $(this).parent().removeClass("layui-input-active");
         }
     })
+
 })

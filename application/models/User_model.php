@@ -51,4 +51,15 @@ class User_model extends CI_Model
        return $this->db->query($sql)->result_array();*/
     }
 
+
+    // 做登录验证
+    public function checkLogin($where)
+    {
+        return $this->db
+                    ->select('job_number,name,academy,full_spell,identity')
+                    ->where($where)
+                    ->from('user')
+                    ->get()->result_array();
+    }
+
 }

@@ -4,6 +4,21 @@ layui.config({
 }).extend({
 	"bodyTab" : "bodyTab"
 })
+
+$.ajax({
+	url:rootUrl+'/Login/isLogin',
+	type:'get',
+	dataType:'json',
+	success:function (res) {
+		console.log(res);
+		if(res.code == 4)
+		{
+			layer.msg(res.msg);
+			location.href = 'http://127.0.0.1/107/SCIManage/view/page/login/login.html';
+			return ;
+		}
+	}
+});
 layui.use(['bodyTab','form','element','layer','jquery'],function(){
 	var form = layui.form,
 		element = layui.element;

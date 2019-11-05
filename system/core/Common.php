@@ -861,6 +861,7 @@ if ( ! function_exists('function_usable'))
             'data' => $data
         );
         return json_encode($data,JSON_UNESCAPED_UNICODE);
+
     }
     /*
      * 错误码定义：
