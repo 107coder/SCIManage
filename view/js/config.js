@@ -1,0 +1,1 @@
+window.urlRoot = "http://localhost:88/SCIManage/index.php"; 
