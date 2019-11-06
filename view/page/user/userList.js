@@ -37,9 +37,7 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
               curr: 1 //重新从第 1 页开始
             }
             ,where: {
-              key: {
                 key: demoReload.val()
-              }
             }
           });
       });
@@ -59,10 +57,14 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
             success : function(layero, index){
                 var body = layui.layer.getChildFrame('body', index);
                 body.find(".job_number").val(data.job_number);  
-                body.find(".name").val(data.name);  
-                body.find(".userSex input[value="+data.gender+"]").attr("prop", true); //还有问题               
+                body.find(".name").val(data.name); 
+                body.find(".gender input[value="+data.gender+"]").next('.layui-unselect').addClass("layui-form-radioed");
+                body.find(".layui-form-radioed").find('i').addClass("layui-anim-scaleSpring");              
                 body.find(".academy").val(data.academy);  
                 body.find(".identity option[value="+data.identity+"]").attr('selected',true);
+                body.find(".layui-anim-upbit dd[lay-value='0']").removeClass("layui-this"); //取消默认身份颜色样式
+                body.find(".layui-anim-upbit dd[lay-value="+data.identity+"]").addClass("layui-this");  //为相应身份添加颜色样式   
+                body.find(".layui-unselect").val(returnIdentity(data.identity));    //改变编辑时的身份数值
                 $.ajax({
                     url : rootUrl+"/user/checkUser",
                     dataType:"JSON",
@@ -89,7 +91,18 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
         $(window).on("resize",function(){
             layui.layer.full(window.sessionStorage.getItem("index"));
         })
-    } 
+    }
+    //根据identity的值返回相应文字说明
+    function returnIdentity(data){ 
+        if(data==0)
+            return "普通用户";
+        else if(data==1)
+            return "院级管理员"; 
+        else if(data==2)
+            return "校级管理员";
+        else
+            return "身份错误";
+    }
 
     //添加用户
     function addUser(edit){

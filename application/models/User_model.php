@@ -20,7 +20,8 @@ class User_model extends CI_Model
                     ->or_like('academy' ,$key,)
                     ->or_like('gender' ,$key,)
                     ->or_like('identity' ,$identity,)
-                    ->order_by('identity desc','job_number')
+                    ->order_by('identity desc')
+                    ->order_by('job_number')
                     ->get()->result_array();
     }
     //添加用户
@@ -41,19 +42,4 @@ class User_model extends CI_Model
     public function editUser($job_number,$data){
        $this->db->update('user',$data,array('job_number'=>$job_number));
     }
-    //搜索用户
-    public function searchUser($perPage,$offest,$key){
-        return $this->db
-                    ->limit($perPage,$offest)
-                    ->select('job_number,name,gender,academy,identity')
-                    ->from('user')
-                    ->like('job_number' ,$key,)
-                    ->or_like('name' ,$key,)
-                    ->or_like('academy' ,$key,)
-                    ->order_by('identity desc','job_number')
-                    ->get()->result_array();
-       /*$sql = "select * from user where job_number like '%$key%' or name like '%$key%' or gender like '%$key%' or academy like '%$key%' or identity like '%$key%' order by 'identity desc','job_number'";
-       return $this->db->query($sql)->result_array();*/
-    }
-
 }

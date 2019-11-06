@@ -21,15 +21,15 @@ class User extends CI_Controller
         $limit = $this->input->get('limit');    //每页多少条
         $offset=(($page-1)*$limit);         //从第几条开始
         $key = $this->input->get('key');
-        if($key["key"]=="校级管理员")    //判断用户身份
+        if($key=="校级管理员")    //判断用户身份
             $identity=2;
-        else if($key["key"]=="院级管理员")
+        else if($key=="院级管理员")
             $identity=1;
-        else if($key["key"]=="普通用户")
+        else if($key=="普通用户")
             $identity=0;
         else
             $identity=-1;
-        $data = $this->user->getAllUser($limit,$offset,$key["key"],$identity);
+        $data = $this->user->getAllUser($limit,$offset,$key,$identity);
         $resdata = array(
             'code'  => '0',
             'msg'   => '数据请求正常',
