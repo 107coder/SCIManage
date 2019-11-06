@@ -27,43 +27,27 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
             {title: '操作', minWidth:175, templet:'#userListBar',fixed:"right",align:"center"}
         ]]
     });
-    //搜索
-    /*table.render({ 
-        elem: '#userList',
-        url : rootUrl+'/user/searchUser', 
-        cellMinWidth : 95,
-        page : true,
-        height : "full-105", 
-        limit : 10,
-        limits : [10,20,30,40,50],
-        loading : true,
-        id : "userListTable",
-        cols : [[
-            {type: "checkbox", fixed:"left", width:50},
-            {field: 'job_number', title: '工号', align:'center',minWidth:150},
-            {field: 'name', title: '姓名', minWidth:100, align:"center"},
-            {field: 'gender', title: '用户性别', align:'center'},
-            {field: 'academy', title: '学院', minWidth:100, align:"center"},
-            {field: 'identity', title: '身份', minWidth:100, align:"center"},
-            {title: '操作', minWidth:175, templet:'#userListBar',fixed:"right",align:"center"}
-        ]]
-    });*/
     //用户查询
     var $ = layui.$;
     var demoReload = $('#demoReload');   
       $('.search_btn').on('click', function(){
-        //执行重载
+          //执行重载
           table.reload('userListTable', {
             page: {
               curr: 1 //重新从第 1 页开始
             }
             ,where: {
               key: {
-                /*: */
                 key: demoReload.val()
               }
             }
           });
+      });
+      $(document).on('keydown', function (event) {  //按enter键搜索
+            if (event.keyCode == 13) {
+                $(".search_btn").click();
+                return false
+            }
       });
     //修改用户时的数值的显示
     function editUser(data){ 
@@ -99,7 +83,6 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
                 form.render();
             }
         })
-
         layui.layer.full(index);
         window.sessionStorage.setItem("index",index);
         //改变窗口大小时，重置弹窗的宽高，防止超出可视区域（如F12调出debug的操作）

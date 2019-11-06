@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  
 class User_model extends CI_Model
 {
-    public function getAllUser($perPage,$offest,$key)
+    public function getAllUser($perPage,$offest,$key,$identity)
     {
         return $this->db
                     ->limit($perPage,$offest,$key)
@@ -18,6 +18,8 @@ class User_model extends CI_Model
                     ->like('job_number' ,$key,)
                     ->or_like('name' ,$key,)
                     ->or_like('academy' ,$key,)
+                    ->or_like('gender' ,$key,)
+                    ->or_like('identity' ,$identity,)
                     ->order_by('identity desc','job_number')
                     ->get()->result_array();
     }
