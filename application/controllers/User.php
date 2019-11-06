@@ -20,7 +20,8 @@ class User extends CI_Controller
         $page = $this->input->get('page');
         $limit = $this->input->get('limit');    //每页多少条
         $offset=(($page-1)*$limit);         //从第几条开始
-        $data = $this->user->getAllUser($limit,$offset);
+        $key = $this->input->get('key');
+        $data = $this->user->getAllUser($limit,$offset,$key);
         $resdata = array(
             'code'  => '0',
             'msg'   => '数据请求正常',

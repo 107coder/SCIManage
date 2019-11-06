@@ -46,7 +46,7 @@
 	<div class="layui-form-item layui-row layui-col-xs12">
 		<label class="layui-form-label">学院</label>
 		<div class="layui-input-block">
-			<input type="text" class="layui-input academy" lay-verify="required" placeholder="请输入学院名称">
+			<input type="text" class="layui-input academy" lay-verify="required" placeholder="请输入学院名称"><span class="tips">*必填项</span>
 		</div>
 	</div>
 	<div class="layui-form-item layui-row layui-col-xs12">
@@ -91,12 +91,22 @@
 			<input type="text" class="layui-input full_spell" lay-verify="required" placeholder="请输入姓名全拼  （如zhang sanfeng）"><span class="tips">*必填项</span>
 		</div>
 	</div>
-	<div class="layui-form-item layui-row layui-col-xs12">
+	<div class="magb15 layui-col-md6 layui-col-xs12">
+			<label class="layui-form-label">用户等级</label>
+			<div class="layui-input-block">
+				<select name="identity" class="identity" lay-filter="identity">
+					<option value="0">普通用户</option>
+					<option value="1">院级管理员</option>
+					<option value="2">校级管理员</option>
+				</select>
+			</div><span class="tips">*必填项</span>
+	</div>
+	<!-- <div class="layui-form-item layui-row layui-col-xs12">
 		<label class="layui-form-label">身份</label>
 		<div class="layui-input-block">
 			<input type="text" class="layui-input identity" lay-verify="identity" placeholder="请输入身份   （0：普通用户、1：院级管理员、2：校级管理员）"><span class="tips">*必填项</span>
 		</div>
-	</div>
+	</div> -->
 	<div class="layui-form-item layui-row layui-col-xs12">
 		<div class="layui-input-block">
 			<button class="layui-btn layui-btn-sm" lay-submit="" lay-filter="addUser">立即添加</button>

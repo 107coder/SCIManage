@@ -6,22 +6,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Date: 2019/10/26
  * Time: 12:03
  */ 
-
+ 
 class User_model extends CI_Model
 {
-    public function getAllUser($perPage,$offest)
+    public function getAllUser($perPage,$offest,$key)
     {
         return $this->db
-                    ->limit($perPage,$offest)
+                    ->limit($perPage,$offest,$key)
                     ->select('job_number,name,gender,academy,identity')
                     ->from('user')
+                    ->like('job_number' ,$key,)
+                    ->or_like('name' ,$key,)
+                    ->or_like('academy' ,$key,)
                     ->order_by('identity desc','job_number')
                     ->get()->result_array();
     }
     //添加用户
-	public function addUser($data){
-		$this->db->insert('user',$data);
-	} 
+    public function addUser($data){
+        $this->db->insert('user',$data);
+    } 
  
     //删除用户
     public function delUser($job_number){
@@ -49,17 +52,6 @@ class User_model extends CI_Model
                     ->get()->result_array();
        /*$sql = "select * from user where job_number like '%$key%' or name like '%$key%' or gender like '%$key%' or academy like '%$key%' or identity like '%$key%' order by 'identity desc','job_number'";
        return $this->db->query($sql)->result_array();*/
-    }
-
-
-    // 做登录验证
-    public function checkLogin($where)
-    {
-        return $this->db
-                    ->select('job_number,name,academy,full_spell,identity')
-                    ->where($where)
-                    ->from('user')
-                    ->get()->result_array();
     }
 
 }

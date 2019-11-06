@@ -5,7 +5,7 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
         $ = layui.jquery,
         laytpl = layui.laytpl,
         table = layui.table;
-
+ 
     //用户列表
     var tableIns = table.render({ 
         elem: '#userList',
@@ -23,7 +23,7 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
             {field: 'name', title: '姓名', minWidth:100, align:"center"},
             {field: 'gender', title: '用户性别', align:'center'},
             {field: 'academy', title: '学院', minWidth:100, align:"center"},
-            {field: 'identity', title: '身份', minWidth:100, align:"center"},
+            {field: 'identity', title: '身份', templet:'#identity',minWidth:100, align:"center"},
             {title: '操作', minWidth:175, templet:'#userListBar',fixed:"right",align:"center"}
         ]]
     });
@@ -48,33 +48,28 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
             {title: '操作', minWidth:175, templet:'#userListBar',fixed:"right",align:"center"}
         ]]
     });*/
-    var $ = layui.$, active = {
-    reload: function(){
-      var demoReload = $('#demoReload');
-      
-      //执行重载
-      table.reload('userListTable', {
-        page: {
-          curr: 1 //重新从第 1 页开始
-        }
-        ,where: {
-          key: {
-            name: demoReload.val()
-          }
-        }
-      }, 'data');
-    }
-  };
-  
-  $('.search_btn').on('click', function(){
-    var type = $(this).data('type');
-    active[type] ? active[type].call(this) : '';
-  });
+    //用户查询
+    var $ = layui.$;
+    var demoReload = $('#demoReload');   
+      $('.search_btn').on('click', function(){
+        //执行重载
+          table.reload('userListTable', {
+            page: {
+              curr: 1 //重新从第 1 页开始
+            }
+            ,where: {
+              key: {
+                /*: */
+                key: demoReload.val()
+              }
+            }
+          });
+      });
     //修改用户时的数值的显示
     function editUser(data){ 
         
         var index = layui.layer.open({
-            title : "添加用户",
+            title : "修改用户",
             type : 2,
             content : "userEdit.html",
             success : function(layero, index){
@@ -83,7 +78,7 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
                 body.find(".name").val(data.name);  
                 body.find(".userSex input[value="+data.gender+"]").attr("prop", true); //还有问题               
                 body.find(".academy").val(data.academy);  
-                body.find(".identity").val(data.identity);
+                body.find(".identity option[value="+data.identity+"]").attr('selected',true);
                 $.ajax({
                     url : rootUrl+"/user/checkUser",
                     dataType:"JSON",
