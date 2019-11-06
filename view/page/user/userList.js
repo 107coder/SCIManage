@@ -48,8 +48,7 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
             }
       });
     //修改用户时的数值的显示
-    function editUser(data){ 
-        
+    function editUser(data){      
         var index = layui.layer.open({
             title : "修改用户",
             type : 2,
@@ -57,14 +56,10 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
             success : function(layero, index){
                 var body = layui.layer.getChildFrame('body', index);
                 body.find(".job_number").val(data.job_number);  
-                body.find(".name").val(data.name); 
-                body.find(".gender input[value="+data.gender+"]").next('.layui-unselect').addClass("layui-form-radioed");
-                body.find(".layui-form-radioed").find('i').addClass("layui-anim-scaleSpring");              
+                body.find(".name").val(data.name);
+                body.find(".gender input[value="+data.gender+"]").next(".layui-form-radio").find('i').click();  //找到目标单选框的临近i标签,然后触发它的click事件
                 body.find(".academy").val(data.academy);  
-                body.find(".identity option[value="+data.identity+"]").attr('selected',true);
-                body.find(".layui-anim-upbit dd[lay-value='0']").removeClass("layui-this"); //取消默认身份颜色样式
-                body.find(".layui-anim-upbit dd[lay-value="+data.identity+"]").addClass("layui-this");  //为相应身份添加颜色样式   
-                body.find(".layui-unselect").val(returnIdentity(data.identity));    //改变编辑时的身份数值
+                body.find(".layui-anim-upbit dd[lay-value="+data.identity+"]").click();     //找到目标下拉框的临近i标签,然后触发它的click事件
                 $.ajax({
                     url : rootUrl+"/user/checkUser",
                     dataType:"JSON",
@@ -82,7 +77,7 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
                         body.find(".job_title_series").val(res[0].job_title_series);
                     }
                 });    
-                form.render();
+                form.render('radio');
             }
         })
         layui.layer.full(index);
@@ -92,18 +87,6 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
             layui.layer.full(window.sessionStorage.getItem("index"));
         })
     }
-    //根据identity的值返回相应文字说明
-    function returnIdentity(data){ 
-        if(data==0)
-            return "普通用户";
-        else if(data==1)
-            return "院级管理员"; 
-        else if(data==2)
-            return "校级管理员";
-        else
-            return "身份错误";
-    }
-
     //添加用户
     function addUser(edit){
         var index = layui.layer.open({
