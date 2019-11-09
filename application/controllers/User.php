@@ -94,21 +94,7 @@ class User extends CI_Controller
         $job_number=$this->input->post('job_number');
         $this->user->delUser($job_number);
     }
-    //搜索用户
-    public function searchUser()
-    {
-        $page = $this->input->get('page');
-        $limit = $this->input->get('limit');    //每页多少条
-        $offset=(($page-1)*$limit);         //从第几条开始
-        $key=$this->input->get('key');
-        $data = $this->user->searchUser($limit,$offset,$key);
-        $resdata = array(
-            'code'  => '0',
-            'msg'   => '数据请求正常',
-            'count' =>  $this->db->count_all('user'),
-            'data'  =>  $data
-        );
-        echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
-    }
+    
+        
 
 }

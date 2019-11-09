@@ -1,10 +1,11 @@
-layui.use(['form','layer','table','laytpl','laypage'],function(){
+layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
     var form = layui.form,
         layer = parent.layer === undefined ? layui.layer : top.layer,
-        laypage = layui.laypage;
+        laypage = layui.laypage,
         $ = layui.jquery,
         laytpl = layui.laytpl,
-        table = layui.table;
+        table = layui.table,
+        upload = layui.upload;
  
     //用户列表
     var tableIns = table.render({ 
@@ -166,4 +167,46 @@ layui.use(['form','layer','table','laytpl','laypage'],function(){
     });
 
     // 批量添加用户 / 通过Excel表格导入用户
+    var uploadInst = upload.render({
+        elem: '#import_data' //绑定元素
+        ,url: rootUrl+'/ExcelAction/uploadUserFileApi' //上传接口
+        ,accept: 'file'
+        ,before: function(obj){ //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+            layer.load(); //上传loading
+        }
+        ,done: function(res){
+            layer.closeAll('loading'); //关闭loading
+            console.log(res);
+            if(res.code == 0)
+            {
+                layer.msg(res.msg);
+            }
+            table.reload('userListTable', { //刷新页面
+                page: {
+                  curr: 1 
+                }
+            });
+        }
+        ,error: function(){
+            console.log('error');
+            layer.closeAll('loading'); //关闭loading
+            layer.msg("导入错误");
+        //请求异常回调
+        }
+    });
+    /*$('#insertExcel').change(function(e) {
+        var files = e.target.files;
+        try {             
+            LAY_EXCEL.importExcel(files, {
+                fields: {
+                    'job_number': 'A'
+                    ,'name': 'B'
+                }
+            }, function(data) {
+
+            });
+        } catch (e) {
+            layer.alert(e.message);
+        }
+    });*/
 })

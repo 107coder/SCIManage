@@ -42,4 +42,25 @@ class User_model extends CI_Model
     public function editUser($job_number,$data){
        $this->db->update('user',$data,array('job_number'=>$job_number));
     }
+    // 返回数据库中的条数，判断数据是否存在
+    public function userExist($where)
+    {
+
+        $this->db->where($where);
+        $this->db->from('user');
+        return $this->db->count_all_results();
+    }
+    // 插入用户
+    public function userInsert($data_arr)
+    {
+        return $this->db->insert_batch('user',$data_arr);
+    }
+    //Excel导入用户
+    public function insert_excel($main_question,$answer){
+            $data = array(
+                'main_question'=>$main_question,
+                'answer' => $answer,
+            );
+            $this->db->insert('user',$data);
+        }
 }
