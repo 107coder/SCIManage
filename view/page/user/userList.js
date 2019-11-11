@@ -194,19 +194,4 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
         //请求异常回调
         }
     });
-    /*$('#insertExcel').change(function(e) {
-        var files = e.target.files;
-        try {             
-            LAY_EXCEL.importExcel(files, {
-                fields: {
-                    'job_number': 'A'
-                    ,'name': 'B'
-                }
-            }, function(data) {
-
-            });
-        } catch (e) {
-            layer.alert(e.message);
-        }
-    });*/
 })
