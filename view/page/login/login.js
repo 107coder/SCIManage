@@ -38,7 +38,8 @@ layui.use(['form','layer','jquery'],function(){
             },
             error:function()
             {
-                layer.msg('服务器出现错误，请联系系统管理员！')
+                layer.msg('服务器出现错误，请联系系统管理员！');
+                $(this).text("登录").attr("disabled","").removeClass("layui-disabled");
             }
         });
 

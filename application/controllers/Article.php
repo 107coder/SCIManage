@@ -42,4 +42,14 @@ class Article extends MY_Controller {
         );
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
+
+    /**
+     * 添加文章
+     *
+     * @return json 添加成功或者失败
+     */
+    public function insertArticleApi()
+    {   
+
+    }
 }
