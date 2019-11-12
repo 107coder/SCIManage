@@ -30,10 +30,11 @@ class User extends CI_Controller
         else
             $identity=-1;
         $data = $this->user->getAllUser($limit,$offset,$key,$identity);
+        $nums= $this->user->getUserNums($key,$identity);
         $resdata = array(
             'code'  => '0',
             'msg'   => '数据请求正常',
-            'count' =>  $this->db->count_all('user'),
+            'count' =>  $nums,
             'data'  =>  $data
         );
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
@@ -93,8 +94,6 @@ class User extends CI_Controller
     {
         $job_number=$this->input->post('job_number');
         $this->user->delUser($job_number);
-    }
-    
-        
+    }      
 
 }

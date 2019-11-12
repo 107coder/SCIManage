@@ -12,17 +12,30 @@ class User_model extends CI_Model
     public function getAllUser($perPage,$offest,$key,$identity)
     {
         return $this->db
-                    ->limit($perPage,$offest,$key)
+                    ->limit($perPage,$offest)
                     ->select('job_number,name,gender,academy,identity')
                     ->from('user')
-                    ->like('job_number' ,$key,)
-                    ->or_like('name' ,$key,)
-                    ->or_like('academy' ,$key,)
-                    ->or_like('gender' ,$key,)
-                    ->or_like('identity' ,$identity,)
+                    ->like('job_number' ,$key)
+                    ->or_like('name' ,$key)
+                    ->or_like('academy' ,$key)
+                    ->or_like('gender' ,$key)
+                    ->or_like('identity' ,$identity)
                     ->order_by('identity desc')
                     ->order_by('job_number')
                     ->get()->result_array();
+    }
+    //返回查询的总数量
+    public function getUserNums($key,$identity)
+    {
+        return $this->db
+                    ->select('job_number,name,gender,academy,identity')
+                    ->from('user')
+                    ->like('job_number' ,$key)
+                    ->or_like('name' ,$key)
+                    ->or_like('academy' ,$key)
+                    ->or_like('gender' ,$key)
+                    ->or_like('identity' ,$identity)
+                    ->count_all_results();
     }
     //添加用户
     public function addUser($data){
@@ -45,22 +58,13 @@ class User_model extends CI_Model
     // 返回数据库中的条数，判断数据是否存在
     public function userExist($where)
     {
-
         $this->db->where($where);
         $this->db->from('user');
         return $this->db->count_all_results();
     }
-    // 插入用户
-    public function userInsert($data_arr)
+    //Excel导入用户
+     public function userInsert($data_arr)
     {
         return $this->db->insert_batch('user',$data_arr);
     }
-    //Excel导入用户
-    public function insert_excel($main_question,$answer){
-            $data = array(
-                'main_question'=>$main_question,
-                'answer' => $answer,
-            );
-            $this->db->insert('user',$data);
-        }
 }
