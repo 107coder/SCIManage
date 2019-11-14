@@ -81,8 +81,18 @@
 				<option value="4">4</option>
 			</select>
 		</div>
-	</div>
 
+		<label class="layui-form-label">所属大类</label>
+		<div class="layui-input-inline">
+			<select name="subject" id="subject" lay-verify="required" lay-verify="subject">
+				<option value=""></option>
+				<option value="1">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+			</select>
+		</div>
+	</div>
 	<div class="layui-form-item">
 		<label class="layui-form-label">来源简写</label>
 		<div class="layui-input-inline">
@@ -95,18 +105,18 @@
 		</div>
 		<div class="layui-form-mid">-</div>
 		<div class="layui-input-inline" style="width: 100px;">
-			<input type="text" name="endPage" required lay-verify="required" placeholder="结束页" autocomplete="off" class="layui-input">
+			<input type="text" name="endPage"  lay-verify="" placeholder="结束页" autocomplete="off" class="layui-input">
 		</div>
 	</div>
 	<div class="layui-form-item">
 		<label class="layui-form-label">年</label>
 		<div class="layui-input-inline">
-			<input type="text" name="year" required lay-verify="required" placeholder="请输入论文分区" autocomplete="off" class="layui-input">
+			<input type="text" name="year"  lay-verify="" placeholder="请输入论文分区" autocomplete="off" class="layui-input">
 		</div>
 
 		<label class="layui-form-label">日期</label>
 		<div class="layui-input-inline">
-			<input type="text" name="date" required lay-verify="required" placeholder="请输入奖励分值" autocomplete="off" class="layui-input">
+			<input type="text" name="date"  lay-verify="" placeholder="请输入奖励分值" autocomplete="off" class="layui-input">
 		</div>
 	</div>
 	<div class="layui-form-item">
@@ -117,7 +127,7 @@
 
 		<label class="layui-form-label">期</label>
 		<div class="layui-input-inline">
-			<input type="text" name="peroid" required lay-verify="required" placeholder="请输入期号" autocomplete="off" class="layui-input">
+			<input type="text" name="period" required lay-verify="required" placeholder="请输入期号" autocomplete="off" class="layui-input">
 		</div>
 	</div>
 	<div class="layui-form-item">
@@ -202,7 +212,7 @@
 	<!--</div>-->
 	<div class="layui-form-item">
 		<div class="layui-input-block">
-			<button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+			<button class="layui-btn" lay-submit lay-filter="articleAdd">立即提交</button>
 			<button type="reset" class="layui-btn layui-btn-primary">重置</button>
 		</div>
 	</div>

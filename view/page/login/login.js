@@ -13,7 +13,9 @@ layui.use(['form','layer','jquery'],function(){
     form.on("submit(login)",function(data){
         // 获取前端页面输入的信息
         var loginData = data.field;
+        var _this = $(this);
         $(this).text("登录中...").attr("disabled","disabled").addClass("layui-disabled");
+
         $.ajax({
             url:rootUrl+'/Login/checkLogin',
             data:{
@@ -33,13 +35,13 @@ layui.use(['form','layer','jquery'],function(){
                 else
                 {
                     layer.msg(res.msg);
-                    $(this).text("登录").attr("disabled","").removeClass("layui-disabled");
+                    _this.text("登录").attr("disabled","").removeClass("layui-disabled");
                 }
             },
             error:function()
             {
                 layer.msg('服务器出现错误，请联系系统管理员！');
-                $(this).text("登录").attr("disabled","").removeClass("layui-disabled");
+                _this.text("登录").attr("disabled","").removeClass("layui-disabled");
             }
         });
 

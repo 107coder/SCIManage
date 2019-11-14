@@ -67,4 +67,9 @@ class User_model extends CI_Model
     {
         return $this->db->insert_batch('user',$data_arr);
     }
+
+    public function checkLogin($where)
+    {
+        return $this->db->select('job_number,name,gender,academy,identity')->from('user')->get()->result_array();
+    }
 }

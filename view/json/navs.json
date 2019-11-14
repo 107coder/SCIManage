@@ -40,6 +40,14 @@
 			]
 		}
 	],
+	"articleManagement":[
+		{
+			"title":"SCI论文认领",
+			"icon": "&#xe609;",
+			"href":"page/article/sciArticleList.html",
+			"spread":false
+		}
+	],
 	"memberCenter": [
 		{
 			"title": "用户中心",

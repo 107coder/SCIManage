@@ -43,6 +43,16 @@ class Article extends MY_Controller {
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
 
+    public function getTypeForAdd(){
+        $data = $this->article->getType();
+        $resdata = array(
+            'code' => '0',
+            'msg'  => '请求数据正常',
+            'count'=> $this->db->count_all('subject'),
+            'data' => $data
+        );
+        echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
+    }
     /**
      * 添加文章
      *
@@ -50,6 +60,28 @@ class Article extends MY_Controller {
      */
     public function insertArticleApi()
     {   
-
+        $data = $this->input->post('data');
+        $dataArt = json_decode($data,true);
+        $dataArt['page'] = $dataArt['startPage'].'--'.$dataArt['endPage'];
+        unset($dataArt['startPage'],$dataArt['endPage']);
+        $dataArt['is_first_inst'] = !empty($dataArt['is_first_inst'])?'是':'不是';
+        $dataArt['is_cover'] = !empty($dataArt['is_cover'])?'是':'不是';
+        $dataArt['is_top'] = !empty($dataArt['is_top'])?'是':'不是';
+        $dataArt['add_method'] = 1;
+        if($this->article->checkArticleExist($dataArt['accession_number']))
+        {
+            $status = $this->article->insertArticle($dataArt);
+            if($status){
+                echo JsonEcho(0,'添加成功');
+            }
+            else 
+            {
+                exit(JsonEcho(2,'添加失败'));
+            }
+        }
+        else
+        {
+            exit(JsonEcho(1,'文章已存在，请检查wos号'));
+        }
     }
 }
