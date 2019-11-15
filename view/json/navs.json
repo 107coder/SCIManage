@@ -13,9 +13,9 @@
 			"spread": false
 		},
 		{
-			"title": "图片管理",
+			"title": "论文审核",
 			"icon": "&#xe634;",
-			"href": "page/img/images.html",
+			"href": "page/news/newsList.html",
 			"spread": false
 		},
 		{

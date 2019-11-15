@@ -14,6 +14,7 @@ class Article extends MY_Controller {
         $this->load->view('welcome_message');
     }
 
+
     public function getArticleApi()
     {
         $page = $this->input->get('page');
@@ -83,5 +84,46 @@ class Article extends MY_Controller {
         {
             exit(JsonEcho(1,'文章已存在，请检查wos号'));
         }
+    }
+
+    /**
+     * 更新作者中的第一作者用户限制认领
+     */
+    public function updateAuthor()
+    {
+        $author = 'Wang,Guan';
+//        获取所有文章的信息
+        $data = $this->article->getArticle();
+        foreach ($data as $value)
+        {
+            $first_author = explode('; ',$value['author'])[0]; // 截取出来第一个作者，作为认领人的限制条件
+            $first_author = str_replace(' ','',$first_author);
+            $first_author = str_replace('-','',$first_author);
+            $data_arr = array('first_author'=>$first_author);
+            $where = array('accession_number'=>$value['accession_number']);
+            $this->article->updateArticle($data_arr,$where);
+//            if(strnatcasecmp($first_author,$author) != 0) continue;
+//            echo "<pre>";
+//            print_r($where);
+//            print_r($data);
+//            echo "</pre>";
+        }
+//        echo "<pre>";
+//        print_r(explode('; ',$data[0]['author']));
+//        echo "</pre>";
+
+    }
+
+    public function claimArticle()
+    {
+        $accession_number = $this->input->post('accession_number');
+        $where = ['accession_number'=>$accession_number];
+        $data = $this->article->checkArticle($where);
+        $yourName = $this->session->full_spell;
+        $first_author = $data[0]['first_author'];
+        if(strnatcasecmp($yourName,$first_author) == 0)
+            echo JsonEcho('0','您可认领这篇文章',$data);
+        else
+            exit(JsonEcho('1','抱歉，不能认领属于自己的文章'));
     }
 }

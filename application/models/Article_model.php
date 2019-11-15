@@ -22,12 +22,20 @@ class Article_model extends CI_Model{
     }
 
     // 获取所有的论文信息
-    public function getArticle($page,$limit)
+    public function getArticle($page=null,$limit=null)
     {
-        return $this->db
+        if($page==null && $limit==null){
+            return $this->db
+//                    ->limit($limit,$page)
+                // ->select('accession_number,title,author,source,address,quite_time,is_top,roll,period,date,year,page,is_first_inst,impact_factor,subject,sci_type,other_info,articleStatus')
+                ->from('article')->get()->result_array();
+        }else{
+            return $this->db
                     ->limit($limit,$page)
-                    // ->select('accession_number,title,author,source,address,quite_time,is_top,roll,period,date,year,page,is_first_inst,impact_factor,subject,sci_type,other_info,articleStatus')
-                    ->from('article')->get()->result_array();
+                // ->select('accession_number,title,author,source,address,quite_time,is_top,roll,period,date,year,page,is_first_inst,impact_factor,subject,sci_type,other_info,articleStatus')
+                ->from('article')->get()->result_array();
+        }
+
     }
 
     /**
@@ -53,5 +61,19 @@ class Article_model extends CI_Model{
         return $this->db->insert('article',$data_arr);
     }
 
+    /**
+     * 更新文章
+     *
+     * @param $data_arr 传入要修改的数据
+     * @param $where    修改的条件
+     * @return mixed
+     */
+    public function updateArticle($data_arr,$where)
+    {
+        return $this->db->update('article',$data_arr,$where);
+    }
 
+    public function checkArticle($where){
+        return $this->db->select('first_author')->where($where)->from('article')->get()->result_array();
+    }
 }

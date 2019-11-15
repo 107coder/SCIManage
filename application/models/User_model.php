@@ -70,6 +70,6 @@ class User_model extends CI_Model
 
     public function checkLogin($where)
     {
-        return $this->db->select('job_number,name,gender,academy,identity')->from('user')->get()->result_array();
+        return $this->db->select('job_number,full_spell,name,gender,academy,identity')->where($where)->from('user')->get()->result_array();
     }
 }

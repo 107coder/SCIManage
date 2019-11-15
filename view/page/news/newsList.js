@@ -24,14 +24,14 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
             // {field: 'newsId', title: 'ID', width:60, align:"center"},
             {field: 'title', title: '文章标题', width:250},
             {field: 'author', title: '发布者', align:'center'},
-            {field: 'source', title: '发布者', align:'center'},
+            {field: 'source', title: '文章来源', align:'center'},
             {field: 'address', title: '通讯作者地址', align:'center'},
             {field: 'quite_time', title: '引用次数', align:'center'},
             {field: 'is_top', title: '是否置顶', align:'center'},
             {field: 'roll', title: '卷', align:'center'},
             {field: 'period', title: '期', align:'center'},
             {field: 'page', title: '页码', align:'center'},
-            {field: 'articleStatus', title: '发布状态',  align:'center',templet:"#articleStatus"},
+            {field: 'articleStatus', title: '论文状态', width:110, align:'center',templet:"#articleStatus"},
             // {field: 'newsTop', title: '是否置顶', align:'center', templet:function(d){
             //     return '<input type="checkbox" name="newsTop" lay-filter="newsTop" lay-skin="switch" lay-text="是|否" '+d.newsTop+'>'
             // }},

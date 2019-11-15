@@ -1,10 +1,12 @@
-layui.use(['form','layer','layedit','laydate','upload'],function(){
+layui.use(['form','layer','layedit','laydate','upload','element','table'],function(){
     var form = layui.form
         layer = parent.layer === undefined ? layui.layer : top.layer,
         laypage = layui.laypage,
         upload = layui.upload,
         layedit = layui.layedit,
         laydate = layui.laydate,
+        table = layui.table, //表格
+        element = layui.element,
         $ = layui.jquery;
         
     //用于同步编辑器内容到textarea
@@ -138,4 +140,71 @@ layui.use(['form','layer','layedit','laydate','upload'],function(){
         }
     });
 
+
+    // 加载下面添加人员信息的部分
+
+        //监听地址选择操作
+        form.on('select(selectDemo)', function (obj) {
+            layer.tips(obj.elem.getAttribute('name') + '：'+obj.value + ' ' + obj.elem.getAttribute('dataId') , obj.othis);
+        });
+        //监听性别操作
+        form.on('switch(sexDemo)', function (obj) {
+            layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
+        });
+
+        //执行一个 table 实例
+        table.render({
+            elem: '#tableDemo'
+            // , height: 332
+            , url: rootUrl+'/Config/test' //数据接口
+            // , page: true //开启分页
+            , cols: [[ //表头
+                {field: 'id', title: 'ID', width: 80, fixed: 'left'}
+                , {field: 'Type', title: '作者类型', width: 150, templet: '#selectType', unresize: true}
+                , {field: 'name', title: '作者姓名', edit:'text', width: 150}
+                , {field: 'Number', title: '作者职工号', edit: 'text',width: 150}
+                , {field: 'Sex', title: '性别', width: 85, templet: '#selectSex', unresize: true }
+                , {field: 'Xueli', title: '学历', edit:"text", width: 100}
+                , {field: 'Title', title: '职称', edit:"text", width: 100}
+                , {field: 'Tongxun', title: '是否为通讯作者', width: 150, templet:"#switchTpl"}
+                , {field: 'Unit', title: '工作单位', edit:"text"}
+            ]]
+        });
+        //监听单元格编辑
+        table.on('edit(tableDemo)', function(obj){
+            var value = obj.value //得到修改后的值
+                ,data = obj.data //得到所在行所有键值
+                ,field = obj.field; //得到字段
+            layer.msg('[ID: '+ data.id +'] ' + field + ' 字段更改为：'+ value);
+        });
+
+
+
+
 })
+function claimArticle() {
+    var accession_number = $('#accession_number').text();
+    $.ajax({
+        url:rootUrl+"/Article/claimArticle",
+        type:'post',
+        data:{accession_number:accession_number},
+        dataType: 'json',
+        success:function(res)
+        {
+            console.log(res.data);
+            if(res.code == 0)
+            {
+                layer.msg(res.msg);
+            }else
+            {
+                layer.msg(res.msg);
+                return false;
+            }
+
+            console.log(res);
+        },error:function (res) {
+            layer.msg("服务器出现错误，请联系系统管理员！");
+        }
+    });
+    // layer.msg(accession_number);
+}

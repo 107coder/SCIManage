@@ -1,4 +1,4 @@
-layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
+layui.use(['form','layer','laydate','table','laytpl','upload','element'],function(){
     var form = layui.form,
         layer = parent.layer === undefined ? layui.layer : top.layer,
         $ = layui.jquery,
@@ -26,7 +26,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
             {field: 'author', title: '发布者', align:'center'},
             {field: 'source', title: '文章来源', align:'center'},
             {field: 'address', title: '通讯作者地址', align:'center'},
-            {field: 'articleStatus', title: '发布状态',  align:'center',templet:"#articleStatus"},
+            {field: 'articleStatus', title: '论文状态', width:110,  align:'center',templet:"#articleStatus"},
             {field: 'quite_time', title: '引用次数', align:'center'},
             {field: 'is_top', title: '是否置顶', align:'center'},
             {field: 'roll', title: '卷', align:'center'},
@@ -87,13 +87,14 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
             if(data == '' || data == "undefined"){
                 return "未填写";
             }else{
-                console.log(data);
+
                 return data;
             }
         }
+        body.find("#accession_number").text(nullData(data.accession_number));
         body.find("#article_title").text(nullData(data.title));  
         body.find(".article_type").text(nullData(data.article_type));        
-        body.find(".frist_author").text(nullData(data.frist_author));   
+        body.find(".first_author").text(nullData(data.first_author));
         body.find(".other_author").text(nullData(data.other_author));     
         body.find(".date").text(nullData(data.date));    
         body.find(".source").text(nullData(data.source));    
@@ -111,7 +112,27 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
         body.find(".organization").text(nullData(data.organization));
         body.find(".claim_time").text(nullData(data.claim_time));
         body.find(".impact_factor").text(nullData(data.impact_factor));
-       }
+   }
+
+   function insertUser()
+   {
+       //执行一个 table 实例
+       table.render({
+           elem: '#tableDemo'
+           , height: 332
+           , url: rootUrl+'/Config/test' //数据接口
+           , page: true //开启分页
+           , cols: [[ //表头
+               {field: 'id', title: 'ID', width: 80, sort: true, fixed: 'left'}
+               , {field: 'username', title: '用户名', width: 80}
+               , {field: 'sign', title: '可编辑', edit: 'text',width: 80, sort: true}
+               , {field: 'city', title: '城市', width: 80}
+               , {field: 'sex', title: '性别', width: 85, templet: '#switchTpl', unresize: true}
+               , {field: 'lock', title: '下拉框', width: 110, templet: '#selectTool', unresize: true}
+               // , {fixed: 'right', title: '操作', width: 165, align: 'center', toolbar: '#barDemo'}
+           ]]
+       });
+   }
 
     //加载文章的内容
     function claim(edit){
@@ -134,6 +155,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
                     fillParameter(body,edit);
                 
                 }
+                insertUser();
                 setTimeout(function(){
                     layui.layer.tips('点击此处返回文章列表', '.layui-layer-setwin .layui-layer-close', {
                         tips: 3
