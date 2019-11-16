@@ -29,8 +29,11 @@ layui.use(['form','layer','jquery'],function(){
                 {
                     layer.msg(res.msg);
                     setTimeout(function(){
+                        // 崔少峰
                         window.location.href = 'http://127.0.0.1/107/SCIManage/view/';
-                    },1000);
+                        //赵士顺
+                        /*window.location.href = 'http://localhost:88/SCIManage/view/';*/      
+                    },1000);                   
                 }
                 else
                 {
@@ -64,5 +67,4 @@ layui.use(['form','layer','jquery'],function(){
             $(this).parent().removeClass("layui-input-active");
         }
     })
-
 })
