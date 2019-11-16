@@ -58,7 +58,12 @@ class Login extends CI_Controller {
     {
         $job_number=$this->session->job_number;
         $data=$this->user->checkUser($job_number);
-        echo json_encode($data);
+        $resdata = array(
+            'code'  => '0',
+            'msg'   => '数据请求正常',
+            'data'  =>  $data[0]
+        );
+        echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
 
 }

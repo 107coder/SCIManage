@@ -65,7 +65,12 @@ class User extends CI_Controller
     public function checkUser(){
         $job_number=$this->input->post('job_number');
         $data=$this->user->checkUser($job_number);
-        echo json_encode($data);
+        $resdata = array(
+            'code'  => '0',
+            'msg'   => '数据请求正常',
+            'data'  =>  $data[0]
+        ); 
+        echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
 
     //编辑用户
