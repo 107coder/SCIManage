@@ -151,15 +151,17 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
         form.on('switch(sexDemo)', function (obj) {
             layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
         });
-
+        var accession_number = $('#accession_number').text();
         //执行一个 table 实例
         table.render({
             elem: '#tableDemo'
             // , height: 332
-            , url: rootUrl+'/Config/test' //数据接口
+            , url: rootUrl+'/Config/userInfo' //数据接口
+            , where: {accession_number:accession_number}
+            , type:'post'
             // , page: true //开启分页
             , cols: [[ //表头
-                {field: 'id', title: 'ID', width: 80, fixed: 'left'}
+                {field: 'full_spell', title: '姓名全拼', width: 120, fixed: 'left'}
                 , {field: 'Type', title: '作者类型', width: 150, templet: '#selectType', unresize: true}
                 , {field: 'name', title: '作者姓名', edit:'text', width: 150}
                 , {field: 'Number', title: '作者职工号', edit: 'text',width: 150}
@@ -174,9 +176,39 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
         table.on('edit(tableDemo)', function(obj){
             var value = obj.value //得到修改后的值
                 ,data = obj.data //得到所在行所有键值
+                ,tr = obj.tr  // 获取tr的dom对象
                 ,field = obj.field; //得到字段
-            layer.msg('[ID: '+ data.id +'] ' + field + ' 字段更改为：'+ value);
+                var index = data.LAY_TABLE_INDEX;
+                $.ajax({
+                    url:rootUrl+"/User/checkUser"
+                    ,type:'post'
+                    ,data:{job_number:data.Number}
+                    ,dataType:'json'
+                    ,success:function(res){
+                        // layer.msg(res);
+                        console.log(res);
+                    },error:function()
+                    {
+                        // layer.msg('err');
+                    }
+                });
+                // updateArticle(index);
+               
+
+            // layer.msg('[ID: '+ data.full_spell +'] ' + field + ' 字段更改为：'+ value);
         });
+
+        function updateArticle(index,data)
+        {
+            $("[data-index="+index+"]").find("[data-field='name']").find('div').text('ee');
+            $("[data-index="+index+"]").find("[data-field='name']").find('div').text('ee');
+            $("[data-index="+index+"]").find("[data-field='Xueli']").find('div').text('ee');
+            $("[data-index="+index+"]").find("[data-field='Title']").find('div').text('ee');
+            $("[data-index="+index+"]").find("[data-field='Unit']").find('div').text('ee');
+            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text('ee');
+            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text('ee');
+            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text('ee');
+        }
 
 
 

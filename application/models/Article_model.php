@@ -73,7 +73,20 @@ class Article_model extends CI_Model{
         return $this->db->update('article',$data_arr,$where);
     }
 
+    // 检测文章是否可以认领
     public function checkArticle($where){
         return $this->db->select('first_author')->where($where)->from('article')->get()->result_array();
+    }
+
+    /**
+     * 获取文章表中符合条件的某个或者某些属性
+     *
+     * @param [array] $where
+     * @param string $cols
+     * @return void
+     */
+    public function getAnyArticle($where,$cols='')
+    {
+        return $this->db->select($cols)->get_where('article',$where)->result_array();
     }
 }

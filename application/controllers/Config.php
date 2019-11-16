@@ -14,20 +14,32 @@ class Config extends CI_Controller
     }
 
     public function userInfo(){
-        $data = array(
-            'userId' => 1,
-            'userType' => null,
-            'userName' => null,
-            'userNumber' => null,
-            'userSex' => null,
-            'userXueli' => null,
-            'userTitle' => null,
-            'userTongxun' => null,
-            'userUnit' => 'computer'
-        );
-        $data=[$data];
+        $accession_number = $this->input->post('accession_number');
+        $accession_number = 'WOS:000452969500009';
+        $this->load->model('article_model','article');
+        $cols = 'author';
+        $where = ['accession_number'=>$accession_number];
+        $data = $this->article->getAnyArticle($where,$cols);
+        $author = explode('; ',$data[0]['author']);
+        $author_arr = ["code"=>0,"msg"=>'',"count"=>count($author),"data"=>[]];
+        foreach($author as $key => $val)
+        {
+            $data = [
+                "full_spell"=> $val,
+                "name"=> "",
+                "sex"=> "",
+                "Number"=> "",
+                "Xueli"=> "",
+                "Title"=> "",
+                "Tongxun"=> "",
+                "Unit"=> ""
+            ];
+            array_push($author_arr['data'],$data);
+        }
+        // P($author_arr); 
+      
 
-        echo json_encode($data,JSON_UNESCAPED_UNICODE);
+        echo json_encode($author_arr,JSON_UNESCAPED_UNICODE);
     }
 
     function test()
