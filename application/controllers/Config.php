@@ -14,9 +14,10 @@ class Config extends CI_Controller
     }
 
     public function userInfo(){
-        $accession_number = $this->input->post('accession_number');
-        $accession_number = 'WOS:000452969500009';
+        // 获取数据   table中的where是通过get方式获取的
+        $accession_number = $this->input->get('accession_number');
         $this->load->model('article_model','article');
+
         $cols = 'author';
         $where = ['accession_number'=>$accession_number];
         $data = $this->article->getAnyArticle($where,$cols);
@@ -36,12 +37,16 @@ class Config extends CI_Controller
             ];
             array_push($author_arr['data'],$data);
         }
-        // P($author_arr); 
       
-
         echo json_encode($author_arr,JSON_UNESCAPED_UNICODE);
     }
 
+    public function getSession()
+    {
+        echo "<pre>";
+        print_r($_SESSION);
+        echo "</pre>";
+    }
     function test()
     {
         $userData = ["code"=>0,"msg"=>'',"count"=>6,"data"=>

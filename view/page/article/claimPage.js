@@ -153,18 +153,18 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
         });
         var accession_number = $('#accession_number').text();
         //执行一个 table 实例
-        table.render({
+        var userTable = table.render({
             elem: '#tableDemo'
             // , height: 332
             , url: rootUrl+'/Config/userInfo' //数据接口
-            , where: {accession_number:accession_number}
             , type:'post'
+            , where: {accession_number:accession_number}
             // , page: true //开启分页
             , cols: [[ //表头
                 {field: 'full_spell', title: '姓名全拼', width: 120, fixed: 'left'}
-                , {field: 'Type', title: '作者类型', width: 150, templet: '#selectType', unresize: true}
-                , {field: 'name', title: '作者姓名', edit:'text', width: 150}
+                , {field: 'authorType', title: '作者类型', width: 150, templet: '#selectType', unresize: true}
                 , {field: 'Number', title: '作者职工号', edit: 'text',width: 150}
+                , {field: 'name', title: '作者姓名', edit:'text', width: 150}
                 , {field: 'Sex', title: '性别', width: 85, templet: '#selectSex', unresize: true }
                 , {field: 'Xueli', title: '学历', edit:"text", width: 100}
                 , {field: 'Title', title: '职称', edit:"text", width: 100}
@@ -178,15 +178,27 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                 ,data = obj.data //得到所在行所有键值
                 ,tr = obj.tr  // 获取tr的dom对象
                 ,field = obj.field; //得到字段
+                // 控制如果不是修改的工号，就不会给整行填写数据
+                if(field != 'Number'){
+                    return false;
+                }
+                // console.log(data);
                 var index = data.LAY_TABLE_INDEX;
                 $.ajax({
-                    url:rootUrl+"/User/checkUser"
+                    url:rootUrl+"/User/getOneUser"
                     ,type:'post'
                     ,data:{job_number:data.Number}
                     ,dataType:'json'
                     ,success:function(res){
-                        // layer.msg(res);
-                        console.log(res);
+                        console.log(res.data);
+                        if(res.code==0)
+                        {
+                            updateArticle(index,res.data);
+                        }else
+                        {
+                            data = [];
+                            updateArticle(index,data);
+                        }
                     },error:function()
                     {
                         // layer.msg('err');
@@ -200,34 +212,62 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
 
         function updateArticle(index,data)
         {
-            $("[data-index="+index+"]").find("[data-field='name']").find('div').text('ee');
-            $("[data-index="+index+"]").find("[data-field='name']").find('div').text('ee');
-            $("[data-index="+index+"]").find("[data-field='Xueli']").find('div').text('ee');
-            $("[data-index="+index+"]").find("[data-field='Title']").find('div').text('ee');
-            $("[data-index="+index+"]").find("[data-field='Unit']").find('div').text('ee');
-            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text('ee');
-            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text('ee');
-            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text('ee');
+            $("[data-index="+index+"]").find("[data-field='name']").text(data['name']);
+            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+            $("[data-index="+index+"]").find("[data-field='Xueli']").find('div').text(data['edu_background']);
+            $("[data-index="+index+"]").find("[data-field='Title']").find('div').text(data['job_title']);
+            $("[data-index="+index+"]").find("[data-field='Unit']").text(data['academy']);
+            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
         }
 
+    })
+// $('#claimArticle').click(
+//     claimArticle()
+// );
 
 
+function getAllUser()
+{
+    var table = $("#tableDemo").html();
+    console.log(table);
+}
 
-})
 function claimArticle() {
     var accession_number = $('#accession_number').text();
+    getAllUser();
+    // 获取所有表格的数据 
+    var tableData = table.cache.tableDemo;
+    console.log(tableData);
+    console.log(JSON.stringify(tableData));
+    var flag = true;
+    tableData.forEach(element => {
+        if(element['Number']=='' || element['name']=='' || element['Unit']==''){
+            layer.msg('请将信息填写完整');
+            // console.log(element['Number']=='' || element['name']=='' || element['Unit']=='');
+            flag = false;
+        }
+    });
+    if(!flag){return false;}
     $.ajax({
         url:rootUrl+"/Article/claimArticle",
         type:'post',
-        data:{accession_number:accession_number},
+        data:{
+            accession_number:accession_number,
+            tableData:JSON.stringify(tableData)
+        },
         dataType: 'json',
         success:function(res)
         {
-            console.log(res.data);
+            
+
+            layer.msg("填写信息已完整");
             if(res.code == 0)
             {
-                layer.msg(res.msg);
-            }else
+                
+            }
+            else
             {
                 layer.msg(res.msg);
                 return false;
@@ -238,5 +278,16 @@ function claimArticle() {
             layer.msg("服务器出现错误，请联系系统管理员！");
         }
     });
+    // console.log("data-----"+JSON.stringify(table.cache.tableDemo));
+    // console.log("data-----"+table.cache.tableDemo);
     // layer.msg(accession_number);
 }
+
+
+[{"full_spell":"Zhang, Shiyong","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":0},{"full_spell":"Li, Xiang","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":1},{"full_spell":"Pan, Jianlin","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":2},{"full_spell":"Wang, Minghua","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":3},{"full_spell":"Zhong, Liqiang","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":4},{"full_spell":"Wang, Jiang","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":5},{"full_spell":"Qin, Qin","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":6},{"full_spell":"Liu, Hongyan","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":7},{"full_spell":"Shao, Junjie","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":8},{"full_spell":"Chen, Xiaohui","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":9},{"full_spell":"Bian, Wenji","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":10}]
+
+// Zhao, Wen; Li, Xiaomin; Yin, Rui; Qian, Lei; Huang, Xiaoshuai; Liu, Hu; Zhang, Jiaoxia; Wang, Jun; Ding, Tao; Guo, Zhanhu
+// Qian, L; Wang, J (reprint author), Shandong Univ, Minist Educ, Key Lab Liquid Solid Struct Evolut & Proc Mat, 17923 Jingshi Rd, Jinan 250061, Shandong, Peoples R China.; Guo, ZH (reprint author), Univ Tennessee, Dept Chem & Biomol Engn, ICL, Knoxville, TN
+
+// Cen, Juan; Zhao, Na; Huang, Wei-wei; Liu, Lu; Xie, Yuan-yuan; Gan, Ying; Wang, Chao-jie; Ji, Bian-Sheng
+// Ji, BS (reprint author), Henan Univ, Key Lab Nat Med & Immune Engn, Kaifeng 475001, Peoples R China.; Liu, L (reprint author), Henan Univ, Sch Pharm, Kaifeng 475001, Peoples R China.

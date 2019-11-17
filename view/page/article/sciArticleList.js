@@ -46,7 +46,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
 
             {title: '操作', width:70, templet:'#newsListBar',fixed:"right",align:"center"}
         ]] ,done: function () {
-            $("[data-field='accession_number']").css('display','none');
+            // $("[data-field='accession_number']").css('display','none');
         }
 
     });
@@ -116,7 +116,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
 
  
 
-    //加载文章的内容
+    //加载论文认领页面的内容
     function claim(edit){
         var accession_number = edit.accession_number;
         var index = layui.layer.open({
@@ -135,6 +135,14 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
                     // body.find(".newsTop input[name='newsTop']").prop("checked",edit.newsTop);
                     // form.render();
                     fillParameter(body,edit);
+                    $.post(rootUrl+'/Article/verifyClaimAuthority',{'accession_number':accession_number},function(res){
+                        if(res.code == 1){
+                            layer.alert(res.msg, {
+                                icon: 0,
+                                skin: 'layer-ext-moon' //该皮肤由layer.seaning.com友情扩展。关于皮肤的扩展规则，去这里查阅
+                              })
+                        }
+                    },'json');
                 
                 }
                 setTimeout(function(){

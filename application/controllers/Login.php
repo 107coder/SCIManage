@@ -53,5 +53,17 @@ class Login extends CI_Controller {
             exit(JsonEcho(4,'请先登录！'));
         }
     }
+    // 判断是否首次登陆已经填写姓名全拼
+     public function checkAddFullSpell()
+    {
+        $job_number=$this->session->job_number;
+        $data=$this->user->checkUser($job_number);
+        $resdata = array(
+            'code'  => '0',
+            'msg'   => '数据请求正常',
+            'data'  =>  $data[0]
+        );
+        echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
+    }
 
 }

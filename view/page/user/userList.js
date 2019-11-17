@@ -69,13 +69,13 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
                     async : false,
                     success : function(res)
                     {
-                        body.find(".birthday").val(res[0].birthday);
-                        body.find(".edu_background").val(res[0].edu_background);
-                        body.find(".degree").val(res[0].degree); 
-                        body.find(".full_spell").val(res[0].full_spell);  
-                        body.find(".job_title").val(res[0].job_title);
-                        body.find(".job_title_rank").val(res[0].job_title_rank);
-                        body.find(".job_title_series").val(res[0].job_title_series);
+                        body.find(".birthday").val(res['data'].birthday);
+                        body.find(".edu_background").val(res['data'].edu_background);
+                        body.find(".degree").val(res['data'].degree); 
+                        body.find(".full_spell").val(res['data'].full_spell);  
+                        body.find(".job_title").val(res['data'].job_title);
+                        body.find(".job_title_rank").val(res['data'].job_title_rank);
+                        body.find(".job_title_series").val(res['data'].job_title_series);
                     }
                 });    
                 form.render('radio');

@@ -65,9 +65,29 @@ class User extends CI_Controller
     public function checkUser(){
         $job_number=$this->input->post('job_number');
         $data=$this->user->checkUser($job_number);
-        echo json_encode($data);
+        $resdata = array(
+            'code'  => '0',
+            'msg'   => '数据请求正常',
+            'data'  =>  $data[0]
+        ); 
+        echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * 通过id获取一个用户的信息
+     *
+     * @return void
+     */
+    public function getOneUser()
+    {
+        $job_number=$this->input->post('job_number');
+        $data=$this->user->checkUser($job_number);
+        if(empty($data)){
+          exit(JsonEcho('1','没有该用户'));
+        }else{
+            echo JsonEcho('0','数据请求正常',$data[0]);
+        }
+    }
     //编辑用户
     public function editUser()
     {
@@ -94,6 +114,16 @@ class User extends CI_Controller
     {
         $job_number=$this->input->post('job_number');
         $this->user->delUser($job_number);
+    }
+    //第一次登陆时添加用户姓名全拼
+    public function addFullSpell()
+    {
+        $job_number=$this->session->job_number;
+        $data=array
+        (
+            'full_spell' => $this->input->post('full_spell')  
+        );
+        $this->user->editUser($job_number,$data); 
     }      
 
 }
