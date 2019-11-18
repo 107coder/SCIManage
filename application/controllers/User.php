@@ -40,6 +40,23 @@ class User extends CI_Controller
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
 
+    public function getAllStudentApi()
+    {
+        $page = $this->input->get('page');
+        $limit = $this->input->get('limit');    //每页多少条
+        $offset=(($page-1)*$limit);         //从第几条开始
+        $key = $this->input->get('key');
+        $data = $this->user->getAllStudent($limit,$offset,$key);
+        $nums= $this->user->getStudentNums($key);
+        $resdata = array(
+            'code'  => '0',
+            'msg'   => '数据请求正常',
+            'count' =>  $nums,
+            'data'  =>  $data
+        );
+        echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
+    }
+
     //添加用户
     public function addUser()
     {
@@ -60,11 +77,33 @@ class User extends CI_Controller
         );
         $this->user->addUser($data);   
     }
+    public function addStudent()
+    {
+        $data=array
+        (
+            'sno' => $this->input->post('sno'),
+            'name' => $this->input->post('name'),
+            'gender' => $this->input->post('gender'),
+            'academy' => $this->input->post('academy'),
+            'profession' => $this->input->post('profession'),
+        );
+        $this->user->addStudent($data);   
+    }
 
     //查询对应用户
     public function checkUser(){
         $job_number=$this->input->post('job_number');
         $data=$this->user->checkUser($job_number);
+        $resdata = array(
+            'code'  => '0',
+            'msg'   => '数据请求正常',
+            'data'  =>  $data[0]
+        ); 
+        echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
+    }
+    public function checkStudent(){
+        $sno=$this->input->post('sno');
+        $data=$this->user->checkStudent($sno);
         $resdata = array(
             'code'  => '0',
             'msg'   => '数据请求正常',
@@ -108,12 +147,28 @@ class User extends CI_Controller
         );
         $this->user->editUser($job_number,$data);   
     }
-
+    public function editStudent()
+    {
+        $sno=$this->input->post('sno');
+        $data=array
+        (
+            'name' => $this->input->post('name'),
+            'gender' => $this->input->post('gender'),
+            'academy' => $this->input->post('academy'),
+            'profession' => $this->input->post('profession'),  
+        );
+        $this->user->editStudent($sno,$data);   
+    }
     //删除用户
     public function delUser()
     {
         $job_number=$this->input->post('job_number');
         $this->user->delUser($job_number);
+    }
+    public function delStudent()
+    {
+        $sno=$this->input->post('sno');
+        $this->user->delStudent($sno);
     }
     //第一次登陆时添加用户姓名全拼
     public function addFullSpell()
