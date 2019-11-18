@@ -50,9 +50,15 @@
 	],
 	"memberCenter": [
 		{
-			"title": "用户中心",
+			"title": "教师用户",
 			"icon": "&#xe612;",
 			"href": "page/user/userList.html",
+			"spread": false
+		},
+		{
+			"title": "学生用户",
+			"icon": "&#xe612;",
+			"href": "page/user/student/studentList.html",
 			"spread": false
 		},
 		{

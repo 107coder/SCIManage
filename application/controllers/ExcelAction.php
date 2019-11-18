@@ -234,6 +234,25 @@ class ExcelAction extends CI_Controller {
 
         }
     }
+    public function uploadStudentFileApi()
+    {
+        $config['upload_path']      = './file/';
+        $config['allowed_types']    = 'xls|xlsx|txt';
+        $config['max_size']     = 2048;
+
+        $this->load->library('upload', $config);
+        if (!$this->upload->do_upload('file'))
+        {
+            $error = array('error' => $this->upload->display_errors());
+            exit(JsonEcho('1','上传失败！',$error));
+        }
+        else
+        {
+            $data = $this->upload->data();
+            $this->readStudentExcel($data['full_path']);
+
+        }
+    }
     //执行用户的入库操作
     public function readUserExcel($file='')
     {   
@@ -310,6 +329,83 @@ class ExcelAction extends CI_Controller {
             {
                 $status  = 0;
                 $status = $this->user->userInsert($data_all);
+                $data_all = [];
+                if($status <= 0)
+                {
+                    exit(JsonEcho('1','数据插入错误！'));
+                }
+            }
+        }
+        exit(JsonEcho('0','数据导入成功！'));
+    }
+    public function readStudentExcel($file='')
+    {   
+        $this->load->model('user_model','user');    //载入数据库文件插入的model
+        $this->load->library("PHPExcel");
+        header('Content-Type:text/html;charset=utf-8');
+
+        $PHPReader = new PHPExcel_Reader_Excel5();
+        if(!file_exists($file) || !$PHPReader->canRead($file)){
+            $PHPReader = new PHPExcel_Reader_Excel2007();
+            if(!file_exists($file) || !$PHPReader->canRead($file))
+            {
+                exit(JsonEcho('1','file no exist!'));
+            }
+        }
+        $objPHPExcel = $PHPReader->load($file);
+
+        $sheet = $objPHPExcel->setActiveSheetIndex(0); // 设置只读取第一个sheet
+        $allColumn = $sheet->getHighestColumn();    //总列数
+        $allRow = $sheet->getHighestRow();      //总行数
+
+        $redis = new redis();
+        $redis->connect('127.0.0.1','6379') or exit(JsonEcho('1','服务器出现错误，请联系技术人员！'));
+        $redis->select(2);
+        $redis->flushDB();
+
+        // 循环 遍历，读取表格数据
+        for($row = 2; $row<=$allRow; $row++)
+        {
+            for($col='A'; $col<= $allColumn; $col++)
+            {
+                $address = $col.$row;
+                $data[$col] = $sheet->getCell($address)->getValue();
+            }
+            $wosNumber = $data['A'];
+            if($wosNumber == '') continue;  // 如果判断检测到某行的wos号码为空，直接跳过
+            if($this->user->studentExist(array('sno'=>$wosNumber)) == 0)
+            {
+                $redis->lPush('studentLink',$wosNumber);
+            }
+
+            // 在这里可以对某些数据进行处理然后在进行存储，入库
+            for($col='A'; $col<=$allColumn; $col++)
+            {
+                $redis->set('student:'.$wosNumber.':'.$col,$data[$col]);
+                $redis->pExpire('student:'.$wosNumber.':'.$col,86400000);
+            }
+
+        }
+        $studentLen = $redis->lLen('studentLink');
+
+        $data_all = [];
+        for($i=0; $i<$studentLen; $i++)
+        {
+            $wosCur = $redis->rPop('studentLink');
+            $data_one = array(
+                'sno' => $redis->get('student:'.$wosCur.':A'),
+                'name'            => $redis->get('student:'.$wosCur.':B'),
+                //取gender的第一个汉字
+                'gender'           => $redis->getRange('student:'.$wosCur.':C', 0, 3),
+                'academy'           => $redis->get('student:'.$wosCur.':D'),
+                'profession'           => $redis->get('student:'.$wosCur.':E'),
+            );
+            array_push($data_all,$data_one);
+            // 每300条数据，插入数据库一次
+            if(count($data_all) >= 300 || $i==$studentLen-1)
+            {
+                $status  = 0;
+                $status = $this->user->studentInsert($data_all);
                 $data_all = [];
                 if($status <= 0)
                 {
