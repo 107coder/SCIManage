@@ -17,7 +17,7 @@ class Article extends MY_Controller {
 
     public function getArticleApi()
     {
-        $page = $this->input->get('page');
+        $page = $this->input->get('page')-1;
         $limit = $this->input->get('limit');
         $data = $this->article->getArticle($page,$limit);
         $resdata = array(
@@ -91,7 +91,7 @@ class Article extends MY_Controller {
      */
     public function updateAuthor()
     {
-        $author = 'Wang,Guan';
+        // $author = 'Wang,Guan';
 //        获取所有文章的信息
         $data = $this->article->getArticle();
         foreach ($data as $value)
@@ -114,16 +114,68 @@ class Article extends MY_Controller {
 
     }
 
+    
+    public function verifyClaimAuthority()
+    {
+        // 获取文章wos号码
+        $accession_number = $this->input->post('accession_number');
+        // 拼接出 where 查询条件
+        $where = ['accession_number'=>$accession_number];
+        $data = $this->article->checkArticle($where);
+
+        $yourName = $this->session->full_spell;
+        $first_author = $data[0]['first_author'];
+        if(strnatcasecmp($yourName,$first_author) == 0)
+        {
+            echo JsonEcho('0','您可认领这篇文章');
+        } else{
+            exit(JsonEcho('1','这篇文章您不能认领，只能查看，如有疑问请联系系统系统管理员！'));
+        }
+    }
+
     public function claimArticle()
     {
+        // 从前端获取数据
         $accession_number = $this->input->post('accession_number');
+        $tableData = $this->input->post('tableData');
+        $accession_number = 'WOS:000454084300011';
+        $tableData = '[{"full_spell":"Qin, Peige","name":"1","sex":"","Number":"17101211","Xueli":"1","Title":"1","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":0},{"full_spell":"Yang, Yixin","name":"1","sex":"","Number":"1","Xueli":"1","Title":"1","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":1},{"full_spell":"Li, Wenqi","name":"1","sex":"","Number":"1","Xueli":"1","Title":"1","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":2},{"full_spell":"Zhang, Jing","name":"1","sex":"","Number":"1","Xueli":"1","Title":"1","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":3},{"full_spell":"Zhou, Qian","name":"11","sex":"","Number":"1","Xueli":"1","Title":"11","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":4},{"full_spell":"Lu, Minghua","name":"1","sex":"","Number":"1","Xueli":"1","Title":"1","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":5}]';
         $where = ['accession_number'=>$accession_number];
         $data = $this->article->checkArticle($where);
         $yourName = $this->session->full_spell;
         $first_author = $data[0]['first_author'];
         if(strnatcasecmp($yourName,$first_author) == 0)
-            echo JsonEcho('0','您可认领这篇文章',$data);
-        else
+        {
+            $data = json_decode($tableData,true);
+            $data_arr = [];
+            foreach($data as $key => $value){
+                $data_arr[$key]['aName'] = $value['name'];
+                $data_arr[$key]['aJobNumber'] = $value['Number'];
+                $data_arr[$key]['sSex'] = $value['sex'];
+                $data_arr[$key]['aEduBackground'] = $value['Xueli'];
+                $data_arr[$key]['aJobTitle'] = $value['Title'];
+                $data_arr[$key]['aisAddress'] = $value['Tongxun'];
+                $data_arr[$key]['aUnit'] = $value['Unit'];
+                $data_arr[$key]['aArticleNumber'] = $accession_number;
+                $data_arr[$key]['aIsCliam'] = $value['Number']==$this->session->job_number?1:0;
+            }
+            $this->load->model('Author_model','author');
+            $status = $this->author->insertAuthor($data_arr);
+            var_dump($status);
+            if($status==0)
+            {
+                exit(JsonEcho('2','插入失败'));
+            }else{
+                echo JsonEcho('0','插入成功',$data_arr);
+            }
+        } else{
             exit(JsonEcho('1','抱歉，不能认领属于自己的文章'));
+        }
+            
+    }
+
+    public function doClaimArticle()
+    {
+
     }
 }

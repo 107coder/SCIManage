@@ -127,9 +127,9 @@
 	</form>
 
 	<script type="text/javascript">
-		var cityArr = ['昆明', '长沙', '富源', '楚雄', '长春', '哈尔滨', '桂林'];
+		// var cityArr = ['昆明', '长沙', '富源', '楚雄', '长春', '哈尔滨', '桂林'];
 		var sexArr = ['男','女'];
-		var typeArr = ['本校教师','本校学生','其他人员'];
+		var typeArr = ['本校教师','本校研究生','本校本科生','其他人员'];
 	</script>
 
 		<!--定义性别的工具-->
@@ -141,7 +141,7 @@
 		</select>
 	</script>
 
-	<!--定义性别的工具-->
+	<!--定义作者类型的工具-->
 	<script type="text/html" id="selectType" desc="定义的教师类别" intro="用到了layui模板（不能设置lay-ignore,否则监听不到事件）">
 		<select name="type" dataId="{{d.id}}" lay-filter="selectType">
 			{{# layui.each(typeArr, function(index, item){ }}

@@ -112,6 +112,21 @@ class User extends CI_Controller
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * 通过id获取一个用户的信息
+     *
+     * @return void
+     */
+    public function getOneUser()
+    {
+        $job_number=$this->input->post('job_number');
+        $data=$this->user->checkUser($job_number);
+        if(empty($data)){
+          exit(JsonEcho('1','没有该用户'));
+        }else{
+            echo JsonEcho('0','数据请求正常',$data[0]);
+        }
+    }
     //编辑用户
     public function editUser()
     {
