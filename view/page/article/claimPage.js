@@ -1,3 +1,4 @@
+var authorCount = 0;
 layui.use(['form','layer','layedit','laydate','upload','element','table'],function(){
     var form = layui.form
         layer = parent.layer === undefined ? layui.layer : top.layer,
@@ -163,14 +164,17 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
             , cols: [[ //表头
                 {field: 'full_spell', title: '姓名全拼', width: 120, fixed: 'left'}
                 , {field: 'authorType', title: '作者类型', width: 150, templet: '#selectType', unresize: true}
-                , {field: 'Number', title: '作者职工号', edit: 'text',width: 150}
+                , {field: 'number', title: '作者职工号', edit: 'text',width: 150}
                 , {field: 'name', title: '作者姓名', edit:'text', width: 150}
-                , {field: 'Sex', title: '性别', width: 85, templet: '#selectSex', unresize: true }
-                , {field: 'Xueli', title: '学历', edit:"text", width: 100}
-                , {field: 'Title', title: '职称', edit:"text", width: 100}
-                , {field: 'Tongxun', title: '是否为通讯作者', width: 150, templet:"#switchTpl"}
-                , {field: 'Unit', title: '工作单位', edit:"text"}
+                , {field: 'sex', title: '性别', width: 85, templet: '#selectSex', unresize: true }
+                , {field: 'xueli', title: '学历', edit:"text", width: 100}
+                , {field: 'title', title: '职称', edit:"text", width: 100}
+                , {field: 'tongxun', title: '是否为通讯作者', width: 150, templet:"#switchTpl"}
+                , {field: 'unit', title: '工作单位', edit:"text"}
             ]]
+            ,done:function(res){
+                authorCount = res.count;
+            }
         });
         //监听单元格编辑
         table.on('edit(tableDemo)', function(obj){
@@ -179,7 +183,8 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                 ,tr = obj.tr  // 获取tr的dom对象
                 ,field = obj.field; //得到字段
                 // 控制如果不是修改的工号，就不会给整行填写数据
-                if(field != 'Number'){
+                console.log(field);
+                if(field != 'number'){
                     return false;
                 }
                 // console.log(data);
@@ -187,65 +192,83 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                 $.ajax({
                     url:rootUrl+"/User/getOneUser"
                     ,type:'post'
-                    ,data:{job_number:data.Number}
+                    ,data:{job_number:data.number}
                     ,dataType:'json'
                     ,success:function(res){
                         console.log(res.data);
                         if(res.code==0)
                         {
-                            updateArticle(index,res.data);
+                            updateAuthor(index,res.data);
                         }else
                         {
                             data = [];
-                            updateArticle(index,data);
+                            updateAuthor(index,data);
                         }
                     },error:function()
                     {
                         // layer.msg('err');
                     }
                 });
-                // updateArticle(index);
+                // updateAuthor(index);
                
 
             // layer.msg('[ID: '+ data.full_spell +'] ' + field + ' 字段更改为：'+ value);
         });
 
-        function updateArticle(index,data)
+        function updateAuthor(index,data)
         {
-            $("[data-index="+index+"]").find("[data-field='name']").text(data['name']);
+            $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
             // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
-            $("[data-index="+index+"]").find("[data-field='Xueli']").find('div').text(data['edu_background']);
-            $("[data-index="+index+"]").find("[data-field='Title']").find('div').text(data['job_title']);
-            $("[data-index="+index+"]").find("[data-field='Unit']").text(data['academy']);
-            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+            $("[data-index="+index+"]").find("[data-field='xueli']").find('div').text(data['edu_background']);
+            $("[data-index="+index+"]").find("[data-field='title']").find('div').text(data['job_title']);
+            $("[data-index="+index+"]").find("[data-field='unit']").find('div').text(data['academy']);
+            // $("[data-index="+index+"]").find("[data-field='sex']").find('find').val(data['gender']);
+            $("[data-index="+index+"]").find("[data-field='sex']").find('find').val('女');
             // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
             // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
         }
 
-    })
-// $('#claimArticle').click(
-//     claimArticle()
-// );
 
 
+})
+    
+
+function getAuthor(index)
+{
+    var full_spell = $("[data-index="+index+"]").find("[data-field='full_spell']").find('div').html();
+    var name = $("[data-index="+index+"]").find("[data-field='name']").find('div').text();
+    var xueli =  $("[data-index="+index+"]").find("[data-field='xueli']").find('div').text();
+    var title = $("[data-index="+index+"]").find("[data-field='title']").find('div').text();
+    var unit = $("[data-index="+index+"]").find("[data-field='unit']").find('div').text();
+    var authorType = $("[data-index="+index+"]").find("[data-field='authorType']").find('input').val();
+    var sex = $("[data-index="+index+"]").find("[data-field='sex']").find('input').val();
+    var number = $("[data-index="+index+"]").find("[data-field='number']").find('div').text();
+    var tongxun = $("[data-index="+index+"]").find("[data-field='tongxun']").find('em').text();
+    var arr = new Array(name,full_spell,xueli,title,unit,authorType,sex,number,tongxun);
+    // 姓名 全拼 学历 职称 单位 作者类型 性别 工号 是否为通讯作者
+    return arr;
+}
 function getAllUser()
 {
     var table = $("#tableDemo").html();
+    table = getAuthor(authorCount-1);
     console.log(table);
 }
 
 function claimArticle() {
     var accession_number = $('#accession_number').text();
-    getAllUser();
+    
     // 获取所有表格的数据 
-    var tableData = table.cache.tableDemo;
-    console.log(tableData);
-    console.log(JSON.stringify(tableData));
+    var tableData = new Array();    
+    for(var i=0; i<authorCount; i++)
+    {
+        tableData.push(getAuthor(i));
+    }
+    
     var flag = true;
     tableData.forEach(element => {
-        if(element['Number']=='' || element['name']=='' || element['Unit']==''){
+        if(element[0]=='' || element[4]=='' || element[7]==''){
             layer.msg('请将信息填写完整');
-            // console.log(element['Number']=='' || element['name']=='' || element['Unit']=='');
             flag = false;
         }
     });
@@ -260,12 +283,10 @@ function claimArticle() {
         dataType: 'json',
         success:function(res)
         {
-            
-
             layer.msg("填写信息已完整");
             if(res.code == 0)
             {
-                
+                layer.msg(res.msg);
             }
             else
             {
@@ -282,12 +303,3 @@ function claimArticle() {
     // console.log("data-----"+table.cache.tableDemo);
     // layer.msg(accession_number);
 }
-
-
-[{"full_spell":"Zhang, Shiyong","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":0},{"full_spell":"Li, Xiang","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":1},{"full_spell":"Pan, Jianlin","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":2},{"full_spell":"Wang, Minghua","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":3},{"full_spell":"Zhong, Liqiang","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":4},{"full_spell":"Wang, Jiang","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":5},{"full_spell":"Qin, Qin","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":6},{"full_spell":"Liu, Hongyan","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":7},{"full_spell":"Shao, Junjie","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":8},{"full_spell":"Chen, Xiaohui","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":9},{"full_spell":"Bian, Wenji","name":"","sex":"","Number":"","Xueli":"","Title":"","Tongxun":"","Unit":"","LAY_TABLE_INDEX":10}]
-
-// Zhao, Wen; Li, Xiaomin; Yin, Rui; Qian, Lei; Huang, Xiaoshuai; Liu, Hu; Zhang, Jiaoxia; Wang, Jun; Ding, Tao; Guo, Zhanhu
-// Qian, L; Wang, J (reprint author), Shandong Univ, Minist Educ, Key Lab Liquid Solid Struct Evolut & Proc Mat, 17923 Jingshi Rd, Jinan 250061, Shandong, Peoples R China.; Guo, ZH (reprint author), Univ Tennessee, Dept Chem & Biomol Engn, ICL, Knoxville, TN
-
-// Cen, Juan; Zhao, Na; Huang, Wei-wei; Liu, Lu; Xie, Yuan-yuan; Gan, Ying; Wang, Chao-jie; Ji, Bian-Sheng
-// Ji, BS (reprint author), Henan Univ, Key Lab Nat Med & Immune Engn, Kaifeng 475001, Peoples R China.; Liu, L (reprint author), Henan Univ, Sch Pharm, Kaifeng 475001, Peoples R China.

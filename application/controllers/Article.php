@@ -92,7 +92,7 @@ class Article extends MY_Controller {
     public function updateAuthor()
     {
         // $author = 'Wang,Guan';
-//        获取所有文章的信息
+        // 获取所有文章的信息
         $data = $this->article->getArticle();
         foreach ($data as $value)
         {
@@ -138,38 +138,54 @@ class Article extends MY_Controller {
         // 从前端获取数据
         $accession_number = $this->input->post('accession_number');
         $tableData = $this->input->post('tableData');
-        $accession_number = 'WOS:000454084300011';
-        $tableData = '[{"full_spell":"Qin, Peige","name":"1","sex":"","Number":"17101211","Xueli":"1","Title":"1","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":0},{"full_spell":"Yang, Yixin","name":"1","sex":"","Number":"1","Xueli":"1","Title":"1","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":1},{"full_spell":"Li, Wenqi","name":"1","sex":"","Number":"1","Xueli":"1","Title":"1","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":2},{"full_spell":"Zhang, Jing","name":"1","sex":"","Number":"1","Xueli":"1","Title":"1","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":3},{"full_spell":"Zhou, Qian","name":"11","sex":"","Number":"1","Xueli":"1","Title":"11","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":4},{"full_spell":"Lu, Minghua","name":"1","sex":"","Number":"1","Xueli":"1","Title":"1","Tongxun":"","Unit":"1","LAY_TABLE_INDEX":5}]';
+        // 从article表中获取相关信息，检查是否能够认领并且是否用认领的权限
         $where = ['accession_number'=>$accession_number];
         $data = $this->article->checkArticle($where);
         $yourName = $this->session->full_spell;
         $first_author = $data[0]['first_author'];
         if(strnatcasecmp($yourName,$first_author) == 0)
         {
+            if($data[0]['owner']!=null || $data[0]['articleStatus']!=0)
+            {
+                exit(JsonEcho('1','文章已被认领'));
+            }
+
+            // 首先更新 article 表中的数据
+            $data_article = array(
+                'owner' => $this->session->job_number,
+                'articleStatus' => 1,
+                'claim_time' => time()
+            );
+            $res = $this->article->updateArticle($data_article,$where);
+            if(!$res)
+            {
+                exit(JsonEcho('1','文章认领失败，请稍后重试'));
+            }
             $data = json_decode($tableData,true);
+            // 需要插入的数据，在下面进行拼接
             $data_arr = [];
             foreach($data as $key => $value){
-                $data_arr[$key]['aName'] = $value['name'];
-                $data_arr[$key]['aJobNumber'] = $value['Number'];
-                $data_arr[$key]['sSex'] = $value['sex'];
-                $data_arr[$key]['aEduBackground'] = $value['Xueli'];
-                $data_arr[$key]['aJobTitle'] = $value['Title'];
-                $data_arr[$key]['aisAddress'] = $value['Tongxun'];
-                $data_arr[$key]['aUnit'] = $value['Unit'];
+                $data_arr[$key]['aName'] = $value[0];
+                $data_arr[$key]['aEduBackground'] = $value[2];
+                $data_arr[$key]['aJobTitle'] = $value[3];
+                $data_arr[$key]['aUnit'] = $value[5];
+                $data_arr[$key]['sSex'] = $value[6];
+                $data_arr[$key]['aJobNumber'] = $value[7];
+                $data_arr[$key]['aisAddress'] = $value[8];
                 $data_arr[$key]['aArticleNumber'] = $accession_number;
-                $data_arr[$key]['aIsCliam'] = $value['Number']==$this->session->job_number?1:0;
+                $data_arr[$key]['aIsCliam'] = $value[7]==$this->session->job_number?1:0;
             }
             $this->load->model('Author_model','author');
             $status = $this->author->insertAuthor($data_arr);
-            var_dump($status);
+            
             if($status==0)
             {
-                exit(JsonEcho('2','插入失败'));
+                exit(JsonEcho('1','文章认领失败'));
             }else{
-                echo JsonEcho('0','插入成功',$data_arr);
+                echo JsonEcho('0','文章认领成功',$data_arr);
             }
         } else{
-            exit(JsonEcho('1','抱歉，不能认领属于自己的文章'));
+            exit(JsonEcho('1','抱歉，不能认领不属于自己的文章'));
         }
             
     }

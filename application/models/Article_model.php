@@ -75,7 +75,7 @@ class Article_model extends CI_Model{
 
     // 检测文章是否可以认领
     public function checkArticle($where){
-        return $this->db->select('first_author')->where($where)->from('article')->get()->result_array();
+        return $this->db->select('first_author,owner,claim_time,articleStatus')->where($where)->from('article')->get()->result_array();
     }
 
     /**
