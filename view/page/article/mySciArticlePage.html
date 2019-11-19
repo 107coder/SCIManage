@@ -101,7 +101,7 @@
 						<td class="is_cover"></td>
 					</tr>
 					<tr>
-						<td>是否为TOP期刊</td>
+						<td>是否为置顶</td>
 						<td class="is_top"></td>
 						<td>影响因子</td>
 						<td class="impact_factor"></td>
@@ -123,11 +123,12 @@
 
 		</div>
 
-		<button type="button" style="margin: 10px 40px" class="layui-btn" id="claimArticle" onclick="claimArticle()">认领</button>
+		<button type="button" style="margin: 10px 40px" class="layui-btn" onclick="claimArticle()">修改信息</button>
+		<button type="button" style="margin: 10px 40px" class="layui-btn layui-btn-danger" onclick="backArticle()">退回文章</button>
 	</form>
 
 	<script type="text/javascript">
-		// var cityArr = ['昆明', '长沙', '富源', '楚雄', '长春', '哈尔滨', '桂林'];
+	
 		var sexArr = ['男','女'];
 		var typeArr = ['本校教师','本校研究生','本校本科生','其他人员'];
 	</script>
@@ -156,7 +157,7 @@
 	</script>
 
 	<script type="text/javascript" src="../../layui/layui.js"></script>
-	<script type="text/javascript" src="claimPage.js"></script>
+	<script type="text/javascript" src="mySciArticlePage.js"></script>
 
 
 </body>

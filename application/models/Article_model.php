@@ -38,6 +38,17 @@ class Article_model extends CI_Model{
 
     }
 
+    public function searchArticle($page,$limit,$key)
+    {
+        return $this->db
+                    ->limit($limit,$page)
+                    ->from('article')
+                    ->like('accession_number',$key)
+                    ->or_like('title' ,$key)
+                    ->or_like('author' ,$key)
+                    ->order_by('accession_number')
+                    ->get()->result_array();
+    }
     /**
      * 判断所添加的文章是否存在 存在返回false 不存在返回true
      *
@@ -75,7 +86,7 @@ class Article_model extends CI_Model{
 
     // 检测文章是否可以认领
     public function checkArticle($where){
-        return $this->db->select('first_author,owner,claim_time,articleStatus')->where($where)->from('article')->get()->result_array();
+        return $this->db->select('claim_author,owner,claim_time,articleStatus')->where($where)->from('article')->get()->result_array();
     }
 
     /**
@@ -88,5 +99,17 @@ class Article_model extends CI_Model{
     public function getAnyArticle($where,$cols='')
     {
         return $this->db->select($cols)->get_where('article',$where)->result_array();
+    }
+
+    /**
+     * 文章退回时初始化信息
+     *
+     * @param [type] $data
+     * @param [type] $where
+     * @return void
+     */
+    public function backArticle($data,$where)
+    {
+        return $this->db->update('article',$data,$where);
     }
 }

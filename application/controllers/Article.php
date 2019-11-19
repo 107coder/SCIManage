@@ -19,7 +19,15 @@ class Article extends MY_Controller {
     {
         $page = $this->input->get('page')-1;
         $limit = $this->input->get('limit');
-        $data = $this->article->getArticle($page,$limit);
+
+        $key = $this->input->get('key');
+        // $type = $this->input->get('type');
+        
+        if(empty($key)){
+            $data = $this->article->getArticle($page,$limit);
+        }else{
+            $data = $this->article->searchArticle($page,$limit,$key);
+        }
         $resdata = array(
             'code' => '0',
             'msg'  => '请求数据正常',
@@ -28,6 +36,7 @@ class Article extends MY_Controller {
         );
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
+
 
     // 获取文章分类
     public function getTypeApi()
@@ -99,9 +108,19 @@ class Article extends MY_Controller {
             $first_author = explode('; ',$value['author'])[0]; // 截取出来第一个作者，作为认领人的限制条件
             $first_author = str_replace(' ','',$first_author);
             $first_author = str_replace('-','',$first_author);
-            $data_arr = array('first_author'=>$first_author);
-            $where = array('accession_number'=>$value['accession_number']);
-            $this->article->updateArticle($data_arr,$where);
+            
+            $address = $value['address'];
+            $author = $value['author'];
+            p("通讯作者：".$address);
+            p("所有作者：".$author);
+            $claim_author = $this->searchFullSpell($address,$author);
+
+            $claim_author = implode(';',$claim_author);
+            p("认领作者：".$claim_author);
+            echo '---</br>';
+            // $data_arr = array('first_author'=>$first_author);
+            // $where = array('accession_number'=>$value['accession_number']);
+            // $this->article->updateArticle($data_arr,$where);
 //            if(strnatcasecmp($first_author,$author) != 0) continue;
 //            echo "<pre>";
 //            print_r($where);
@@ -119,17 +138,20 @@ class Article extends MY_Controller {
     {
         // 获取文章wos号码
         $accession_number = $this->input->post('accession_number');
+        $accession_number = 'WOS:000454084300011';
         // 拼接出 where 查询条件
         $where = ['accession_number'=>$accession_number];
         $data = $this->article->checkArticle($where);
 
-        $yourName = $this->session->full_spell;
-        $first_author = $data[0]['first_author'];
-        if(strnatcasecmp($yourName,$first_author) == 0)
+        // 将所有的名字都换成小写，判断是否可以认领
+        $yourName = strtolower($this->session->full_spell);
+        $claim_author = explode(';',strtolower($data[0]['claim_author']));
+        
+        if(in_array($yourName,$claim_author))
         {
             echo JsonEcho('0','您可认领这篇文章');
         } else{
-            exit(JsonEcho('1','这篇文章您不能认领，只能查看，如有疑问请联系系统系统管理员！'));
+            exit(JsonEcho('1','该篇文章只允许第一作者和通讯作者认领，您不能认领，只能查看，如有疑问请联系系统管理员！'));
         }
     }
 
@@ -141,9 +163,11 @@ class Article extends MY_Controller {
         // 从article表中获取相关信息，检查是否能够认领并且是否用认领的权限
         $where = ['accession_number'=>$accession_number];
         $data = $this->article->checkArticle($where);
-        $yourName = $this->session->full_spell;
-        $first_author = $data[0]['first_author'];
-        if(strnatcasecmp($yourName,$first_author) == 0)
+        // 将所有的名字都换成小写，判断是否可以认领
+        $yourName = strtolower($this->session->full_spell);
+        $claim_author = explode(';',strtolower($data[0]['claim_author']));
+        
+        if(in_array($yourName,$claim_author))
         {
             if($data[0]['owner']!=null || $data[0]['articleStatus']!=0)
             {
@@ -166,9 +190,11 @@ class Article extends MY_Controller {
             $data_arr = [];
             foreach($data as $key => $value){
                 $data_arr[$key]['aName'] = $value[0];
+                $data_arr[$key]['aFull_spell'] = $value[1];
                 $data_arr[$key]['aEduBackground'] = $value[2];
                 $data_arr[$key]['aJobTitle'] = $value[3];
-                $data_arr[$key]['aUnit'] = $value[5];
+                $data_arr[$key]['aUnit'] = $value[4];
+                $data_arr[$key]['atype'] = $value[5];
                 $data_arr[$key]['sSex'] = $value[6];
                 $data_arr[$key]['aJobNumber'] = $value[7];
                 $data_arr[$key]['aisAddress'] = $value[8];
@@ -193,5 +219,134 @@ class Article extends MY_Controller {
     public function doClaimArticle()
     {
 
+    }
+
+
+
+    // 请求我的sci论文的列表
+    public function mySciArticle()
+    {
+        $job_number = $this->session->job_number;
+
+        $where = ['owner'=>$job_number];
+        $data = $this->article->getAnyArticle($where);
+        $count = $this->db->where($where)->from('article')->count_all_results();
+        $data = array(
+            'code' => '0',
+            'msg'  => '请求数据正常',
+            'count'=> $count,
+            'data' => $data
+        );
+        echo json_encode($data,256);
+    }
+
+    public function backArticle()
+    {
+        $accession_number = $this->input->post('accession_number');
+
+        $data = [
+            'owner' => null,
+            'claim_time' => null,
+            'articleStatus' => 0
+        ];
+        // 重置论文的认领信息
+        $where = ['accession_number'=>$accession_number];
+        $status = $this->article->backArticle($data,$where);
+        
+        // 删除作者的信息
+        $where = ['aArticleNumber'=>$accession_number];
+        $this->load->model('Author_model','author');
+        $status2 = $this->author->deleteArticle($where);
+
+        if($status && $status2)
+        {
+            echo JsonEcho('0','文章退回成功');
+        }else{
+            exit(JsonEcho('1','文章退回失败'));
+        }
+    }
+
+
+    /**
+     * 根据通讯作者中的简写，在所有作者中查找出来所有通讯作者的全拼
+     *
+     * @param [type] $address
+     * @param [type] $author
+     * @return void
+     */    
+    function searchFullSpell($address,$author){
+        
+        //把作者中的姓名全拼分为数组   这里涉及到两种格式，判断姓名的分类中是否有 ','分割，
+        if(strpos($author,',') == false){
+            $author=str_replace('-', '', $author);
+            $authorArray=explode('; ', $author);
+            foreach($authorArray as &$author){
+                $author=str_replace(', ', ',', $author);
+                $author=str_replace(' ', ',', $author);
+            }
+        }else{
+            $author=str_replace(' ', '', $author);
+            $author=str_replace('-', '', $author);
+            $authorArray=explode(';', $author);
+        }
+       
+       
+
+        //把地址中的姓名简写分为数组  先根据';'分成数组，然后判断是否含有(reprintauthor)如果有截取前面的字符
+        $address=str_replace(' ', '', $address);
+        $addressArray=explode(';', $address);
+        $addressArrayLen=count($addressArray);
+        for ($i=0; $i < $addressArrayLen; $i++) 
+        { 
+            if(strstr($addressArray[$i], "(reprintauthor)")!=false)
+            {
+                $pos=strpos($addressArray[$i],"(reprintauthor)");
+                $addressArray[$i]=substr($addressArray[$i], 0,$pos);
+            }
+                
+        }
+        // $fullSpellArray  = [];
+        //对每个简写查找它的全拼以数组形式返回
+        foreach ($addressArray as $value)
+        {
+            $short=$value;
+            $short=strtolower($short);
+            $shortLowerArray=explode(',', $short);
+            foreach ($authorArray as $author)
+            {
+                $fullSpell=strtolower($author);
+                $authorLowerArray=explode(',', $fullSpell);
+                $bool=true;
+                //判断二者逗号前是否相同
+                if(strstr($authorLowerArray[0], $shortLowerArray[0])==false)
+                    $bool=false;
+                //判断缩写逗号后的字母是否都在全拼逗号后的字符里
+                $length=strlen($shortLowerArray[1]);
+                for ($i=0; $i <$length ; $i++)
+                { 
+                    if(strstr($authorLowerArray[1], $shortLowerArray[1][$i])==false)
+                        $bool=false;
+                }
+                if($bool)
+                {
+                    $fullSpellArray[]=$author;
+                }
+            }
+        }
+        return $fullSpellArray;
+    }
+
+
+    public function test(){
+        $author = 'Xu, Dang-Dang; Zheng, Bei; Song, Chong-Yang; Lin, Yi; Pang, Dai-Wen; Tang, Hong-Wu';
+        $author=str_replace('-', '', $author);
+        $authorArray=explode('; ', $author);
+        foreach($authorArray as &$author){
+            $author=str_replace(', ', ',', $author);
+            $author=str_replace(' ', ',', $author);
+            p($author);
+        }
+
+        p($authorArray);
     }
 }

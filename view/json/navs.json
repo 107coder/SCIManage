@@ -46,6 +46,33 @@
 			"icon": "&#xe609;",
 			"href":"page/article/sciArticleList.html",
 			"spread":false
+		},
+		{
+			"title":"他引认领",
+			"icon": "&#xe609;",
+			"href":"page/article/sciArticleList.html",
+			"spread":false
+		},
+		{
+			"title":"我的论文",
+			"icon": "&#xe609;",
+			"href":"",
+			"spread":false,
+			"children": [
+				{
+					"title": "SCI论文",
+					"icon": "&#xe61c;",
+					"href": "page/article/mySciArticleList.html",
+					"spread": false
+				},
+				{
+					"title": "他引论文",
+					"icon": "&#xe609;",
+					"href": "page/login/login.html",
+					"spread": false,
+					"target": "_blank"
+				}
+			]
 		}
 	],
 	"memberCenter": [

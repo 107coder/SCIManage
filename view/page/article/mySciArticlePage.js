@@ -13,17 +13,6 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
     //用于同步编辑器内容到textarea
     layedit.sync(editIndex);
 
-    //上传缩略图
-    upload.render({
-        elem: '.thumbBox',
-        url: '../../json/userface.json',
-        method : "get",  //此处是为了演示之用，实际使用中请将此删除，默认用post方式提交
-        done: function(res, index, upload){
-            var num = parseInt(4*Math.random());  //生成0-4的随机数，随机显示一个头像信息
-            $('.thumbImg').attr('src',res.data[num].src);
-            $('.thumbBox').css("background","#fff");
-        }
-    });
 
     //格式化时间
     function filterTime(val){
@@ -33,27 +22,8 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
             return val;
         }
     }
-    //定时发布
-    var time = new Date();
-    var submitTime = time.getFullYear()+'-'+filterTime(time.getMonth()+1)+'-'+filterTime(time.getDate())+' '+filterTime(time.getHours())+':'+filterTime(time.getMinutes())+':'+filterTime(time.getSeconds());
-    laydate.render({
-        elem: '#release',
-        type: 'datetime',
-        trigger : "click",
-        done : function(value, date, endDate){
-            submitTime = value;
-        }
-    });
-    form.on("radio(release)",function(data){
-        if(data.elem.title == "定时发布"){
-            $(".releaseDate").removeClass("layui-hide");
-            $(".releaseDate #release").attr("lay-verify","required");
-        }else{
-            $(".releaseDate").addClass("layui-hide");
-            $(".releaseDate #release").removeAttr("lay-verify");
-            submitTime = time.getFullYear()+'-'+(time.getMonth()+1)+'-'+time.getDate()+' '+time.getHours()+':'+time.getMinutes()+':'+time.getSeconds();
-        }
-    });
+
+    
 
     form.verify({
         newsName : function(val){
@@ -153,11 +123,12 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
             layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
         });
         var accession_number = $('#accession_number').text();
+        
         //执行一个 table 实例
         var userTable = table.render({
             elem: '#tableDemo'
             // , height: 332
-            , url: rootUrl+'/Author/userInfo' //数据接口
+            , url: rootUrl+'/Author/getAuthorClaimArticle' //数据接口
             , type:'post'
             , where: {accession_number:accession_number}
             // , page: true //开启分页
@@ -231,11 +202,8 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
 
 
 })
+    
 
-/**
- * 使用jquery获取页面中对应序号的作者的信息
- * @param {author 的序号} index 
- */
 function getAuthor(index)
 {
     var full_spell = $("[data-index="+index+"]").find("[data-field='full_spell']").find('div').html();
@@ -258,7 +226,8 @@ function getAllUser()
     console.log(table);
 }
 
-function claimArticle() {
+// 更新文章信息
+function updateAuthorInfo() {
     var accession_number = $('#accession_number').text();
     
     // 获取所有表格的数据 
@@ -302,7 +271,45 @@ function claimArticle() {
             layer.msg("服务器出现错误，请联系系统管理员！");
         }
     });
-    // console.log("data-----"+JSON.stringify(table.cache.tableDemo));
-    // console.log("data-----"+table.cache.tableDemo);
-    // layer.msg(accession_number);
+    
+}
+
+// 文章退回
+function backArticle()
+{
+    var accession_number = $('#accession_number').text();
+    layer.confirm('您确定要退回这篇文章吗？', {
+        btn: ['确定','取消'] //按钮
+      }, function(){
+        $.ajax({
+            url:rootUrl+"/Article/backArticle",
+            type:'post',
+            data:{
+                accession_number:accession_number,
+            },
+            dataType: 'json',
+            success:function(res)
+            {
+                
+                if(res.code == 0)
+                {
+                    layer.msg(res.msg);
+                }
+                else
+                {
+                    layer.msg(res.msg);
+                    return false;
+                }
+    
+                console.log(res);
+            },error:function (res) {
+                layer.msg("服务器出现错误，请联系系统管理员！");
+            }
+        });
+      }, function(){
+        layer.msg('您已取消', {
+          time: 1000, //1s后自动关闭
+        });
+      });
+
 }

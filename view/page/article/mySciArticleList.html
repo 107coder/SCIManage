@@ -16,37 +16,23 @@
 <form class="layui-form">
 	<blockquote class="layui-elem-quote quoteBox">
 		<form class="layui-form">
-			<div class="layui-inline">
-				<label class="layui-form-label">搜索字段</label>
-				<div class="layui-input-inline">
-					<select name="searchType" lay-verify="required" style="width:50px;" class="searchType">
-					<!-- <option value=""></option> -->
-					<option value="0">作者姓名</option>
-					<option value="1">论文题目</option>
-					<option value="2">wos号</option>
-					<!-- <option value="3">深圳</option>
-					<option value="4">杭州</option> -->
-					</select>
-				</div>
+			<!-- <div class="layui-inline">
 				<div class="layui-input-inline">
 					<input type="text" class="layui-input searchVal" placeholder="请输入搜索的内容" />
 				</div>
 				<a class="layui-btn search_btn" data-type="reload">搜索</a>
+			</div> -->
+			<!-- <div class="layui-inline">
+				<a class="layui-btn layui-btn-normal addNews_btn">添加文章</a>
 			</div>
-			<!--<div class="layui-inline">-->
-				<!--<a class="layui-btn layui-btn-normal addNews_btn">添加文章</a>-->
-			<!--</div>-->
-			<!--<div class="layui-inline">-->
-				<!--<a class="layui-btn layui-btn-danger layui-btn-normal delAll_btn">批量删除</a>-->
-			<!--</div>-->
-			<!--<button type="button" class="layui-btn" id="import_data"  >-->
-				<!--<i class="layui-icon">&#xe67c;</i>导入数据-->
-			<!--</button>-->
+			<div class="layui-inline">
+				<a class="layui-btn layui-btn-danger layui-btn-normal delAll_btn">批量删除</a>
+			</div> -->
 		</form>
 	</blockquote>
 	<table id="newsList" lay-filter="newsList"></table>
 	<!--审核状态-->
-	<!-- <script type="text/html" id="articleStatus">
+	<script type="text/html" id="articleStatus">
 		{{#  if(d.articleStatus == "0"){ }}
 		<span class="layui-red">未认领</span>
 		{{#  } else if(d.articleStatus == "1"){ }}
@@ -60,22 +46,14 @@
 		{{#  } else { }}
 			审核通过
 		{{#  }}}
-	</script> -->
-	<script type="text/html" id="articleStatus">
-		{{#  if(d.articleStatus == "0"){ }}
-		<span class="layui-red">未认领</span>
-		{{#  } else { }}
-		<span class="layui-blue">已认领</span>
-		{{#  }}}
 	</script>
 
 	<!--操作-->
 	<script type="text/html" id="newsListBar">
-		<a class="layui-btn layui-btn-sm layui-bg-green" lay-event="look">认领</a>
+		<a class="layui-btn layui-btn-xs" lay-event="look">预览</a>
 	</script>
 </form>
 <script type="text/javascript" src="../../layui/layui.js"></script>
-<script type="text/javascript" src="sciArticleList.js"></script>
-
+<script type="text/javascript" src="mySciArticleList.js"></script>
 </body>
 </html>
