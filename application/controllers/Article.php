@@ -289,6 +289,7 @@ class Article extends MY_Controller {
             $author=str_replace('-', '', $author);
             $authorArray=explode(';', $author);
         }
+
        
        
 
@@ -321,11 +322,14 @@ class Article extends MY_Controller {
                 if(strstr($authorLowerArray[0], $shortLowerArray[0])==false)
                     $bool=false;
                 //判断缩写逗号后的字母是否都在全拼逗号后的字符里
-                $length=strlen($shortLowerArray[1]);
-                for ($i=0; $i <$length ; $i++)
-                { 
-                    if(strstr($authorLowerArray[1], $shortLowerArray[1][$i])==false)
-                        $bool=false;
+                if(strpos($fullSpell,',') != false)
+                {
+                    $length=strlen($shortLowerArray[1]);
+                    for ($i=0; $i <$length ; $i++)
+                    { 
+                        if(strstr($authorLowerArray[1], $shortLowerArray[1][$i])==false)
+                            $bool=false;
+                    }
                 }
                 if($bool)
                 {
@@ -333,7 +337,10 @@ class Article extends MY_Controller {
                 }
             }
         }
-        return $fullSpellArray;
+        if(isset($fullSpellArray))
+            return $fullSpellArray;
+        else
+            return array();
     }
 
 
