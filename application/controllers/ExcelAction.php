@@ -320,8 +320,9 @@ class ExcelAction extends CI_Controller {
                 'job_title'            => $redis->get('user:'.$wosCur.':H'),
                 'job_title_rank'       => $redis->get('user:'.$wosCur.':I'),
                 'job_title_series' => $redis->get('user:'.$wosCur.':J'),    
-                'full_spell'         => "暂未填写",
+                'full_spell'         => "",
                 'identity'         => 0,
+                'password'         =>md5('a'.$redis->get('user:'.$wosCur.':A'))
             );
             array_push($data_all,$data_one);
             // 每300条数据，插入数据库一次
