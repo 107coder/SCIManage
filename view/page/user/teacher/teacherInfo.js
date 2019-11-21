@@ -13,7 +13,7 @@ layui.use(['form','layer'],function(){
             }
         })
     $.ajax({
-            url : rootUrl+"/user/userInfo",
+            url : rootUrl+"/user/teacherInfo",
             dataType:"JSON",
             type : "post",
             data : {},
@@ -42,10 +42,10 @@ layui.use(['form','layer'],function(){
             }
         });
     
-    form.on("submit(userInfo)",function(data){
+    form.on("submit(teacherInfo)",function(data){
         var index = top.layer.msg('数据提交中，请稍候',{icon: 16,time:false,shade:0.8});
         $.ajax({
-                    url : rootUrl+"/user/changeUser",
+                    url : rootUrl+"/user/changeTeacher",
                     type : "post",
                     data : {
                         job_number : $(".job_number").val(), 

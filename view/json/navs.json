@@ -79,7 +79,7 @@
 		{
 			"title": "教师用户",
 			"icon": "&#xe612;",
-			"href": "page/user/userList.html",
+			"href": "page/user/teacher/teacherList.html",
 			"spread": false
 		},
 		{

@@ -57,7 +57,7 @@ class Login extends CI_Controller {
      public function checkAddFullSpell()
     {
         $job_number=$this->session->job_number;
-        $data=$this->user->checkUser($job_number);
+        $data=$this->user->checkTeacher($job_number);
         $resdata = array(
             'code'  => '0',
             'msg'   => '数据请求正常',

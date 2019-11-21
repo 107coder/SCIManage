@@ -20,7 +20,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         }
     })
     $.ajax({
-            url : rootUrl+"/user/userInfo",
+            url : rootUrl+"/user/teacherInfo",
             dataType:"JSON",
             type : "post",
             data : {},
@@ -55,9 +55,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
                             success : function(res,status)
                             {
                                 if(status=="success"){
-                                    top.layer.msg("密码修改成功！");
-                                    layer.closeAll("iframe");
-                                    parent.location.reload();
+                                    top.layer.msg("密码修改成功，请重新登录！");
                                 }else{
                                     top.layer.msg("密码修改失败！");
                                 }

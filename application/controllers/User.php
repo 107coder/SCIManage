@@ -15,7 +15,7 @@ class User extends CI_Controller
         $this->load->model('user_model','user');
     }
 
-    public function getAllUserApi()
+    public function getAllTeacherApi()
     {
         $page = $this->input->get('page');
         $limit = $this->input->get('limit');    //每页多少条
@@ -29,8 +29,8 @@ class User extends CI_Controller
             $identity=0;
         else
             $identity=-1;
-        $data = $this->user->getAllUser($limit,$offset,$key,$identity);
-        $nums= $this->user->getUserNums($key,$identity);
+        $data = $this->user->getAllTeacher($limit,$offset,$key,$identity);
+        $nums= $this->user->getTeacherNums($key,$identity);
         $resdata = array(
             'code'  => '0',
             'msg'   => '数据请求正常',
@@ -58,7 +58,7 @@ class User extends CI_Controller
     }
 
     //添加用户
-    public function addUser()
+    public function addTeacher()
     {
         $data=array
         (
@@ -73,9 +73,10 @@ class User extends CI_Controller
             'job_title_rank' => $this->input->post('job_title_rank'),
             'job_title_series'=> $this->input->post('job_title_series'),
             'full_spell' => $this->input->post('full_spell'),  
-            'identity' => $this->input->post('identity')  
+            'identity' => $this->input->post('identity'),
+            'password' => md5('a'.$this->input->post('job_number'))
         );
-        $this->user->addUser($data);   
+        $this->user->addTeacher($data);   
     }
     public function addStudent()
     {
@@ -91,9 +92,9 @@ class User extends CI_Controller
     }
 
     //查询对应用户
-    public function checkUser(){
+    public function checkTeacher(){
         $job_number=$this->input->post('job_number');
-        $data=$this->user->checkUser($job_number);
+        $data=$this->user->checkTeacher($job_number);
         $resdata = array(
             'code'  => '0',
             'msg'   => '数据请求正常',
@@ -117,10 +118,10 @@ class User extends CI_Controller
      *
      * @return void
      */
-    public function getOneUser()
+    public function getOneTeacher()
     {
         $job_number=$this->input->post('job_number');
-        $data=$this->user->checkUser($job_number);
+        $data=$this->user->checkTeacher($job_number);
         if(empty($data)){
           exit(JsonEcho('1','没有该用户'));
         }else{
@@ -128,7 +129,7 @@ class User extends CI_Controller
         }
     }
     //管理员编辑用户
-    public function editUser()
+    public function editTeacher()
     {
         $job_number=$this->input->post('job_number');
         $data=array
@@ -145,10 +146,10 @@ class User extends CI_Controller
             'full_spell' => $this->input->post('full_spell'),  
             'identity' => $this->input->post('identity')   
         );
-        $this->user->editUser($job_number,$data);   
+        $this->user->editTeacher($job_number,$data);   
     }
     //用户修改资料
-    public function changeUser()
+    public function changeTeacher()
     {
         $job_number=$this->input->post('job_number');
         $data=array
@@ -165,7 +166,7 @@ class User extends CI_Controller
             'job_title_series'=> $this->input->post('job_title_series'),             
             'identity' => $this->input->post('identity') */  
         );
-        $this->user->editUser($job_number,$data);   
+        $this->user->editTeacher($job_number,$data);   
     }
     public function editStudent()
     {
@@ -180,10 +181,10 @@ class User extends CI_Controller
         $this->user->editStudent($sno,$data);   
     }
     //删除用户
-    public function delUser()
+    public function delTeacher()
     {
         $job_number=$this->input->post('job_number');
-        $this->user->delUser($job_number);
+        $this->user->delTeacher($job_number);
     }
     public function delStudent()
     {
@@ -198,12 +199,12 @@ class User extends CI_Controller
         (
             'full_spell' => $this->input->post('full_spell')  
         );
-        $this->user->editUser($job_number,$data); 
+        $this->user->editTeacher($job_number,$data); 
     }
     //修改密码
-    public function userInfo(){
+    public function teacherInfo(){
         $job_number=$this->session->job_number;
-        $data=$this->user->checkUser($job_number);
+        $data=$this->user->checkTeacher($job_number);
         $resdata = array(
             'code'  => '0',
             'msg'   => '数据请求正常',
@@ -215,7 +216,7 @@ class User extends CI_Controller
     {
         $job_number=$this->session->job_number;
         $oldPwd=md5($this->input->post('oldPwd'));
-        $data=$this->user->checkUser($job_number);
+        $data=$this->user->checkTeacher($job_number);
         if($oldPwd!=$data[0]['password'])
             echo "密码错误！";
            
@@ -227,7 +228,7 @@ class User extends CI_Controller
         (
             'password' => md5($this->input->post('newPwd'))  
         );
-        $this->user->editUser($job_number,$data);    
+        $this->user->editTeacher($job_number,$data);    
     }      
 
 }
