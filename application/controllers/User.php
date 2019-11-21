@@ -127,7 +127,7 @@ class User extends CI_Controller
             echo JsonEcho('0','数据请求正常',$data[0]);
         }
     }
-    //编辑用户
+    //管理员编辑用户
     public function editUser()
     {
         $job_number=$this->input->post('job_number');
@@ -144,6 +144,26 @@ class User extends CI_Controller
             'job_title_series'=> $this->input->post('job_title_series'),
             'full_spell' => $this->input->post('full_spell'),  
             'identity' => $this->input->post('identity')   
+        );
+        $this->user->editUser($job_number,$data);   
+    }
+    //用户修改资料
+    public function changeUser()
+    {
+        $job_number=$this->input->post('job_number');
+        $data=array
+        (
+            'birthday' => $this->input->post('birthday'),
+            'full_spell' => $this->input->post('full_spell'),
+            /*'name' => $this->input->post('name'),
+            'gender' => $this->input->post('gender'),
+            'academy' => $this->input->post('academy'),           
+            'edu_background' => $this->input->post('edu_background'),
+            'degree' => $this->input->post('degree'),
+            'job_title' => $this->input->post('job_title'),
+            'job_title_rank' => $this->input->post('job_title_rank'),
+            'job_title_series'=> $this->input->post('job_title_series'),             
+            'identity' => $this->input->post('identity') */  
         );
         $this->user->editUser($job_number,$data);   
     }
