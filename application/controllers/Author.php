@@ -28,6 +28,7 @@ class Author extends CI_Controller
         foreach($author as $key => $val)
         {
             $data = [
+                "authorType"=> "选择作者类型",
                 "full_spell"=> $val,
                 "name"=> "",
                 "sex"=> "",

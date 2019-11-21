@@ -120,7 +120,19 @@ class User extends CI_Controller
     public function getOneUser()
     {
         $job_number=$this->input->post('job_number');
-        $data=$this->user->checkUser($job_number);
+        $authorType = $this->input->post('authorType');
+        
+        if($authorType == '本校教师'){
+            $data=$this->user->checkUser($job_number);
+        }else if($authorType == '本校研究生'){
+            $this->load->model('author_model','author');
+            $data = $this->author->getPostgraduate(['sno'=>$job_number]);
+            // $ddta[0] = array(
+
+            // );
+        }else{
+            $data = [[]];
+        }
         if(empty($data)){
           exit(JsonEcho('1','没有该用户'));
         }else{

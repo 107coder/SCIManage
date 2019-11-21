@@ -115,10 +115,13 @@ class Article extends MY_Controller {
             p("所有作者：".$author);
             $claim_author = $this->searchFullSpell($address,$author);
 
-            $claim_author = implode(';',$claim_author);
+            // if(!in_array($first_author,$claim_author)){
+            //     array_push($claim_author,$first_author);
+            // }
+            // $claim_author = implode(';',$claim_author);
             p("认领作者：".$claim_author);
             echo '---</br>';
-            // $data_arr = array('first_author'=>$first_author);
+            // $data_arr = array('claim_author'=>$claim_author);
             // $where = array('accession_number'=>$value['accession_number']);
             // $this->article->updateArticle($data_arr,$where);
 //            if(strnatcasecmp($first_author,$author) != 0) continue;
@@ -138,7 +141,7 @@ class Article extends MY_Controller {
     {
         // 获取文章wos号码
         $accession_number = $this->input->post('accession_number');
-        $accession_number = 'WOS:000454084300011';
+        // $accession_number = 'WOS:000454084300011';
         // 拼接出 where 查询条件
         $where = ['accession_number'=>$accession_number];
         $data = $this->article->checkArticle($where);
@@ -240,6 +243,7 @@ class Article extends MY_Controller {
         echo json_encode($data,256);
     }
 
+    // 文章退回
     public function backArticle()
     {
         $accession_number = $this->input->post('accession_number');
@@ -256,9 +260,10 @@ class Article extends MY_Controller {
         // 删除作者的信息
         $where = ['aArticleNumber'=>$accession_number];
         $this->load->model('Author_model','author');
-        $status2 = $this->author->deleteArticle($where);
+        // 不删除作者的信息
+        // $status2 = $this->author->deleteArticle($where);
 
-        if($status && $status2)
+        if($status)
         {
             echo JsonEcho('0','文章退回成功');
         }else{
@@ -289,7 +294,7 @@ class Article extends MY_Controller {
             $author=str_replace('-', '', $author);
             $authorArray=explode(';', $author);
         }
-       
+       $first_author = $authorArray[0];
        
 
         //把地址中的姓名简写分为数组  先根据';'分成数组，然后判断是否含有(reprintauthor)如果有截取前面的字符
@@ -333,7 +338,12 @@ class Article extends MY_Controller {
                 }
             }
         }
-        return $fullSpellArray;
+        $claim_author = $fullSpellArray;
+        if(!in_array($first_author,$claim_author)){
+            array_push($claim_author,$first_author);
+        }
+        $claim_author = implode(';',$claim_author);
+        return $claim_author; return $fullSpellArray;
     }
 
 

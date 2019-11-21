@@ -69,28 +69,6 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
     })
 
 
-    $.ajax({
-        url:rootUrl+'/Article/getTypeForAdd',
-        type:'post',
-        dataType:'json',
-        success:function(res){
-            var data = res.data;
-            var html = '';
-            if (data.length == 0){
-                html += "<option value=''>请添加数据</option>";
-                $("#subject").empty().append(html);
-            }else{
-                $.each(data,function (k,v) {
-                    html += "<option value='"+v.subject_name+"'>"+v.subject_name+"</option>"
-                })
-                $("#subject").empty().append(html);
-            }
-            form.render();
-        },
-        error: function (res) {
-            layer.error(res.msg);
-        }
-    });
 
     form.on("submit(articleAdd)",function(data){
         layer.msg('test');
@@ -156,26 +134,77 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
         //执行一个 table 实例
         var userTable = table.render({
             elem: '#tableDemo'
-            // , height: 332
+            , height: 350
             , url: rootUrl+'/Author/userInfo' //数据接口
             , type:'post'
             , where: {accession_number:accession_number}
             // , page: true //开启分页
             , cols: [[ //表头
                 {field: 'full_spell', title: '姓名全拼', width: 120, fixed: 'left'}
-                , {field: 'authorType', title: '作者类型', width: 150, templet: '#selectType', unresize: true}
+                , {field: 'authorType', title: '作者类型', width: 160, templet: '#selectType', unresize: true}
                 , {field: 'number', title: '作者职工号', edit: 'text',width: 150}
                 , {field: 'name', title: '作者姓名', edit:'text', width: 150}
                 , {field: 'sex', title: '性别', width: 85, templet: '#selectSex', unresize: true }
-                , {field: 'xueli', title: '学历', edit:"text", width: 100}
+                , {field: 'xueli', title: '学历', edit:"text", width: 150}
                 , {field: 'title', title: '职称', edit:"text", width: 100}
                 , {field: 'tongxun', title: '是否为通讯作者', width: 150, templet:"#switchTpl"}
                 , {field: 'unit', title: '工作单位', edit:"text"}
             ]]
             ,done:function(res){
                 authorCount = res.count;
+                $("[data-index=0]").find("[data-field='name']").attr('data-edit','t');
+                // $("[data-index="+0+"]").find("[data-field='name']").attr('data-edit','text');
             }
         });
+
+        // 根据工号和行索引向服务器请求数据  
+        function getOneAuthor(index,job_number,authorType){
+            $.ajax({
+                url:rootUrl+"/User/getOneUser"
+                ,type:'post'
+                ,data:{
+                    job_number:job_number,
+                    authorType:authorType
+                }
+                ,dataType:'json'
+                ,success:function(res){
+                    console.log(res.data);
+                    if(res.code==0)
+                    {
+                        updateAuthor(index,res.data);
+                    }else
+                    {
+                        data = new Array();
+                        data['name'] = '';
+                        data['edu_background'] = '';
+                        data['job_title'] = '';
+                        data['academy'] = '';
+                        data['gender'] = '男';
+                        updateAuthor(index,data);
+                    }
+                },error:function()
+                {
+                    layer.msg('服务器错误，请联系系统管理员');
+                }
+            });
+        }
+
+         // 当填入工号 学号时自动填充信息的方法
+         function updateAuthor(index,data)
+         {
+             $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+             // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+             $("[data-index="+index+"]").find("[data-field='xueli']").find('div').text(data['edu_background']);
+             $("[data-index="+index+"]").find("[data-field='title']").find('div').text(data['job_title']);
+             $("[data-index="+index+"]").find("[data-field='unit']").find('div').text(data['academy']);
+             // $("[data-index="+index+"]").find("[data-field='sex']").find('find').val(data['gender']);
+             $("[data-index="+index+"]").find("dd[lay-value="+data['gender']+"]").click();
+             // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+             // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+         }   
+
+
+
         //监听单元格编辑
         table.on('edit(tableDemo)', function(obj){
             var value = obj.value //得到修改后的值
@@ -183,52 +212,59 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                 ,tr = obj.tr  // 获取tr的dom对象
                 ,field = obj.field; //得到字段
                 // 控制如果不是修改的工号，就不会给整行填写数据
-                console.log(field);
+                
                 if(field != 'number'){
                     return false;
                 }
                 // console.log(data);
+                // 获取对应的单元格的 索引 index
                 var index = data.LAY_TABLE_INDEX;
-                $.ajax({
-                    url:rootUrl+"/User/getOneUser"
-                    ,type:'post'
-                    ,data:{job_number:data.number}
-                    ,dataType:'json'
-                    ,success:function(res){
-                        console.log(res.data);
-                        if(res.code==0)
-                        {
-                            updateAuthor(index,res.data);
-                        }else
-                        {
-                            data = [];
-                            updateAuthor(index,data);
-                        }
-                    },error:function()
-                    {
-                        // layer.msg('err');
-                    }
-                });
-                // updateAuthor(index);
-               
-
-            // layer.msg('[ID: '+ data.full_spell +'] ' + field + ' 字段更改为：'+ value);
+                // 获取到作者的类型
+                var authorType = $("[data-index="+index+"]").find("[data-field='authorType']").find('input').val();
+                // console.log(authorType);
+                if(authorType=='本校教师' || authorType=='本校研究生'){
+                    getOneAuthor(index,data.number,authorType);
+                }else{
+                    data = new Array();
+                    data['name'] = '';
+                    data['edu_background'] = '';
+                    data['job_title'] = '';
+                    data['academy'] = '';
+                    data['gender'] = '男';
+                    updateAuthor(index,data);
+                }
+                
         });
 
-        function updateAuthor(index,data)
-        {
-            $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
-            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
-            $("[data-index="+index+"]").find("[data-field='xueli']").find('div').text(data['edu_background']);
-            $("[data-index="+index+"]").find("[data-field='title']").find('div').text(data['job_title']);
-            $("[data-index="+index+"]").find("[data-field='unit']").find('div').text(data['academy']);
-            // $("[data-index="+index+"]").find("[data-field='sex']").find('find').val(data['gender']);
-            $("[data-index="+index+"]").find("[data-field='sex']").find('find').val('女');
-            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
-            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
-        }
+       
 
+        // 选择教师类型，相应对应的事件
+        form.on("select(selectType)",function(data){
+            // console.log(data.elem); //得到select原始DOM对象
+            console.log(data.value); //得到被选中的值
+            
+            // 获取对应的教师类型的值
+            var authorType = data.value;
+            // 获取对应的行的索引index
+            var index = $(data.elem).parent().parent().parent().attr('data-index');
+            // 获取此时的工号
+            var job_number = $("[data-index="+index+"]").find("[data-field='number']").find('div').text();
+            // 请求数据，填充数据
+            if(authorType=='本校教师' || authorType=='本校研究生'){
+                getOneAuthor(index,job_number,authorType);
+            }else{
+                data = new Array();
+                data['name'] = '';
+                data['edu_background'] = '';
+                data['job_title'] = '';
+                data['academy'] = '';
+                data['gender'] = '男';
+                updateAuthor(index,data);
 
+                $("[data-index="+index+"]").find("[data-field='name']").attr('data-edit','text');
+            }
+            
+          });
 
 })
 
@@ -270,8 +306,8 @@ function claimArticle() {
     
     var flag = true;
     tableData.forEach(element => {
-        if(element[0]=='' || element[4]=='' || element[7]==''){
-            layer.msg('请将信息填写完整');
+        if(element[4]=='' || element[7]==''){
+            layer.msg('作者的中文姓名和学院信息必须填写，请将信息填写完整！');
             flag = false;
         }
     });
@@ -290,6 +326,9 @@ function claimArticle() {
             if(res.code == 0)
             {
                 layer.msg(res.msg);
+                layer.closeAll("iframe");
+                //刷新父页面
+                parent.location.reload();
             }
             else
             {
@@ -302,7 +341,5 @@ function claimArticle() {
             layer.msg("服务器出现错误，请联系系统管理员！");
         }
     });
-    // console.log("data-----"+JSON.stringify(table.cache.tableDemo));
-    // console.log("data-----"+table.cache.tableDemo);
-    // layer.msg(accession_number);
+    
 }

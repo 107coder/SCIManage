@@ -53,6 +53,7 @@ class ExcelAction extends CI_Controller {
     }
     public function readArticleExcel($file = "")
     {
+        $file = './file/上传文件模板.xlsx';
         $this->load->model('file_model','file');    //载入数据库文件插入的model
         $this->load->library("PHPExcel");
         header('Content-Type:text/html;charset=utf-8');
@@ -111,7 +112,7 @@ class ExcelAction extends CI_Controller {
             $data_one = array(
                 'accession_number' => $redis->get('article:'.$wosCur.':A'),
                 'title'            => $redis->get('article:'.$wosCur.':B'),
-                'gender'           => $redis->get('article:'.$wosCur.':C'),
+                'author'           => $redis->get('article:'.$wosCur.':C'),
                 'source'           => $redis->get('article:'.$wosCur.':D'),
                 'article_type'     => $redis->get('article:'.$wosCur.':E'),
                 'organization'     => $redis->get('article:'.$wosCur.':F'),
@@ -133,7 +134,8 @@ class ExcelAction extends CI_Controller {
                 'sci_type'         => $redis->get('article:'.$wosCur.':W'),
                 'reward_point'     => $redis->get('article:'.$wosCur.':X'),
                 'other_info'       => $redis->get('article:'.$wosCur.':Y'),
-                'add_method'       => 0
+                'add_method'       => 0,
+                'claim_author'     => $this->searchFullSpell($redis->get('article:'.$wosCur.':G'),$redis->get('article:'.$wosCur.':C'))
             );
 
             array_push($data_all,$data_one);
@@ -414,6 +416,82 @@ class ExcelAction extends CI_Controller {
             }
         }
         exit(JsonEcho('0','数据导入成功！'));
+    }
+
+    
+    /**
+     * 根据通讯作者中的简写，在所有作者中查找出来所有通讯作者的全拼
+     *
+     * @param [type] $address
+     * @param [type] $author
+     * @return void
+     */    
+    function searchFullSpell($address,$author){
+        
+        //把作者中的姓名全拼分为数组   这里涉及到两种格式，判断姓名的分类中是否有 ','分割，
+        if(strpos($author,',') == false){
+            $author=str_replace('-', '', $author);
+            $authorArray=explode('; ', $author);
+            foreach($authorArray as &$author){
+                $author=str_replace(', ', ',', $author);
+                $author=str_replace(' ', ',', $author);
+            }
+        }else{
+            $author=str_replace(' ', '', $author);
+            $author=str_replace('-', '', $author);
+            $authorArray=explode(';', $author);
+        }
+       $first_author = $authorArray[0];
+       
+
+        //把地址中的姓名简写分为数组  先根据';'分成数组，然后判断是否含有(reprintauthor)如果有截取前面的字符
+        $address=str_replace(' ', '', $address);
+        $addressArray=explode(';', $address);
+        $addressArrayLen=count($addressArray);
+        for ($i=0; $i < $addressArrayLen; $i++) 
+        { 
+            if(strstr($addressArray[$i], "(reprintauthor)")!=false)
+            {
+                $pos=strpos($addressArray[$i],"(reprintauthor)");
+                $addressArray[$i]=substr($addressArray[$i], 0,$pos);
+            }
+                
+        }
+        // $fullSpellArray  = [];
+        //对每个简写查找它的全拼以数组形式返回
+        foreach ($addressArray as $value)
+        {
+            $short=$value;
+            $short=strtolower($short);
+            $shortLowerArray=explode(',', $short);
+            foreach ($authorArray as $author)
+            {
+                $fullSpell=strtolower($author);
+                $authorLowerArray=explode(',', $fullSpell);
+                $bool=true;
+                //判断二者逗号前是否相同
+                if(strstr($authorLowerArray[0], $shortLowerArray[0])==false)
+                    $bool=false;
+                //判断缩写逗号后的字母是否都在全拼逗号后的字符里
+                $length=strlen($shortLowerArray[1]);
+                for ($i=0; $i <$length ; $i++)
+                { 
+                    if(strstr($authorLowerArray[1], $shortLowerArray[1][$i])==false)
+                        $bool=false;
+                }
+                if($bool)
+                {
+                    $fullSpellArray[]=$author;
+                }
+            }
+        }
+        
+        $claim_author = $fullSpellArray;
+        if(!in_array($first_author,$claim_author)){
+            array_push($claim_author,$first_author);
+        }
+        $claim_author = implode(';',$claim_author);
+        return $claim_author;
     }
 
 

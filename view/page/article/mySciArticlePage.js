@@ -138,7 +138,7 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                 , {field: 'number', title: '作者职工号', edit: 'text',width: 150}
                 , {field: 'name', title: '作者姓名', edit:'text', width: 150}
                 , {field: 'sex', title: '性别', width: 85, templet: '#selectSex', unresize: true }
-                , {field: 'xueli', title: '学历', edit:"text", width: 100}
+                , {field: 'xueli', title: '学历', edit:"text", width: 150}
                 , {field: 'title', title: '职称', edit:"text", width: 100}
                 , {field: 'tongxun', title: '是否为通讯作者', width: 150, templet:"#switchTpl"}
                 , {field: 'unit', title: '工作单位', edit:"text"}

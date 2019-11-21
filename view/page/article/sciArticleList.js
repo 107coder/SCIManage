@@ -42,7 +42,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
 
             // 其他一些要隐藏的信息
 
-            {title: '操作', width:'70', templet:'#newsListBar',fixed:"right",align:"center"}
+            {title: '操作', width:'90', templet:'#newsListBar',fixed:"right",align:"center"}
         ]] ,done: function () {
             $("[data-field='accession_number']").css('display','none');
         }
@@ -114,12 +114,16 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
    }
 
  
-
+   var pageTitle = '<label class="layui-form-label">论文认领页面</label>'
+                   +'<label class="layui-form-label" style="color:red;font-wight:bold;">认领步骤：</label>'
+                   +'<label style="padding:3px 10px;">第一步：</label><button type="button" class="layui-btn layui-btn-sm" style="width:180px;background-color:#FF5722;">查看论文基本信息</button>' 
+                   +'<label  style="padding:3px 10px;" class="">第二步：</label><button type="button" class="layui-btn layui-btn-sm" style="width:180px;background-color:#FF5722;">填写论文作者信息</button>'
+                   +'<label  style="padding:3px 10px;" class="">第三步：</label><a href="#claim"><button type="button" class="layui-btn layui-btn-sm" style="width:180px;background-color:#FF5722;" >论文认领</button></a>';
     //加载论文认领页面的内容
     function claim(edit){
         var accession_number = edit.accession_number;
         var index = layui.layer.open({
-            title : "论文认领页面",
+            title : pageTitle,
             type : 2,
             content : "claimPage.html",
             success : function(layero, index){
@@ -129,7 +133,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
                     fillParameter(body,edit);
                     $.post(rootUrl+'/Article/verifyClaimAuthority',{'accession_number':accession_number},function(res){
                         if(res.code == 1){
-                            body.find("#claimArticle").addClass('layui-btn-disabled');
+                            body.find(".claimArticle").addClass('layui-btn-disabled');
                             layer.alert(res.msg, {
                                 icon: 0,
                                 skin: 'layer-ext-moon' //该皮肤由layer.seaning.com友情扩展。关于皮肤的扩展规则，去这里查阅

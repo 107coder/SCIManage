@@ -26,5 +26,9 @@ class Author_model extends CI_Model {
      */
     public function deleteArticle($where){
         return $this->db->delete('author',$where);
-    }   
+    }
+
+    public function getPostgraduate($where){
+        return $this->db->where($where)->get("student")->result_array();
+    }
 }

@@ -158,7 +158,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
     //数据导入
     var uploadInst = upload.render({
         elem: '#import_data' //绑定元素
-        ,url: 'http://www.cuisf.top/index.php/ExcelAction/uploadFileApi' //上传接口
+        ,url: rootUrl+'/ExcelAction/uploadFileApi' //上传接口
         ,accept: 'file'
         ,before: function(obj){ //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
             layer.load(); //上传loading

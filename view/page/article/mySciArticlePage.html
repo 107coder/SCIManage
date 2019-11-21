@@ -135,7 +135,7 @@
 
 		<!--定义性别的工具-->
 	<script type="text/html" id="selectSex" desc="定义性别选择器" intro="用到了layui模板（不能设置lay-ignore,否则监听不到事件）">
-		<select name="sex" dataId="{{d.id}}" lay-filter="selectSex">
+		<select name="sex" dataId="{{d.sex}}" lay-filter="selectSex">
 			{{# layui.each(sexArr, function(index, item){ }}
 			<option {{ (d.sex==item)?'selected' : '' }}>{{ item }}</option>
 			{{# }); }}
@@ -144,16 +144,16 @@
 
 	<!--定义作者类型的工具-->
 	<script type="text/html" id="selectType" desc="定义的教师类别" intro="用到了layui模板（不能设置lay-ignore,否则监听不到事件）">
-		<select name="type" dataId="{{d.id}}" lay-filter="selectType">
+		<select name="type" dataId="{{d.authorType}}" lay-filter="selectType">
 			{{# layui.each(typeArr, function(index, item){ }}
-			<option {{ (d.sex==item)?'selected' : '' }}>{{ item }}</option>
+			<option {{ (d.authorType==item)?'selected' : '' }}>{{ item }}</option>
 			{{# }); }}
 		</select>
 	</script>
 
 	<script type="text/html" id="switchTpl" desc="切换开关" intro="layui表单空间">
-		<input type="checkbox" name="sex" value="{{d.id}}" lay-skin="switch"
-			   lay-text="是|否" lay-filter="tongxun" {{ (d.id==10003)?'checked' : '' }}>
+		<input type="checkbox" name="tongxun" value="{{d.tongxun}}" lay-skin="switch"
+			   lay-text="是|否" lay-filter="tongxun" {{ (d.tongxun==1)?'checked' : '' }}>
 	</script>
 
 	<script type="text/javascript" src="../../layui/layui.js"></script>

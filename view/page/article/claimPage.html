@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>文章列表--layui后台管理模板 2.0</title>
+	<title>论文认领--河南大学科研处</title>
 	<meta name="renderer" content="webkit">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -26,6 +26,13 @@
 </head>
 
 <body class="childrenBody">
+	<!-- 步骤说明 -->
+		<div class="layui-btn-container">
+			<label class="layui-form-label" style="color:red;font-wight:bold;">认领步骤：</label>
+			<label style="padding:3px 10px;">第一步：</label><button type="button" class="layui-btn layui-btn-sm" style="width:180px;background-color:#FF5722;">查看论文基本信息</button>
+			<label  style="padding:3px 10px;" class="">第二步：</label><button type="button" class="layui-btn layui-btn-sm" style="width:180px;background-color:#FF5722;">填写论文作者信息</button>
+			<label  style="padding:3px 10px;" class="">第三步：</label><a href="#claim"><button type="button" class="layui-btn layui-btn-sm" style="width:180px;background-color:#FF5722;" >论文认领</button></a>
+		</div>
 		<div class="layui-col-lg12 layui-col-md12">
 			<blockquote class="layui-elem-quote title">论文基本参数</blockquote>
 			<table class="layui-table magt0" lay-size="sm">
@@ -123,18 +130,17 @@
 
 		</div>
 
-		<button type="button" style="margin: 10px 40px" class="layui-btn" id="claimArticle" onclick="claimArticle()">认领</button>
+		<button type="button" id="claim" style="margin: 10px 40px" class="layui-btn layui-btn-lg claimArticle" onclick="claimArticle()">认领</button>
 	</form>
 
 	<script type="text/javascript">
-		// var cityArr = ['昆明', '长沙', '富源', '楚雄', '长春', '哈尔滨', '桂林'];
 		var sexArr = ['男','女'];
-		var typeArr = ['本校教师','本校研究生','本校本科生','其他人员'];
+		var typeArr = ['选择作者类型','本校教师','本校研究生','本校本科生','其他人员'];
 	</script>
 
 		<!--定义性别的工具-->
 	<script type="text/html" id="selectSex" desc="定义性别选择器" intro="用到了layui模板（不能设置lay-ignore,否则监听不到事件）">
-		<select name="sex" dataId="{{d.id}}" lay-filter="selectSex">
+		<select name="sex" dataId="{{d.sex}}" lay-filter="selectSex">
 			{{# layui.each(sexArr, function(index, item){ }}
 			<option {{ (d.sex==item)?'selected' : '' }}>{{ item }}</option>
 			{{# }); }}
@@ -143,16 +149,17 @@
 
 	<!--定义作者类型的工具-->
 	<script type="text/html" id="selectType" desc="定义的教师类别" intro="用到了layui模板（不能设置lay-ignore,否则监听不到事件）">
-		<select name="type" dataId="{{d.id}}" lay-filter="selectType">
+		<select name="authorType" dataId="{{d.authorType}}" lay-filter="selectType" >
 			{{# layui.each(typeArr, function(index, item){ }}
-			<option {{ (d.sex==item)?'selected' : '' }}>{{ item }}</option>
+			<option {{ (d.authorType==item)?'selected' : '' }}>{{ item }}</option>
 			{{# }); }}
 		</select>
 	</script>
 
+	<!-- 定义是否为通讯作者 -->
 	<script type="text/html" id="switchTpl" desc="切换开关" intro="layui表单空间">
-		<input type="checkbox" name="sex" value="{{d.id}}" lay-skin="switch"
-			   lay-text="是|否" lay-filter="tongxun" {{ (d.id==10003)?'checked' : '' }}>
+		<input type="checkbox" name="tongxun" value="{{d.id}}" lay-skin="switch"
+			   lay-text="是|否" lay-filter="tongxun" {{ (d.tongxun==1)?'checked' : '' }}>
 	</script>
 
 	<script type="text/javascript" src="../../layui/layui.js"></script>
