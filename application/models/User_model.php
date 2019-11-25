@@ -9,7 +9,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  
 class User_model extends CI_Model
 {
-    public function getAllUser($perPage,$offest,$key,$identity)
+    public function getAllTeacher($perPage,$offest,$key,$identity)
     {
         return $this->db
                     ->limit($perPage,$offest)
@@ -39,7 +39,7 @@ class User_model extends CI_Model
                     ->get()->result_array();
     }
     //返回查询的总数量
-    public function getUserNums($key,$identity)
+    public function getTeacherNums($key,$identity)
     {
         return $this->db
                     ->select('job_number,name,gender,academy,identity')
@@ -64,7 +64,7 @@ class User_model extends CI_Model
                     ->count_all_results();
     }
     //添加用户
-    public function addUser($data){
+    public function addTeacher($data){
         $this->db->insert('user',$data);
     }
     public function addStudent($data){
@@ -72,14 +72,14 @@ class User_model extends CI_Model
     } 
  
     //删除用户
-    public function delUser($job_number){
+    public function delTeacher($job_number){
         $this->db->where_in('job_number',$job_number)->delete('user');    
     }
     public function delStudent($sno){
         $this->db->where_in('sno',$sno)->delete('student');    
     }
     //查询对应的用户
-    public function checkUser($job_number){
+    public function checkTeacher($job_number){
         $data=$this->db->where(array('job_number'=>$job_number))->get('user')->result_array();
         return $data;
     }
@@ -88,14 +88,14 @@ class User_model extends CI_Model
         return $data;
     }
     //修改用户
-    public function editUser($job_number,$data){
+    public function editTeacher($job_number,$data){
        $this->db->update('user',$data,array('job_number'=>$job_number));
     }
     public function editStudent($sno,$data){
        $this->db->update('student',$data,array('sno'=>$sno));
     }
     // 返回数据库中的条数，判断数据是否存在
-    public function userExist($where)
+    public function TeacherExist($where)
     {
         $this->db->where($where);
         $this->db->from('user');
@@ -108,7 +108,7 @@ class User_model extends CI_Model
         return $this->db->count_all_results();
     }
     //Excel导入用户
-     public function userInsert($data_arr)
+     public function teacherInsert($data_arr)
     {
         return $this->db->insert_batch('user',$data_arr);
     }

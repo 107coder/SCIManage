@@ -224,7 +224,7 @@ class ExcelAction extends CI_Controller {
     }
 
     //用户的导入
-    public function uploadUserFileApi()
+    public function uploadTeacherFileApi()
     {
         $config['upload_path']      = './file/';
         $config['allowed_types']    = 'xls|xlsx|txt';
@@ -239,7 +239,7 @@ class ExcelAction extends CI_Controller {
         else
         {
             $data = $this->upload->data();
-            $this->readUserExcel($data['full_path']);
+            $this->readTeacherExcel($data['full_path']);
 
         }
     }
@@ -263,7 +263,7 @@ class ExcelAction extends CI_Controller {
         }
     }
     //执行用户的入库操作
-    public function readUserExcel($file='')
+    public function readTeacherExcel($file='')
     {   
         $this->load->model('user_model','user');    //载入数据库文件插入的model
         $this->load->library("PHPExcel");
@@ -298,7 +298,7 @@ class ExcelAction extends CI_Controller {
             }
             $wosNumber = $data['A'];
             if($wosNumber == '') continue;  // 如果判断检测到某行的wos号码为空，直接跳过
-            if($this->user->userExist(array('job_number'=>$wosNumber)) == 0)
+            if($this->user->TeacherExist(array('job_number'=>$wosNumber)) == 0)
             {
                 $redis->lPush('userLink',$wosNumber);
             }
@@ -338,7 +338,7 @@ class ExcelAction extends CI_Controller {
             if(count($data_all) >= 300 || $i==$userLen-1)
             {
                 $status  = 0;
-                $status = $this->user->userInsert($data_all);
+                $status = $this->user->teacherInsert($data_all);
                 $data_all = [];
                 if($status <= 0)
                 {

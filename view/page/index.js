@@ -7,7 +7,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         table = layui.table;
 
     $.ajax({
-            url : rootUrl+"/user/userInfo",
+            url : rootUrl+"/user/teacherInfo",
             dataType:"JSON",
             type : "post",
             data : {},

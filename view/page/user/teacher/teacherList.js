@@ -9,15 +9,15 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
  
     //用户列表
     var tableIns = table.render({ 
-        elem: '#userList',
-        url : rootUrl+'/user/getAllUserApi', 
+        elem: '#teacherList',
+        url : rootUrl+'/user/getAllTeacherApi', 
         cellMinWidth : 95,
         page : true,
         height : "full-105", 
         limit : 10,
         limits : [10,20,30,40,50],
         loading : true,
-        id : "userListTable",
+        id : "teacherListTable",
         cols : [[
             {type: "checkbox", fixed:"left", width:50},
             {field: 'job_number', title: '工号', align:'center',minWidth:150},
@@ -25,7 +25,7 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
             {field: 'gender', title: '用户性别', align:'center'},
             {field: 'academy', title: '学院', minWidth:100, align:"center"},
             {field: 'identity', title: '身份', templet:'#identity',minWidth:100, align:"center"},
-            {title: '操作', minWidth:175, templet:'#userListBar',fixed:"right",align:"center"}
+            {title: '操作', minWidth:175, templet:'#teacherListBar',fixed:"right",align:"center"}
         ]]
     });
     //用户查询
@@ -33,7 +33,7 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
     var demoReload = $('#demoReload');   
       $('.search_btn').on('click', function(){
           //执行重载
-          table.reload('userListTable', {
+          table.reload('teacherListTable', {
             page: {
               curr: 1 //重新从第 1 页开始
             }
@@ -49,11 +49,11 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
             }
       });
     //修改用户时的数值的显示
-    function editUser(data){      
+    function editTeacher(data){      
         var index = layui.layer.open({
             title : "修改用户",
             type : 2,
-            content : "userEdit.html",
+            content : "teacherEdit.html",
             success : function(layero, index){
                 var body = layui.layer.getChildFrame('body', index);
                 body.find(".job_number").val(data.job_number);  
@@ -62,7 +62,7 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
                 body.find(".academy").val(data.academy);  
                 body.find(".layui-anim-upbit dd[lay-value="+data.identity+"]").click();     //找到目标下拉框的临近i标签,然后触发它的click事件
                 $.ajax({
-                    url : rootUrl+"/user/checkUser",
+                    url : rootUrl+"/user/checkTeacher",
                     dataType:"JSON",
                     type : "post",
                     data : {job_number : data.job_number},
@@ -89,11 +89,11 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
         })
     }
     //添加用户
-    function addUser(edit){
+    function addTeacher(edit){
         var index = layui.layer.open({
             title : "添加用户",
             type : 2,
-            content : "userAdd.html",
+            content : "teacherAdd.html",
         })
         layui.layer.full(index);
         window.sessionStorage.setItem("index",index);
@@ -103,12 +103,12 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
         })
     }
     $(".addNews_btn").click(function(){
-        addUser();
+        addTeacher();
     })
 
     //批量删除
     $(".delAll_btn").click(function(){
-        var checkStatus = table.checkStatus('userListTable'),
+        var checkStatus = table.checkStatus('teacherListTable'),
             data = checkStatus.data,
             job_number = [];
         if(data.length > 0)
@@ -117,7 +117,7 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
                 job_number.push(data[i].job_number);
             layer.confirm('确定删除选中的用户？', {icon: 3, title: '提示信息'}, function (index) {
                 $.ajax({
-                    url : rootUrl+"/user/delUser",
+                    url : rootUrl+"/user/delTeacher",
                     type : "post",
                     data : {job_number : job_number},
                     async : false,
@@ -138,17 +138,17 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
     })
 
     //列表操作
-    table.on('tool(userList)', function(obj){
+    table.on('tool(teacherList)', function(obj){
         var layEvent = obj.event,
             data = obj.data;
 
         if(layEvent === 'edit'){ //编辑
-            editUser(data);
+            editTeacher(data);
         }else 
         if(layEvent === 'del'){ //删除
             layer.confirm('确定删除此用户？',{icon:3, title:'提示信息'},function(index){
                 $.ajax({
-                    url : rootUrl+"/user/delUser",
+                    url : rootUrl+"/user/delTeacher",
                     type : "post",
                     data : {job_number : data.job_number},
                     async : false,
@@ -169,7 +169,7 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
     // 批量添加用户 / 通过Excel表格导入用户
     var uploadInst = upload.render({
         elem: '#import_data' //绑定元素
-        ,url: rootUrl+'/ExcelAction/uploadUserFileApi' //上传接口
+        ,url: rootUrl+'/ExcelAction/uploadTeacherFileApi' //上传接口
         ,accept: 'file'
         ,before: function(obj){ //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
             layer.load(); //上传loading
@@ -181,7 +181,7 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
             {
                 layer.msg(res.msg);
             }
-            table.reload('userListTable', { //刷新页面
+            table.reload('teacherListTable', { //刷新页面
                 page: {
                   curr: 1 
                 }
