@@ -4,10 +4,13 @@ if(/layuicms2.0\/page/.test(top.location.href) && !/login.html/.test(top.locatio
 } 
 //外部图标链接 
 var iconUrl = "https://at.alicdn.com/t/font_400842_q6tk84n9ywvu0udi.css";
+// 定义全局登录状态
+
 //定义请求路径的根URL
 // 崔少峰
 // window.rootUrl = "http://localhost/a/107/SCIManage/index.php";
 window.rootUrl = "http://localhost/107/SCIManage/index.php";
+/*window.rootUrl = "http://127.0.0.1/107/SCIManage/index.php";*/
 // 赵士顺
 // window.rootUrl = "http://localhost:88/SCIManage/index.php";
 /** layui-v2.2.5 MIT License By https://www.layui.com */

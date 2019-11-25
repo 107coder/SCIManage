@@ -127,13 +127,15 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
         //执行一个 table 实例
         var userTable = table.render({
             elem: '#tableDemo'
-            // , height: 332
+            , height: 400
             , url: rootUrl+'/Author/getAuthorClaimArticle' //数据接口
             , type:'post'
             , where: {accession_number:accession_number}
             // , page: true //开启分页
             , cols: [[ //表头
+
                 {field: 'full_spell', title: '姓名全拼', width: 120, fixed: 'left'}
+                ,{field: 'aId', title: '作者ID', width: 20}
                 , {field: 'authorType', title: '作者类型', width: 150, templet: '#selectType', unresize: true}
                 , {field: 'number', title: '作者职工号', edit: 'text',width: 150}
                 , {field: 'name', title: '作者姓名', edit:'text', width: 150}
@@ -145,6 +147,7 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
             ]]
             ,done:function(res){
                 authorCount = res.count;
+                $("[data-field='aId']").css('display','none');
             }
         });
         //监听单元格编辑
@@ -201,12 +204,12 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
 
 
 
-})
-    
+
 
 function getAuthor(index)
 {
     var full_spell = $("[data-index="+index+"]").find("[data-field='full_spell']").find('div').html();
+    var aId = $("[data-index="+index+"]").find("[data-field='aId']").find('div').html();
     var name = $("[data-index="+index+"]").find("[data-field='name']").find('div').text();
     var xueli =  $("[data-index="+index+"]").find("[data-field='xueli']").find('div').text();
     var title = $("[data-index="+index+"]").find("[data-field='title']").find('div').text();
@@ -215,7 +218,7 @@ function getAuthor(index)
     var sex = $("[data-index="+index+"]").find("[data-field='sex']").find('input').val();
     var number = $("[data-index="+index+"]").find("[data-field='number']").find('div').text();
     var tongxun = $("[data-index="+index+"]").find("[data-field='tongxun']").find('em').text();
-    var arr = new Array(name,full_spell,xueli,title,unit,authorType,sex,number,tongxun);
+    var arr = new Array(name,full_spell,xueli,title,unit,authorType,sex,number,tongxun,aId);
     // 姓名 全拼 学历 职称 单位 作者类型 性别 工号 是否为通讯作者
     return arr;
 }
@@ -275,7 +278,8 @@ function updateAuthorInfo() {
 }
 
 // 文章退回
-function backArticle()
+
+form.on('submit(backArticle)',function()
 {
     var accession_number = $('#accession_number').text();
     layer.confirm('您确定要退回这篇文章吗？', {
@@ -293,7 +297,13 @@ function backArticle()
                 
                 if(res.code == 0)
                 {
-                    layer.msg(res.msg);
+                    
+                    layer.msg(res.msg); 
+                    setTimeout(() => {
+                        layer.closeAll("iframe");
+                        //刷新父页面
+                        parent.location.reload();
+                    }, 1000);
                 }
                 else
                 {
@@ -301,7 +311,7 @@ function backArticle()
                     return false;
                 }
     
-                console.log(res);
+                
             },error:function (res) {
                 layer.msg("服务器出现错误，请联系系统管理员！");
             }
@@ -312,4 +322,49 @@ function backArticle()
         });
       });
 
-}
+});
+
+// function backArticle()
+// {
+//     var accession_number = $('#accession_number').text();
+//     layer.confirm('您确定要退回这篇文章吗？', {
+//         btn: ['确定','取消'] //按钮
+//       }, function(){
+//         $.ajax({
+//             url:rootUrl+"/Article/backArticle",
+//             type:'post',
+//             data:{
+//                 accession_number:accession_number,
+//             },
+//             dataType: 'json',
+//             success:function(res)
+//             {
+                
+//                 if(res.code == 0)
+//                 {
+//                     top.layer.close(index);
+//                     layer.msg(res.msg); 
+//                     layer.closeAll("iframe");
+//                     //刷新父页面
+//                     parent.location.reload();
+//                 }
+//                 else
+//                 {
+//                     layer.msg(res.msg);
+//                     return false;
+//                 }
+    
+                
+//             },error:function (res) {
+//                 layer.msg("服务器出现错误，请联系系统管理员！");
+//             }
+//         });
+//       }, function(){
+//         layer.msg('您已取消', {
+//           time: 1000, //1s后自动关闭
+//         });
+//       });
+
+// }
+
+})

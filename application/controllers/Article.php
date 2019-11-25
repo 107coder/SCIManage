@@ -15,28 +15,42 @@ class Article extends MY_Controller {
     }
 
 
+    /**
+     * 获取所有文章的内容
+     *
+     * @return void
+     */
     public function getArticleApi()
     {
         $page = $this->input->get('page')-1;
         $limit = $this->input->get('limit');
 
         $key = $this->input->get('key');
-        // $type = $this->input->get('type');
         
         if(empty($key)){
             $data = $this->article->getArticle($page,$limit);
+            $count = $this->db->count_all('article');
         }else{
             $data = $this->article->searchArticle($page,$limit,$key);
+            $count = $this->article->searchArticleCount($key);
         }
         $resdata = array(
             'code' => '0',
             'msg'  => '请求数据正常',
-            'count'=> $this->db->count_all('article'),
+            'count'=> $count,
             'data' => $data
         );
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * 获取当前登录着的姓名全拼，填写的搜索框中
+     *
+     * @return void
+     */
+    public function getFullSpell(){
+
+    }
 
     // 获取文章分类
     public function getTypeApi()
@@ -149,30 +163,37 @@ class Article extends MY_Controller {
         // 将所有的名字都换成小写，判断是否可以认领
         $yourName = strtolower($this->session->full_spell);
         $claim_author = explode(';',strtolower($data[0]['claim_author']));
-        
+        $resData = ['articleStatus'=> $data[0]['articleStatus']];
         if(in_array($yourName,$claim_author))
         {
-            echo JsonEcho('0','您可认领这篇文章');
+            echo JsonEcho('0','您可认领这篇文章',$resData);
         } else{
-            exit(JsonEcho('1','该篇文章只允许第一作者和通讯作者认领，您不能认领，只能查看，如有疑问请联系系统管理员！'));
+            exit(JsonEcho('1','该篇文章只允许第一作者和通讯作者认领，您不能认领，只能查看，如有疑问请联系系统管理员！',$resData));
         }
     }
 
+    /**
+     * 文章认领
+     *
+     * @return void
+     */
     public function claimArticle()
     {
         // 从前端获取数据
         $accession_number = $this->input->post('accession_number');
         $tableData = $this->input->post('tableData');
+        // $accession_number = 'WOS:000454836700027';
+        // $tableData = '[["崔少峰","Li, Rui","","","计算机与信息工程学院","本校教师","男","17101211","否","127"],["刘瑞欣","Huang, Xiaowei","","","文学院","本校研究生","女","104752100022","否","128"],["刘瑞欣","Ma, Xiaoyu","","","文学院","本校研究生","女","104752100022","否","129"],["刘瑞欣","Zhu, Zhili","","","文学院","本校研究生","女","104752100022","否","130"],["刘瑞欣","Li, Chong","","","文学院","本校研究生","女","104752100022","否","131"],["马征","Xia, Congxin","博士研究生","副教授","黄河文明与可持续发展研究中心","本校教师","女","10010003","否","132"],["马征","Zeng, Zaiping","博士研究生","副教授","黄河文明与可持续发展研究中心","本校教师","女","10010003","否","133"],["马征","Jia, Yu","博士研究生","副教授","黄河文明与可持续发展研究中心","本校教师","女","10010003","否","134"]]';
         // 从article表中获取相关信息，检查是否能够认领并且是否用认领的权限
         $where = ['accession_number'=>$accession_number];
-        $data = $this->article->checkArticle($where);
+        $articleData = $this->article->checkArticle($where);
         // 将所有的名字都换成小写，判断是否可以认领
         $yourName = strtolower($this->session->full_spell);
-        $claim_author = explode(';',strtolower($data[0]['claim_author']));
+        $claim_author = explode(';',strtolower($articleData[0]['claim_author']));
         
         if(in_array($yourName,$claim_author))
         {
-            if($data[0]['owner']!=null || $data[0]['articleStatus']!=0)
+            if($articleData[0]['owner']!=null || $articleData[0]['articleStatus']!=0)
             {
                 exit(JsonEcho('1','文章已被认领'));
             }
@@ -180,6 +201,7 @@ class Article extends MY_Controller {
             // 首先更新 article 表中的数据
             $data_article = array(
                 'owner' => $this->session->job_number,
+                "owner_name"=> $this->session->name,
                 'articleStatus' => 1,
                 'claim_time' => time()
             );
@@ -188,10 +210,10 @@ class Article extends MY_Controller {
             {
                 exit(JsonEcho('1','文章认领失败，请稍后重试'));
             }
-            $data = json_decode($tableData,true);
+            $authorData = json_decode($tableData,true);
             // 需要插入的数据，在下面进行拼接
             $data_arr = [];
-            foreach($data as $key => $value){
+            foreach($authorData as $key => $value){
                 $data_arr[$key]['aName'] = $value[0];
                 $data_arr[$key]['aFull_spell'] = $value[1];
                 $data_arr[$key]['aEduBackground'] = $value[2];
@@ -203,15 +225,26 @@ class Article extends MY_Controller {
                 $data_arr[$key]['aisAddress'] = $value[8];
                 $data_arr[$key]['aArticleNumber'] = $accession_number;
                 $data_arr[$key]['aIsCliam'] = $value[7]==$this->session->job_number?1:0;
+                if($value[9] != -1){
+                    $data_arr[$key]['aId'] = $value[9];
+                }
+                
             }
             $this->load->model('Author_model','author');
-            $status = $this->author->insertAuthor($data_arr);
             
-            if($status==0)
-            {
-                exit(JsonEcho('1','文章认领失败'));
+            if($articleData[0]['claim_time']==NULL || $articleData[0]['claim_time']==''){
+                $status = $this->author->insertAuthor($data_arr);
             }else{
-                echo JsonEcho('0','文章认领成功',$data_arr);
+                $where = ['aArticleNumber'=>$accession_number];
+                $status = $this->author->updateAuthor($data_arr,$where);
+                // var_dump($status);
+            }
+            
+            if($status === false)
+            {
+                exit(JsonEcho('1','论文认领失败'));
+            }else{
+                echo JsonEcho('0','论文认领成功');
             }
         } else{
             exit(JsonEcho('1','抱歉，不能认领不属于自己的文章'));
@@ -219,10 +252,8 @@ class Article extends MY_Controller {
             
     }
 
-    public function doClaimArticle()
-    {
 
-    }
+    
 
 
 
@@ -250,7 +281,7 @@ class Article extends MY_Controller {
 
         $data = [
             'owner' => null,
-            'claim_time' => null,
+            'owner_name' => null,
             'articleStatus' => 0
         ];
         // 重置论文的认领信息
@@ -294,7 +325,8 @@ class Article extends MY_Controller {
             $author=str_replace('-', '', $author);
             $authorArray=explode(';', $author);
         }
-       $first_author = $authorArray[0];
+
+       
        
 
         //把地址中的姓名简写分为数组  先根据';'分成数组，然后判断是否含有(reprintauthor)如果有截取前面的字符
@@ -326,11 +358,14 @@ class Article extends MY_Controller {
                 if(strstr($authorLowerArray[0], $shortLowerArray[0])==false)
                     $bool=false;
                 //判断缩写逗号后的字母是否都在全拼逗号后的字符里
-                $length=strlen($shortLowerArray[1]);
-                for ($i=0; $i <$length ; $i++)
-                { 
-                    if(strstr($authorLowerArray[1], $shortLowerArray[1][$i])==false)
-                        $bool=false;
+                if(strpos($fullSpell,',') != false)
+                {
+                    $length=strlen($shortLowerArray[1]);
+                    for ($i=0; $i <$length ; $i++)
+                    { 
+                        if(strstr($authorLowerArray[1], $shortLowerArray[1][$i])==false)
+                            $bool=false;
+                    }
                 }
                 if($bool)
                 {
@@ -338,12 +373,18 @@ class Article extends MY_Controller {
                 }
             }
         }
-        $claim_author = $fullSpellArray;
+        if(isset($fullSpellArray))
+            $claim_author = $fullSpellArray;
+        else
+            $claim_author = array();
+        
         if(!in_array($first_author,$claim_author)){
             array_push($claim_author,$first_author);
         }
         $claim_author = implode(';',$claim_author);
         return $claim_author; return $fullSpellArray;
+
+        
     }
 
 

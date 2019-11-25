@@ -51,6 +51,16 @@ class Login extends CI_Controller {
         if(empty($userId))
         {
             exit(JsonEcho(4,'请先登录！'));
+        }else{
+            $data = array(
+                'job_number' => $this->session->job_number,
+                'full_spell' => $this->session->full_spell,
+                'name' => $this->session->name,
+                'gender' => $this->session->gender,
+                'academy' => $this->session->academy,
+                'identity' => $this->session->identity
+            );
+            exit(JsonEcho(0,'已登录',$data));
         }
     }
     // 判断是否首次登陆已经填写姓名全拼
@@ -66,4 +76,13 @@ class Login extends CI_Controller {
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
 
+
+    public function signOut(){
+        $status = session_destroy();
+        if($status){
+            exit(JsonEcho(0,'退出成功！'));
+        }else{
+            exit(JsonEcho(1,"退出失败！"));
+        }
+    }
 }

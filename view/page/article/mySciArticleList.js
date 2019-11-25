@@ -24,18 +24,9 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             {field: 'source', title: '文章来源', align:'center'},
             {field: 'address', title: '通讯作者', align:'center',width:200},
             {field: 'articleStatus', title: '论文状态', width:110,  align:'center',templet:"#articleStatus"},
-            {field: 'claimName', title: '认领人', align:'center'},
-            // {field: 'is_top', title: '是否置顶', align:'center'},
-            // {field: 'roll', title: '卷', align:'center'},
-            // {field: 'period', title: '期', align:'center'},
-            // {field: 'page', title: '页码', align:'center'},
-            
+            {field: 'owner_name', title: '认领人', align:'center'},
             {field: 'date', title: '发表时间', align:'center', minWidth:110},
-            // {field: 'is_first_inst', title: '第一机构', align:'center'},
-            // {field: 'impact_factor', title: '影响因子', align:'center'},
-            // {field: 'subject', title: '学科分类', align:'center'},
             {field: 'sci_type', title: '论文类型', align:'center'},
-            // {field: 'other_info', title: '其他信息', align:'center'},
 
             // 其他一些要隐藏的信息
 
@@ -45,19 +36,7 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         }
     });
 
-    //是否置顶
-    form.on('switch(newsTop)', function(data){
-        var index = layer.msg('修改中，请稍候',{icon: 16,time:false,shade:0.8});
-        setTimeout(function(){
-            layer.close(index);
-            if(data.elem.checked){
-                layer.msg("置顶成功！");
-            }else{
-                layer.msg("取消置顶成功！");
-            }
-        },500);
-    })
-
+    
      // 预览文章时候  填写论文的基本信息信息
      function fillParameter(body,data){
         //判断字段数据是否存在
@@ -119,27 +98,8 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
     }
 
 
-    //批量删除
-    $(".delAll_btn").click(function(){
-        var checkStatus = table.checkStatus('newsListTable'),
-            data = checkStatus.data,
-            newsId = [];
-        if(data.length > 0) {
-            for (var i in data) {
-                newsId.push(data[i].newsId);
-            }
-            layer.confirm('确定删除选中的文章？', {icon: 3, title: '提示信息'}, function (index) {
-                // $.get("删除文章接口",{
-                //     newsId : newsId  //将需要删除的newsId作为参数传入
-                // },function(data){
-                tableIns.reload();
-                layer.close(index);
-                // })
-            })
-        }else{
-            layer.msg("请选择需要删除的文章");
-        }
-    })
+
+    
 
     //列表操作
     table.on('tool(newsList)', function(obj){
@@ -148,8 +108,8 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
 
         if(layEvent === 'edit'){ //编辑
             addNews(data);
-        } else if(layEvent === 'del'){ //删除
-            layer.confirm('确定删除此文章？',{icon:3, title:'提示信息'},function(index){
+        } else if(layEvent === 'back'){ //删除
+            layer.confirm('确定退回此论文？',{icon:3, title:'提示信息'},function(index){
                 // $.get("删除文章接口",{
                 //     newsId : data.newsId  //将需要删除的newsId作为参数传入
                 // },function(data){

@@ -28,7 +28,21 @@ class Author_model extends CI_Model {
         return $this->db->delete('author',$where);
     }
 
+    /**
+     * 获取研究生信息
+     *
+     * @param [type] $where
+     * @return void
+     */
     public function getPostgraduate($where){
         return $this->db->where($where)->get("student")->result_array();
+    }
+    /**
+     * 更新用户信息
+     *
+     * @return void
+     */
+    public function updateAuthor($data_arr,$where){
+        return $this->db->update_batch('author',$data_arr,'aId');
     }
 }

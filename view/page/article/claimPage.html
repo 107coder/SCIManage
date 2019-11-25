@@ -27,12 +27,12 @@
 
 <body class="childrenBody">
 	<!-- 步骤说明 -->
-		<div class="layui-btn-container">
+		<!-- <div class="layui-btn-container">
 			<label class="layui-form-label" style="color:red;font-wight:bold;">认领步骤：</label>
 			<label style="padding:3px 10px;">第一步：</label><button type="button" class="layui-btn layui-btn-sm" style="width:180px;background-color:#FF5722;">查看论文基本信息</button>
 			<label  style="padding:3px 10px;" class="">第二步：</label><button type="button" class="layui-btn layui-btn-sm" style="width:180px;background-color:#FF5722;">填写论文作者信息</button>
 			<label  style="padding:3px 10px;" class="">第三步：</label><a href="#claim"><button type="button" class="layui-btn layui-btn-sm" style="width:180px;background-color:#FF5722;" >论文认领</button></a>
-		</div>
+		</div> -->
 		<div class="layui-col-lg12 layui-col-md12">
 			<blockquote class="layui-elem-quote title">论文基本参数</blockquote>
 			<table class="layui-table magt0" lay-size="sm">
@@ -66,7 +66,7 @@
 						<td class="organization" colspan="3"></td>
 					</tr>
 					<tr>
-						<td>第一作者</td>
+						<td>文章认领作者</td>
 						<td class="claim_author"></td>
 						<td>其他作者</td>
 						<td class="other_author"></td>
@@ -130,7 +130,7 @@
 
 		</div>
 
-		<button type="button" id="claim" style="margin: 10px 40px" class="layui-btn layui-btn-lg claimArticle" onclick="claimArticle()">认领</button>
+		<button type="button" id="claim" style="margin: 10px 40px" class="layui-btn layui-btn-lg claimArticle" lay-submit lay-filter="claimArticle">认领</button>
 	</form>
 
 	<script type="text/javascript">
@@ -159,7 +159,7 @@
 	<!-- 定义是否为通讯作者 -->
 	<script type="text/html" id="switchTpl" desc="切换开关" intro="layui表单空间">
 		<input type="checkbox" name="tongxun" value="{{d.id}}" lay-skin="switch"
-			   lay-text="是|否" lay-filter="tongxun" {{ (d.tongxun==1)?'checked' : '' }}>
+			   lay-text="是|否" lay-filter="tongxun" {{ (d.tongxun=='是')?'checked' : '' }}>
 	</script>
 
 	<script type="text/javascript" src="../../layui/layui.js"></script>

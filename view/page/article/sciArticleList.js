@@ -7,6 +7,21 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
         upload = layui.upload,
         table = layui.table;
 
+        // 自动在搜索框内填写登录这的姓名全拼
+        $.ajax({
+            url:rootUrl+"/User/userInfo",
+            data:{},
+            type:"post",
+            dataType:'json',
+            success:function(res){
+                if(res.code == 0){
+                    
+                    $(".searchVal").val(res.data["full_spell"]);
+                }
+            },error:function(){
+                layer.msg("服务器错误");
+            }
+        });
     
     //新闻列表
     var tableIns = table.render({
@@ -27,7 +42,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
             {field: 'source', title: '文章来源', align:'center'},
             {field: 'address', title: '通讯作者', align:'center',width:200},
             {field: 'articleStatus', title: '论文状态', width:110,  align:'center',templet:"#articleStatus"},
-            {field: 'ownerName', title: '认领人', align:'center'},
+            {field: 'owner_name', title: '认领人', align:'center'},
             // {field: 'is_top', title: '是否置顶', align:'center'},
             // {field: 'roll', title: '卷', align:'center'},
             // {field: 'period', title: '期', align:'center'},
@@ -45,22 +60,12 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
             {title: '操作', width:'90', templet:'#newsListBar',fixed:"right",align:"center"}
         ]] ,done: function () {
             $("[data-field='accession_number']").css('display','none');
+         
         }
 
     });
 
-    //是否置顶
-    form.on('switch(newsTop)', function(data){
-        var index = layer.msg('修改中，请稍候',{icon: 16,time:false,shade:0.8});
-        setTimeout(function(){
-            layer.close(index);
-            if(data.elem.checked){
-                layer.msg("置顶成功！");
-            }else{
-                layer.msg("取消置顶成功！");
-            }
-        },500);
-    })
+ 
 
     //搜索【此功能需要后台配合，所以暂时没有动态效果演示】
     $(".search_btn").on("click",function(){
@@ -70,7 +75,6 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
                     curr: 1 //重新从第 1 页开始
                 },
                 where: {
-                    type: $(".searchType").val(),
                     key: $(".searchVal").val()  //搜索的关键字
                 }
             })
@@ -132,12 +136,17 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
                     
                     fillParameter(body,edit);
                     $.post(rootUrl+'/Article/verifyClaimAuthority',{'accession_number':accession_number},function(res){
+
                         if(res.code == 1){
                             body.find(".claimArticle").addClass('layui-btn-disabled');
                             layer.alert(res.msg, {
                                 icon: 0,
-                                skin: 'layer-ext-moon' //该皮肤由layer.seaning.com友情扩展。关于皮肤的扩展规则，去这里查阅
-                              })
+                                skin: 'layer-ext-moon' 
+                              });
+                        }else{
+                            if(res.data['articleStatus']!=0){
+                                body.find(".claimArticle").addClass('layui-btn-disabled');
+                            }
                         }
                     },'json');
                 
@@ -155,31 +164,11 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
             layui.layer.full(index);
         })
     }
-    $(".addNews_btn").click(function(){
-        addNews();
-    })
 
-    //批量删除
-    $(".delAll_btn").click(function(){
-        var checkStatus = table.checkStatus('newsListTable'),
-            data = checkStatus.data,
-            newsId = [];
-        if(data.length > 0) {
-            for (var i in data) {
-                newsId.push(data[i].newsId);
-            }
-            layer.confirm('确定删除选中的文章？', {icon: 3, title: '提示信息'}, function (index) {
-                // $.get("删除文章接口",{
-                //     newsId : newsId  //将需要删除的newsId作为参数传入
-                // },function(data){
-                tableIns.reload();
-                layer.close(index);
-                // })
-            })
-        }else{
-            layer.msg("请选择需要删除的文章");
-        }
-    })
+    
+
+ 
+    
 
     //列表操作
     table.on('tool(newsList)', function(obj){
@@ -198,30 +187,6 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
             });
         } else if(layEvent === 'look'){
             claim(data);
-        }
-    });
-
-    //数据导入
-    var uploadInst = upload.render({
-        elem: '#import_data' //绑定元素
-        ,url: 'http://www.cuisf.top/index.php/ExcelAction/uploadFileApi' //上传接口
-        ,accept: 'file'
-        ,before: function(obj){ //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
-            layer.load(); //上传loading
-        }
-        ,done: function(res){
-            layer.closeAll('loading'); //关闭loading
-            console.log(res);
-            if(res.code == 0)
-            {
-                layer.msg(res.msg);
-            }
-        }
-        ,error: function(){
-            console.log('error');
-            layer.closeAll('loading'); //关闭loading
-            layer.msg("导入错误");
-        //请求异常回调
         }
     });
 

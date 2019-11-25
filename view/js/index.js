@@ -5,18 +5,29 @@ layui.config({
 	"bodyTab" : "bodyTab"
 })
 
+
 $.ajax({
 	url:rootUrl+'/Login/isLogin',
 	type:'get',
 	dataType:'json',
 	success:function (res) {
-		console.log(res);
 		if(res.code == 4)
 		{
-			layer.msg(res.msg);
+			layer.msg("请先登录");
 			location.href = 'http://localhost/107/SCIManage/view/page/login/login.html';
 			return ;
+		}else if(res.code == 0){
+			
+			if(res.data['identity']==0){
+				$('.admin-li').remove();
+			}else{
+				$('.admin-li').removeClass('layui-hide');
+			}
+			
 		}
+	},error:function()
+	{
+		console.log('error');
 	}
 });
 layui.use(['bodyTab','form','element','layer','jquery'],function(){
@@ -26,30 +37,24 @@ layui.use(['bodyTab','form','element','layer','jquery'],function(){
     	layer = parent.layer === undefined ? layui.layer : top.layer;
 		tab = layui.bodyTab({
 			openTabNum : "50",  //最大可打开窗口数量
-			url : "json/navs.json" //获取菜单json地址
+			// url : "json/navs.json" //获取菜单json地址
+			url : rootUrl+"/Main/nav" //获取菜单json地址
 		});
 
 	//通过顶部菜单获取左侧二三级菜单   注：此处只做演示之用，实际开发中通过接口传参的方式获取导航数据
 	function getData(json){
 		$.getJSON(tab.tabConfig.url,function(data){
-			if(json == "contentManagement"){
-				dataStr = data.contentManagement;
+			if(json == "articleManagement"){
+				dataStr = data.articleManagement;
 				//重新渲染左侧菜单
 				tab.render();
 			}else if(json == "memberCenter"){
 				dataStr = data.memberCenter;
 				//重新渲染左侧菜单
 				tab.render();
-			}else if(json == "systemeSttings"){
-				dataStr = data.systemeSttings;
-				//重新渲染左侧菜单
-				tab.render();
-			}else if(json == "seraphApi"){
-                dataStr = data.seraphApi;
-                //重新渲染左侧菜单
-                tab.render();
-			}else if(json == "articleManagement"){
-				dataStr = data.articleManagement;
+			}else if(json == "contentManagement"){
+				
+				dataStr = data.contentManagement;
 				//重新渲染左侧菜单
 				tab.render();
 			}
@@ -82,7 +87,8 @@ layui.use(['bodyTab','form','element','layer','jquery'],function(){
 	})
 
 	//通过顶部菜单获取左侧二三级菜单   注：此处只做演示之用，实际开发中通过接口传参的方式获取导航数据
-	getData("contentManagement");
+	// 这里修改默认打开的页面
+	getData("articleManagement");
 
 	//手机设备的简单适配
     $('.site-tree-mobile').on('click', function(){
@@ -160,27 +166,4 @@ function addTab(_this){
 	tab.tabAdd(_this);
 }
 
-//捐赠弹窗
-function donation(){
-	layer.tab({
-		area : ['260px', '367px'],
-		tab : [{
-			title : "微信",
-			content : "<div style='padding:30px;overflow:hidden;background:#d2d0d0;'><img src='images/wechat.jpg'></div>"
-		},{
-			title : "支付宝",
-			content : "<div style='padding:30px;overflow:hidden;background:#d2d0d0;'><img src='images/alipay.jpg'></div>"
-		}]
-	})
-}
 
-//图片管理弹窗
-function showImg(){
-    $.getJSON('json/images.json', function(json){
-        var res = json;
-        layer.photos({
-            photos: res,
-            anim: 5
-        });
-    });
-}

@@ -38,16 +38,35 @@ class Article_model extends CI_Model{
 
     }
 
+    /**
+     * 文章搜索
+     *
+     * @param [type] $page
+     * @param [type] $limit
+     * @param [type] $key
+     * @return void
+     */
     public function searchArticle($page,$limit,$key)
     {
         return $this->db
-                    ->limit($limit,$page)
                     ->from('article')
                     ->like('accession_number',$key)
                     ->or_like('title' ,$key)
                     ->or_like('author' ,$key)
+                    ->or_like('claim_author' ,$key)
                     ->order_by('accession_number')
+                    ->limit($limit,$page)
                     ->get()->result_array();
+    }
+    public function searchArticleCount($key){
+        return $this->db
+            ->from('article')
+            ->like('accession_number',$key)
+            ->or_like('title' ,$key)
+            ->or_like('author' ,$key)
+            ->or_like('claim_author' ,$key)
+            ->order_by('accession_number')
+            ->count_all_results();
     }
     /**
      * 判断所添加的文章是否存在 存在返回false 不存在返回true
@@ -86,7 +105,7 @@ class Article_model extends CI_Model{
 
     // 检测文章是否可以认领
     public function checkArticle($where){
-        return $this->db->select('claim_author,owner,claim_time,articleStatus')->where($where)->from('article')->get()->result_array();
+        return $this->db->select('claim_author,owner,claim_time,articleStatus,owner_name')->where($where)->from('article')->get()->result_array();
     }
 
     /**

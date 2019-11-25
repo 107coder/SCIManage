@@ -191,6 +191,35 @@ class User extends CI_Controller
             'full_spell' => $this->input->post('full_spell')  
         );
         $this->user->editUser($job_number,$data); 
+    }
+    //修改密码
+    public function userInfo(){
+        $job_number=$this->session->job_number;
+        $data=$this->user->checkUser($job_number);
+        $resdata = array(
+            'code'  => '0',
+            'msg'   => '数据请求正常',
+            'data'  =>  $data[0]
+        ); 
+        echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
+    }
+    public function checkPwd()
+    {
+        $job_number=$this->session->job_number;
+        $oldPwd=md5($this->input->post('oldPwd'));
+        $data=$this->user->checkUser($job_number);
+        if($oldPwd!=$data[0]['password'])
+            echo "密码错误！";
+           
+    }
+    public function changePwd()
+    {
+        $job_number=$this->session->job_number;
+        $data=array
+        (
+            'password' => md5($this->input->post('newPwd'))  
+        );
+        $this->user->editUser($job_number,$data);    
     }      
 
 }

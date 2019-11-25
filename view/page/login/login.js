@@ -8,7 +8,7 @@ layui.use(['form','layer','jquery'],function(){
             time:5000
         });
     })
-
+    
     //登录按钮
     form.on("submit(login)",function(data){
         // 获取前端页面输入的信息
@@ -27,13 +27,15 @@ layui.use(['form','layer','jquery'],function(){
             success:function (res) {
                 if(res.code == 0)
                 {
+                    
                     layer.msg(res.msg);
                     setTimeout(function(){
+                        // window.loginStatus = false;
                         // 崔少峰
-                        /*window.location.href = 'http://127.0.0.1/107/SCIManage/view/';*/
+                        window.location.href = 'http://localhost/107/SCIManage/view/';
                         //赵士顺
-                        window.location.href = 'http://localhost:88/SCIManage/view/';      
-                    },1000);                   
+                        // window.location.href = 'http://localhost:88/SCIManage/view/';      
+                    },1000);
                 }
                 else
                 {

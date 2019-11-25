@@ -35,23 +35,15 @@
 	<script type="text/html" id="articleStatus">
 		{{#  if(d.articleStatus == "0"){ }}
 		<span class="layui-red">未认领</span>
-		<!-- {{#  } else if(d.articleStatus == "1"){ }}
-		<span class="layui-blue">学院未审核</span>
-		{{#  } else if(d.articleStatus == "2"){ }}
-		<span class="layui-blue">学院不通过</span>
-		{{#  } else if(d.articleStatus == "3"){ }}
-		<span class="layui-blue">学校未审核</span>
-		{{#  } else if(d.articleStatus == "4"){ }}
-		<span class="layui-blue">学校不通过</span> -->
 		{{#  } else { }}
-			<!-- 审核通过 -->
-			<span class="layui-blue">已认领</span>
+		<span class="layui-blue">已认领</span>
 		{{#  }}}
 	</script>
 
 	<!--操作-->
 	<script type="text/html" id="newsListBar">
-		<a class="layui-btn layui-btn-sm" lay-event="look">预览</a>
+		<a class="layui-btn layui-btn-sm" lay-event="look">查看</a>
+		<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="back">退回</a>
 	</script>
 </form>
 <script type="text/javascript" src="../../layui/layui.js"></script>

@@ -83,14 +83,19 @@ class ExcelAction extends CI_Controller {
             for($col='A'; $col<= $allColumn; $col++)
             {
                 $address = $col.$row;
-                $data[$col] = $sheet->getCell($address)->getValue();
+                if($col == 'K'){
+                    $time = PHPExcel_Shared_Date::ExcelToPHP(intval($sheet->getCell($address)->getValue()));
+                    $data[$col] = date("Y-m-d",$time);
+                }else{
+                    $data[$col] = $sheet->getCell($address)->getValue();
+                }
             }
             $wosNumber = $data['A'];
             if($wosNumber == '') continue;  // 如果判断检测到某行的wos号码为空，直接跳过
-            if($this->file->articleExist(array('accession_number'=>$wosNumber)) == 0)
-            {
-                $redis->lPush('articleLink',$wosNumber);
-            }
+           if($this->file->articleExist(array('accession_number'=>$wosNumber)) == 0)
+           {
+               $redis->lPush('articleLink',$wosNumber);
+           }
 
             // 在这里可以对某些数据进行处理然后在进行存储，入库
             for($col='A'; $col<=$allColumn; $col++)
@@ -101,7 +106,7 @@ class ExcelAction extends CI_Controller {
 
         }
         $articleLen = $redis->lLen('articleLink');
-
+        
         $data_all = [];
         for($i=0; $i<$articleLen; $i++)
         {
@@ -137,20 +142,22 @@ class ExcelAction extends CI_Controller {
                 'add_method'       => 0,
                 'claim_author'     => $this->searchFullSpell($redis->get('article:'.$wosCur.':G'),$redis->get('article:'.$wosCur.':C'))
             );
-
+            
             array_push($data_all,$data_one);
             // 每300条数据，插入数据库一次
-            if(count($data_all) >= 300 || $i==$articleLen-1)
-            {
-                $status  = 0;
-                $status = $this->file->articleInsert($data_all);
-                $data_all = [];
-                if($status <= 0)
-                {
-                    exit(JsonEcho('1','数据插入错误！'));
-                }
-            }
+           if(count($data_all) >= 300 || $i==$articleLen-1)
+           {
+               $status  = 0;
+               $status = $this->file->articleInsert($data_all);
+
+               $data_all = [];
+               if($status <= 0)
+               {
+                   exit(JsonEcho('1','数据插入错误！'));
+               }
+           }
         }
+        
         exit(JsonEcho('0','数据导入成功！'));
     }
 
@@ -322,8 +329,9 @@ class ExcelAction extends CI_Controller {
                 'job_title'            => $redis->get('user:'.$wosCur.':H'),
                 'job_title_rank'       => $redis->get('user:'.$wosCur.':I'),
                 'job_title_series' => $redis->get('user:'.$wosCur.':J'),    
-                'full_spell'         => "暂未填写",
+                'full_spell'         => "",
                 'identity'         => 0,
+                'password'         =>md5('a'.$redis->get('user:'.$wosCur.':A'))
             );
             array_push($data_all,$data_one);
             // 每300条数据，插入数据库一次
@@ -474,10 +482,14 @@ class ExcelAction extends CI_Controller {
                     $bool=false;
                 //判断缩写逗号后的字母是否都在全拼逗号后的字符里
                 $length=strlen($shortLowerArray[1]);
-                for ($i=0; $i <$length ; $i++)
-                { 
-                    if(strstr($authorLowerArray[1], $shortLowerArray[1][$i])==false)
-                        $bool=false;
+                if(strpos($fullSpell,',') != false)
+                {
+                    $length=strlen($shortLowerArray[1]);
+                    for ($i=0; $i <$length ; $i++)
+                    { 
+                        if(strstr($authorLowerArray[1], $shortLowerArray[1][$i])==false)
+                            $bool=false;
+                    }
                 }
                 if($bool)
                 {
@@ -485,10 +497,14 @@ class ExcelAction extends CI_Controller {
                 }
             }
         }
+        if(isset($fullSpellArray))
+            $claim_author = $fullSpellArray;
+         else
+            $claim_author = array();
+
         
-        $claim_author = $fullSpellArray;
         if(!in_array($first_author,$claim_author)){
-            array_push($claim_author,$first_author);
+            array_unshift($claim_author,$first_author);
         }
         $claim_author = implode(';',$claim_author);
         return $claim_author;

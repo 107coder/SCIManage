@@ -19,27 +19,51 @@ class Author extends CI_Controller
         // 获取数据   table中的where是通过get方式获取的
         $accession_number = $this->input->get('accession_number');
         $this->load->model('article_model','article');
-
-        $cols = 'author';
+        // $accession_number = "WOS:000454836700027";
+        $cols = 'author,claim_time';
         $where = ['accession_number'=>$accession_number];
         $data = $this->article->getAnyArticle($where,$cols);
         $author = explode('; ',$data[0]['author']);
         $author_arr = ["code"=>0,"msg"=>'',"count"=>count($author),"data"=>[]];
-        foreach($author as $key => $val)
-        {
-            $data = [
-                "authorType"=> "选择作者类型",
-                "full_spell"=> $val,
-                "name"=> "",
-                "sex"=> "",
-                "number"=> "",
-                "xueli"=> "",
-                "title"=> "",
-                "tongxun"=> "",
-                "unit"=> ""
-            ];
-            array_push($author_arr['data'],$data);
+        if($data[0]['claim_time']==NULL || $data[0]['claim_time']==''){
+            
+            foreach($author as $key => $val)
+            {
+                $data = [
+                    "aId"=> -1,
+                    "authorType"=> "选择作者类型",
+                    "full_spell"=> $val,
+                    "name"=> "",
+                    "sex"=> "",
+                    "number"=> "",
+                    "xueli"=> "",
+                    "title"=> "",
+                    "tongxun"=> "",
+                    "unit"=> ""
+                ];
+                array_push($author_arr['data'],$data);
+            }
+        }else{
+            $where = ['aArticleNumber'=>$accession_number];
+            $author = $this->author->getAuthorClaimArticle($where); 
+            foreach($author as $key => $val)
+            {
+                $data = [
+                    "aId" => $val["aId"],
+                    "full_spell"=> $val['aFull_spell'],
+                    "name"=> $val['aName'],
+                    "sex"=> $val['sSex'],
+                    "number"=> $val['aJobNumber'],
+                    "xueli"=> $val['aEduBackground'],
+                    "title"=> $val['aJobTitle'],
+                    "tongxun"=> $val['aisAddress'],
+                    "unit"=> $val['aUnit'],
+                    "authorType"=>$val['aType']
+                ];
+                array_push($author_arr['data'],$data);
+            }
         }
+       
       
         echo json_encode($author_arr,JSON_UNESCAPED_UNICODE);
     }
@@ -62,6 +86,7 @@ class Author extends CI_Controller
         foreach($author as $key => $val)
         {
             $data = [
+                "aId" => $val["aId"],
                 "full_spell"=> $val['aFull_spell'],
                 "name"=> $val['aName'],
                 "sex"=> $val['sSex'],
