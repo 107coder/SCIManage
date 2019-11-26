@@ -92,7 +92,7 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                     parent.location.reload();
                 },500);
             }else if(res.code == 1){
-                console.log(res);
+                
                 top.layer.close(index);
                 top.layer.msg(res.msg);
                 return false;
@@ -130,6 +130,7 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
             layer.tips(this.value + ' ' + this.name + '：' + obj.elem.checked, obj.othis);
         });
         var accession_number = $('#accession_number').text();
+        
         //执行一个 table 实例
         var userTable = table.render({
             elem: '#tableDemo'
@@ -153,15 +154,14 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
             ,done:function(res){
                 authorCount = res.count;
                 $("[data-field='aId']").css('display','none');
-                // $("[data-index=0]").find("[data-field='name']").attr('data-edit','t');
-                // $("[data-index="+0+"]").find("[data-field='name']").attr('data-edit','text');
+                
             }
         });
 
         // 根据工号和行索引向服务器请求数据  
         function getOneAuthor(index,job_number,authorType){
             $.ajax({
-                url:rootUrl+"/User/getOneUser"
+                url:rootUrl+"/User/getOneTeacher"
                 ,type:'post'
                 ,data:{
                     job_number:job_number,
@@ -169,7 +169,7 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                 }
                 ,dataType:'json'
                 ,success:function(res){
-                    console.log(res.data);
+                    
                     if(res.code==0)
                     {
                         updateAuthor(index,res.data);
@@ -217,12 +217,12 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                 if(field != 'number'){
                     return false;
                 }
-                // console.log(data);
+                
                 // 获取对应的单元格的 索引 index
                 var index = data.LAY_TABLE_INDEX;
                 // 获取到作者的类型
                 var authorType = $("[data-index="+index+"]").find("[data-field='authorType']").find('input').val();
-                // console.log(authorType);
+                
                 if(authorType=='本校教师' || authorType=='本校研究生'){
                     getOneAuthor(index,data.number,authorType);
                 }else{
@@ -242,7 +242,7 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
         // 选择教师类型，相应对应的事件
         form.on("select(selectType)",function(data){
             // console.log(data.elem); //得到select原始DOM对象
-            console.log(data.value); //得到被选中的值
+            // console.log(data.value); //得到被选中的值
             
             // 获取对应的教师类型的值
             var authorType = data.value;
@@ -288,12 +288,8 @@ function getAuthor(index)
     // 姓名 全拼 学历 职称 单位 作者类型 性别 工号 是否为通讯作者
     return arr;
 }
-function getAllUser()
-{
-    var table = $("#tableDemo").html();
-    table = getAuthor(authorCount-1);
-    console.log(table);
-}
+
+
 
 // 监听按钮点击事件
 form.on('submit(claimArticle)',function() {
@@ -326,7 +322,7 @@ form.on('submit(claimArticle)',function() {
         dataType: 'json',
         success:function(res)
         {
-            console.log(res);
+            
             if(res.code == 0)
             {
                 layer.msg(res.msg);
@@ -342,7 +338,7 @@ form.on('submit(claimArticle)',function() {
                 return false;
             }
 
-            console.log(res);
+            
         },error:function (res) {
             layer.msg("服务器出现错误，请联系系统管理员！");
         }

@@ -14,7 +14,7 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
         cellMinWidth : 95,
         page : true,
         height : "full-105", 
-        limit : 10,
+        limit : 30,
         limits : [10,20,30,40,50],
         loading : true,
         id : "teacherListTable",
@@ -176,7 +176,7 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
         }
         ,done: function(res){
             layer.closeAll('loading'); //关闭loading
-            console.log(res);
+            // console.log(res);
             if(res.code == 0)
             {
                 layer.msg(res.msg);

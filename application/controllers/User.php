@@ -7,7 +7,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Time: 12:01
  */
 
-class User extends CI_Controller
+class User extends MY_Controller
 {
     public function __construct()
     {
@@ -125,10 +125,10 @@ class User extends CI_Controller
         
         if(!empty($authorType)){
             if($authorType == '本校教师'){
-                $data=$this->user->checkUser($job_number);
+                $data=$this->user->checkTeacher($job_number);
             }else if($authorType == '本校研究生'){
                 $this->load->model('author_model','author');
-                $data = $this->author->getPostgraduate(['sno'=>$job_number]);
+                $data = $this->user->checkStudent($job_number);
                 // $ddta[0] = array(
     
                 // );
@@ -184,6 +184,8 @@ class User extends CI_Controller
             'identity' => $this->input->post('identity') */  
         );
         $this->user->editTeacher($job_number,$data);   
+        // 修改完姓名全拼之后需要更新session中的姓名全拼的值
+        $this->session->full_spell = $this->input->post('full_spell');
     }
     public function editStudent()
     {
@@ -217,6 +219,8 @@ class User extends CI_Controller
             'full_spell' => $this->input->post('full_spell')  
         );
         $this->user->editTeacher($job_number,$data); 
+        // 添加全拼之后，将姓名全拼放入session用作验证
+        $this->session->full_spell = $this->input->post('full_spell');
     }
     //修改密码
     public function teacherInfo(){

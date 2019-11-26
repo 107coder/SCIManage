@@ -30,23 +30,20 @@ layui.use(['form','layer','jquery'],function(){
                     
                     layer.msg(res.msg);
                     setTimeout(function(){
-                        // window.loginStatus = false;
-                        // 崔少峰
-                        window.location.href = 'http://localhost/107/SCIManage/view/';
-                        //赵士顺
-                        // window.location.href = 'http://localhost:88/SCIManage/view/';      
+                        window.location.href = webRoot ;
+                      
                     },1000);
                 }
                 else
                 {
                     layer.msg(res.msg);
-                    _this.text("登录").attr("disabled","").removeClass("layui-disabled");
+                    _this.text("登录").removeAttr("disabled").removeClass("layui-disabled");
                 }
             },
             error:function()
             {
                 layer.msg('服务器出现错误，请联系系统管理员！');
-                _this.text("登录").attr("disabled","").removeClass("layui-disabled");
+                _this.text("登录").removeAttr("disabled").removeClass("layui-disabled");
             }
         });
 

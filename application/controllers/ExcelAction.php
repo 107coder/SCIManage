@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class ExcelAction extends CI_Controller {
+class ExcelAction extends MY_Controller {
 
     public function uploadFileApi()
     {

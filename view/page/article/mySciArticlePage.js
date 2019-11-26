@@ -85,7 +85,7 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                     parent.location.reload();
                 },500);
             }else if(res.code == 1){
-                console.log(res);
+                
                 top.layer.close(index);
                 top.layer.msg(res.msg);
                 return false;
@@ -157,19 +157,20 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                 ,tr = obj.tr  // 获取tr的dom对象
                 ,field = obj.field; //得到字段
                 // 控制如果不是修改的工号，就不会给整行填写数据
-                console.log(field);
+
+                // console.log(field);
                 if(field != 'number'){
                     return false;
                 }
                 // console.log(data);
                 var index = data.LAY_TABLE_INDEX;
                 $.ajax({
-                    url:rootUrl+"/User/getOneUser"
+                    url:rootUrl+"/User/getOneTeacher"
                     ,type:'post'
                     ,data:{job_number:data.number}
                     ,dataType:'json'
                     ,success:function(res){
-                        console.log(res.data);
+                        // console.log(res.data);
                         if(res.code==0)
                         {
                             updateAuthor(index,res.data);
@@ -222,12 +223,7 @@ function getAuthor(index)
     // 姓名 全拼 学历 职称 单位 作者类型 性别 工号 是否为通讯作者
     return arr;
 }
-function getAllUser()
-{
-    var table = $("#tableDemo").html();
-    table = getAuthor(authorCount-1);
-    console.log(table);
-}
+
 
 // 更新文章信息
 function updateAuthorInfo() {
@@ -269,7 +265,7 @@ function updateAuthorInfo() {
                 return false;
             }
 
-            console.log(res);
+            // console.log(res);
         },error:function (res) {
             layer.msg("服务器出现错误，请联系系统管理员！");
         }

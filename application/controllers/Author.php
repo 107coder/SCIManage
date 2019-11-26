@@ -6,7 +6,7 @@
  * Time: 20:17
  */
 
-class Author extends CI_Controller
+class Author extends MY_Controller
 {
     public function __construct()
     {
@@ -20,6 +20,9 @@ class Author extends CI_Controller
         $accession_number = $this->input->get('accession_number');
         $this->load->model('article_model','article');
         // $accession_number = "WOS:000454836700027";
+        if(empty($accession_number)){
+            exit(JsonEcho(1,'数据错误',[$accession_number]));
+        }
         $cols = 'author,claim_time';
         $where = ['accession_number'=>$accession_number];
         $data = $this->article->getAnyArticle($where,$cols);

@@ -110,13 +110,27 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
             addNews(data);
         } else if(layEvent === 'back'){ //删除
             layer.confirm('确定退回此论文？',{icon:3, title:'提示信息'},function(index){
-                // $.get("删除文章接口",{
-                //     newsId : data.newsId  //将需要删除的newsId作为参数传入
-                // },function(data){
-                    tableIns.reload();
-                    layer.close(index);
-                // })
+                $.post(rootUrl+"/Article/backArticle",{
+                    accession_number : data.accession_number  //将需要删除的newsId作为参数传入
+                },function(res){
+                    
+                    if(res.code == 0)
+                    {
+                        layer.msg(res.msg); 
+                        setTimeout(() => {
+                            tableIns.reload();
+                            layer.close(index);
+                        }, 1000);
+                    }
+                    else
+                    {
+                        layer.msg(res.msg);
+                        return false;
+                    }
+
+                },'json');
             });
+            
         } else if(layEvent === 'look'){ //预览
             previewArticle(data);
         }

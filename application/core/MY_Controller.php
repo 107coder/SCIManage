@@ -11,9 +11,9 @@ class MY_Controller extends CI_Controller
     {
         parent::__construct();
         $userId = $this->session->job_number;
-        // if(empty($userId))
-        // {
-        //     exit(JsonEcho(4,'请先登录！'));
-        // }
+        if(empty($userId))
+        {
+            exit(JsonEcho(4,'请先登录！',[]));
+        }
     }
 }

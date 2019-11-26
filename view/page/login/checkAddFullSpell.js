@@ -20,10 +20,8 @@ layui.use(['form','layer','jquery'],function(){
             title:"提示框",
             move:false,
             area: ['400px', '200px'],
-            // 赵士顺
-            // content: 'http://localhost:88/SCIManage/view/page/login/addFullSpell.html',
-            // 崔少峰
-            content: 'http://localhost/107/SCIManage/view/page/login/addFullSpell.html',
+            
+            content: webRoot + '/page/login/addFullSpell.html',
             // 右上角关闭按钮的点击事件
             cancel: function(){
                 layer.msg("您必须先填写您的姓名全拼！");

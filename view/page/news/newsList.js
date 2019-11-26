@@ -165,7 +165,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
         }
         ,done: function(res){
             layer.closeAll('loading'); //关闭loading
-            console.log(res);
+            // console.log(res);
             if(res.code == 0)
             {
                 layer.msg(res.msg);

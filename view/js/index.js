@@ -8,13 +8,13 @@ layui.config({
 
 $.ajax({
 	url:rootUrl+'/Login/isLogin',
-	type:'get',
+	type:'post',
 	dataType:'json',
 	success:function (res) {
 		if(res.code == 4)
 		{
+			location.href = webRoot + '/page/login/login.html';
 			layer.msg("请先登录");
-			location.href = 'http://localhost/107/SCIManage/view/page/login/login.html';
 			return ;
 		}else if(res.code == 0){
 			

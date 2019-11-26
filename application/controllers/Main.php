@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Main extends CI_Controller {
+class Main extends MY_Controller {
 
 	public function index()
 	{
@@ -76,7 +76,7 @@ class Main extends CI_Controller {
 				{
 					"title": "教师用户",
 					"icon": "&#xe612;",
-					"href": "page/user/userList.html",
+					"href": "page/user/teacher/teacherList.html",
 					"spread": false
 				},
 				{

@@ -35,7 +35,7 @@ function signOut(){
                 layer.msg(res.msg);
                 setTimeout(() => {
                     // 崔少峰
-                    window.location.href = 'http://localhost/107/SCIManage/view/page/login/login.html';
+                    window.location.href = webRoot + '/page/login/login.html';
                     //赵士顺
                     // window.location.href = 'http://localhost:88/SCIManage/view/page/login/login.html';      
                 }, 1000);

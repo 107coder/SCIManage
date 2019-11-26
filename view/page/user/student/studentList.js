@@ -160,7 +160,7 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
         }
         ,done: function(res){
             layer.closeAll('loading'); //关闭loading
-            console.log(res);
+            // console.log(res);
             if(res.code == 0)
             {
                 layer.msg(res.msg);

@@ -112,7 +112,7 @@ layui.use(['form','layer','layedit','laydate','upload'],function(){
                     parent.location.reload();
                 },500);
             }else if(res.code == 1){
-                console.log(res);
+                // console.log(res);
                 top.layer.close(index);
                 top.layer.msg(res.msg);
                 return false;

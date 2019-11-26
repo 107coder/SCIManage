@@ -22,6 +22,7 @@ class Login extends CI_Controller {
         {
             $where = array(
                 'job_number'=>$username,
+                'password' => md5($password)
             );
             $userInfo = $this->user->checkLogin($where);
 //            print_r($userInfo);

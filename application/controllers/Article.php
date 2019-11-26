@@ -109,46 +109,8 @@ class Article extends MY_Controller {
         }
     }
 
-    /**
-     * 更新作者中的第一作者用户限制认领
-     */
-    public function updateAuthor()
-    {
-        // $author = 'Wang,Guan';
-        // 获取所有文章的信息
-        $data = $this->article->getArticle();
-        foreach ($data as $value)
-        {
-            $first_author = explode('; ',$value['author'])[0]; // 截取出来第一个作者，作为认领人的限制条件
-            $first_author = str_replace(' ','',$first_author);
-            $first_author = str_replace('-','',$first_author);
-            
-            $address = $value['address'];
-            $author = $value['author'];
-            p("通讯作者：".$address);
-            p("所有作者：".$author);
-            $claim_author = $this->searchFullSpell($address,$author);
-
-            // if(!in_array($first_author,$claim_author)){
-            //     array_push($claim_author,$first_author);
-            // }
-            // $claim_author = implode(';',$claim_author);
-            p("认领作者：".$claim_author);
-            echo '---</br>';
-            // $data_arr = array('claim_author'=>$claim_author);
-            // $where = array('accession_number'=>$value['accession_number']);
-            // $this->article->updateArticle($data_arr,$where);
-//            if(strnatcasecmp($first_author,$author) != 0) continue;
-//            echo "<pre>";
-//            print_r($where);
-//            print_r($data);
-//            echo "</pre>";
-        }
-//        echo "<pre>";
-//        print_r(explode('; ',$data[0]['author']));
-//        echo "</pre>";
-
-    }
+   
+    
 
     
     public function verifyClaimAuthority()
@@ -182,9 +144,7 @@ class Article extends MY_Controller {
         // 从前端获取数据
         $accession_number = $this->input->post('accession_number');
         $tableData = $this->input->post('tableData');
-        // $accession_number = 'WOS:000454836700027';
-        // $tableData = '[["崔少峰","Li, Rui","","","计算机与信息工程学院","本校教师","男","17101211","否","127"],["刘瑞欣","Huang, Xiaowei","","","文学院","本校研究生","女","104752100022","否","128"],["刘瑞欣","Ma, Xiaoyu","","","文学院","本校研究生","女","104752100022","否","129"],["刘瑞欣","Zhu, Zhili","","","文学院","本校研究生","女","104752100022","否","130"],["刘瑞欣","Li, Chong","","","文学院","本校研究生","女","104752100022","否","131"],["马征","Xia, Congxin","博士研究生","副教授","黄河文明与可持续发展研究中心","本校教师","女","10010003","否","132"],["马征","Zeng, Zaiping","博士研究生","副教授","黄河文明与可持续发展研究中心","本校教师","女","10010003","否","133"],["马征","Jia, Yu","博士研究生","副教授","黄河文明与可持续发展研究中心","本校教师","女","10010003","否","134"]]';
-        // 从article表中获取相关信息，检查是否能够认领并且是否用认领的权限
+        
         $where = ['accession_number'=>$accession_number];
         $articleData = $this->article->checkArticle($where);
         // 将所有的名字都换成小写，判断是否可以认领
@@ -288,9 +248,9 @@ class Article extends MY_Controller {
         $where = ['accession_number'=>$accession_number];
         $status = $this->article->backArticle($data,$where);
         
-        // 删除作者的信息
-        $where = ['aArticleNumber'=>$accession_number];
-        $this->load->model('Author_model','author');
+        // 删除作者的信息 引入对应model
+        // $where = ['aArticleNumber'=>$accession_number];
+        // $this->load->model('Author_model','author');
         // 不删除作者的信息
         // $status2 = $this->author->deleteArticle($where);
 

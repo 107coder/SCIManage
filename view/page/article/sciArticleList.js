@@ -9,7 +9,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
 
         // 自动在搜索框内填写登录这的姓名全拼
         $.ajax({
-            url:rootUrl+"/User/userInfo",
+            url:rootUrl+"/User/teacherInfo",
             data:{},
             type:"post",
             dataType:'json',
@@ -35,29 +35,23 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
         loding : true,
         id : "newsListTable",
         cols : [[
-            // {type: "checkbox", fixed:"left", width:50},
+            
             {field: 'accession_number', title: 'wos', width:0, align:"center"},
             {field: 'title', title: '文章标题', width:250},
             {field: 'author', title: '文章作者', align:'center',width:200},
-            {field: 'source', title: '文章来源', align:'center'},
+            {field: 'source', title: '文章来源', align:'center',minWidth:200},
             {field: 'address', title: '通讯作者', align:'center',width:200},
             {field: 'articleStatus', title: '论文状态', width:110,  align:'center',templet:"#articleStatus"},
             {field: 'owner_name', title: '认领人', align:'center'},
-            // {field: 'is_top', title: '是否置顶', align:'center'},
-            // {field: 'roll', title: '卷', align:'center'},
-            // {field: 'period', title: '期', align:'center'},
-            // {field: 'page', title: '页码', align:'center'},
             
             {field: 'date', title: '发表时间', align:'center', minWidth:110},
-            // {field: 'is_first_inst', title: '第一机构', align:'center'},
-            // {field: 'impact_factor', title: '影响因子', align:'center'},
-            // {field: 'subject', title: '学科分类', align:'center'},
+            
             {field: 'sci_type', title: '论文类型', align:'center',width:'250'},
-            // {field: 'other_info', title: '其他信息', align:'center'},
+            
 
-            // 其他一些要隐藏的信息
+            
 
-            {title: '操作', width:'90', templet:'#newsListBar',fixed:"right",align:"center"}
+            {title: '操作', width:90, templet:'#newsListBar',fixed:"right",align:"center"}
         ]] ,done: function () {
             $("[data-field='accession_number']").css('display','none');
          
@@ -82,7 +76,12 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
             layer.msg("请输入搜索的内容");
         }
     });
-
+    $(document).on('keydown', function (event) {  //按enter键搜索
+        if (event.keyCode == 13) {
+            $(".search_btn").click();
+            return false
+        }
+  });
     // 预览文章时候  填写论文的基本信息信息
     function fillParameter(body,data){
         //判断字段数据是否存在
@@ -98,6 +97,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
         body.find("#article_title").text(nullData(data.title));  
         body.find(".article_type").text(nullData(data.article_type));        
         body.find(".claim_author").text(nullData(data.claim_author));
+        body.find(".author").text(nullData(data.author));
         body.find(".other_author").text(nullData(data.other_author));     
         body.find(".date").text(nullData(data.date));    
         body.find(".source").text(nullData(data.source));    
@@ -153,7 +153,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
                 }
                 setTimeout(function(){
                     layui.layer.tips('点击此处返回文章列表', '.layui-layer-setwin .layui-layer-close', {
-                        tips: 3
+                        tips: 3,time: 40000
                     });
                 },500)
             }
