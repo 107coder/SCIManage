@@ -19,21 +19,27 @@ class Main extends MY_Controller {
 		{
 			"contentManagement": [
 				{
-					"title": "文章列表",
+					"title": "分类列表",
 					"icon": "icon-text",
-					"href": "page/news/newsList.html",
+					"href": "page/admin/typesList.html",
 					"spread": false
 				},
 				{
-					"title": "分类列表",
+					"title": "SCI论文列表",
 					"icon": "icon-text",
-					"href": "page/news/typesList.html",
+					"href": "page/admin/sciArticleList.html",
+					"spread": false
+				},
+				{
+					"title": "他引论文列表",
+					"icon": "icon-text",
+					"href": "page/admin/citationList.html",
 					"spread": false
 				},
 				{
 					"title": "论文审核",
 					"icon": "&#xe634;",
-					"href": "page/news/newsList.html",
+					"href": "page/admin/sciArticleList.html",
 					"spread": false
 				}
 			],
@@ -47,7 +53,7 @@ class Main extends MY_Controller {
 				{
 					"title":"他引认领",
 					"icon": "&#xe609;",
-					"href":"page/article/sciArticleList.html",
+					"href":"page/citation/citationList.html",
 					"spread":false
 				},
 				{
@@ -65,9 +71,9 @@ class Main extends MY_Controller {
 						{
 							"title": "他引论文",
 							"icon": "&#xe609;",
-							"href": "page/login/login.html",
+							"href": "page/citation/myCitationList.html",
 							"spread": false,
-							"target": "_blank"
+							"target": ""
 						}
 					]
 				}

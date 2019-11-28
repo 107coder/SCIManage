@@ -48,21 +48,9 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
         ]]
     });
 
-    //是否置顶
-    form.on('switch(newsTop)', function(data){
-        var index = layer.msg('修改中，请稍候',{icon: 16,time:false,shade:0.8});
-        setTimeout(function(){
-            layer.close(index);
-            if(data.elem.checked){
-                layer.msg("置顶成功！");
-            }else{
-                layer.msg("取消置顶成功！");
-            }
-        },500);
-    })
-
-    //搜索【此功能需要后台配合，所以暂时没有动态效果演示】
-    $(".search_btn").on("click",function(){
+    
+     //搜索【此功能需要后台配合，所以暂时没有动态效果演示】
+     $(".search_btn").on("click",function(){
         if($(".searchVal").val() != ''){
             table.reload("newsListTable",{
                 page: {
@@ -76,13 +64,20 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
             layer.msg("请输入搜索的内容");
         }
     });
+    $(document).on('keydown', function (event) {  //按enter键搜索
+        if (event.keyCode == 13) {
+            $(".search_btn").click();
+            return false
+        }
+    });
+
 
     //添加文章
     function addNews(edit){
         var index = layui.layer.open({
             title : "添加文章",
             type : 2,
-            content : "newsAdd.html",
+            content : "sciArticleAdd.html",
             success : function(layero, index){
                 var body = layui.layer.getChildFrame('body', index);
                 if(edit){
@@ -99,7 +94,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
                     layui.layer.tips('点击此处返回文章列表', '.layui-layer-setwin .layui-layer-close', {
                         tips: 3
                     });
-                },500)
+                },50000)
             }
         })
         layui.layer.full(index);

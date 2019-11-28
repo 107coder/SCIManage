@@ -120,7 +120,7 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
 
 
     // 加载下面添加人员信息的部分
-    var load = layer.load(1,{shade:[0.2,'#000']});
+
         //监听地址选择操作
         form.on('select(selectDemo)', function (obj) {
             layer.tips(obj.elem.getAttribute('name') + '：'+obj.value + ' ' + obj.elem.getAttribute('dataId') , obj.othis);
@@ -154,7 +154,6 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
             ,done:function(res){
                 authorCount = res.count;
                 $("[data-field='aId']").css('display','none');
-                layer.close(load);
                 
             }
         });
@@ -307,7 +306,7 @@ form.on('submit(claimArticle)',function() {
     var flag = true;
     tableData.forEach(element => {
         if(element[4]=='' || element[7]==''){
-            layer.msg('所有作者的 中文姓名 和 工作单位 必须填写完整，请将信息填写完整！');
+            layer.msg('作者的中文姓名和学院信息必须填写，请将信息填写完整！');
             flag = false;
         }
     });

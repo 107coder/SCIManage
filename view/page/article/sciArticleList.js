@@ -38,8 +38,8 @@ layui.use(['form','layer','laydate','table','laytpl','upload','element'],functio
             
             {field: 'accession_number', title: 'wos', width:0, align:"center"},
             {field: 'title', title: '文章标题', width:250},
-            {field: 'author', title: '文章作者', align:'center',width:200},
             {field: 'source', title: '文章来源', align:'center',minWidth:200},
+            {field: 'author', title: '文章作者', align:'center',width:200},
             {field: 'address', title: '通讯作者', align:'center',width:200},
             {field: 'articleStatus', title: '论文状态', width:110,  align:'center',templet:"#articleStatus"},
             {field: 'owner_name', title: '认领人', align:'center'},

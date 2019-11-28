@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Article_model extends CI_Model{
 
+    // =========================   SCI论文部分   ==============================
     // 获取所有的论文的分类
     public function getType($page=null,$limit=null)
     {
@@ -105,7 +106,7 @@ class Article_model extends CI_Model{
 
     // 检测文章是否可以认领
     public function checkArticle($where){
-        return $this->db->select('claim_author,owner,claim_time,articleStatus,owner_name')->where($where)->from('article')->get()->result_array();
+        return $this->db->select('claim_author,owner,claim_time,articleStatus,owner_name,claimer_unit')->where($where)->from('article')->get()->result_array();
     }
 
     /**
@@ -131,4 +132,6 @@ class Article_model extends CI_Model{
     {
         return $this->db->update('article',$data,$where);
     }
+
+
 }
