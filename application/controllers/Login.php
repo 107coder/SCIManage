@@ -13,6 +13,16 @@ class Login extends CI_Controller {
         $this->load->model('user_model','user');
     }
 
+    public function index(){
+        if(empty($this->session->job_number)){
+            redirect(base_url('/view/page/login/login.html'));
+            exit();
+        }else{
+            redirect(base_url('/view/index.html'));
+        }
+    }
+
+
     public function checkLogin()
     {
         $username = $this->input->post('username');
