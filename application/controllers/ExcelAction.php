@@ -3,6 +3,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class ExcelAction extends MY_Controller {
 
+    /**
+     * sci论文表格文件的导入
+     *
+     * @return void
+     */
     public function uploadFileApi()
     {
         $config['upload_path']      = './file/';
@@ -40,17 +45,13 @@ class ExcelAction extends MY_Controller {
             raw_name: "一级学科分类"
          */
     }
-    public function getSession()
-    {
-//        session_destroy();
-        echo "<pre>";
-        print_r($_SESSION);
-        echo "</pre>";
-//        $this->load->model('file_model','file');
-//        $where = array('accession_number'=>'WOS:0004542483000113');
-//        var_dump($this->file->articleExist($where));
 
-    }
+    /**
+     * 添加sci论文的操作
+     *
+     * @param string $file
+     * @return void
+     */
     public function readArticleExcel($file = "")
     {
         $file = './file/上传文件模板.xlsx';
@@ -103,6 +104,7 @@ class ExcelAction extends MY_Controller {
                 $redis->set('article:'.$wosNumber.':'.$col,$data[$col]);
                 $redis->pExpire('article:'.$wosNumber.':'.$col,86400000);
             }
+            p($data);
 
         }
         $articleLen = $redis->lLen('articleLink');
@@ -161,7 +163,12 @@ class ExcelAction extends MY_Controller {
         exit(JsonEcho('0','数据导入成功！'));
     }
 
-    //学科分类的导入
+   
+    /**
+     * /学科分类的导入
+     *
+     * @return void
+     */
     public function uploadTypeFileApi()
     {
         $config['upload_path']      = './file/';
@@ -180,7 +187,13 @@ class ExcelAction extends MY_Controller {
             $this->readTypeExcel($data['full_path']);
         }
     }
-    //执行分类的入库操作
+    //
+    /**
+     *执行分类的入库操作
+     *
+     * @param string $file
+     * @return void
+     */
     public function readTypeExcel($file='')
     {
         $this->load->model('file_model','file');    //载入数据库文件插入的model
@@ -224,6 +237,11 @@ class ExcelAction extends MY_Controller {
     }
 
     //用户的导入
+    /**
+     * 教师名单表格文件的上传
+     *
+     * @return void
+     */
     public function uploadTeacherFileApi()
     {
         $config['upload_path']      = './file/';
@@ -243,6 +261,11 @@ class ExcelAction extends MY_Controller {
 
         }
     }
+    /**
+     * 学生表格文件的上传
+     *
+     * @return void
+     */
     public function uploadStudentFileApi()
     {
         $config['upload_path']      = './file/';
@@ -263,6 +286,12 @@ class ExcelAction extends MY_Controller {
         }
     }
     //执行用户的入库操作
+    /**
+     * 教师数据的处理，并进行入库的操作
+     *
+     * @param string $file
+     * @return void
+     */
     public function readTeacherExcel($file='')
     {   
         $this->load->model('user_model','user');    //载入数据库文件插入的model
@@ -348,6 +377,12 @@ class ExcelAction extends MY_Controller {
         }
         exit(JsonEcho('0','数据导入成功！'));
     }
+    /**
+     * 学生数据的处理及写入数据库
+     *
+     * @param string $file
+     * @return void
+     */
     public function readStudentExcel($file='')
     {   
         $this->load->model('user_model','user');    //载入数据库文件插入的model
@@ -426,7 +461,148 @@ class ExcelAction extends MY_Controller {
         exit(JsonEcho('0','数据导入成功！'));
     }
 
+
+    /**
+     * 他引文章文件的上传
+     *
+     * @return void
+     */
+    public function uploadCitationApi()
+    {
+        $config['upload_path']      = './file/';
+        $config['allowed_types']    = 'xls|xlsx|txt';
+        $config['max_size']     = 2048;
+
+        $this->load->library('upload', $config);
+        if (!$this->upload->do_upload('file'))
+        {
+            $error = array('error' => $this->upload->display_errors());
+            exit(JsonEcho('1','上传失败！',$error));
+        }
+        else
+        {
+            $data = $this->upload->data();
+            $this->readCitationExcel($data['full_path']);
+        }
+        
+    }
+    /**
+     * 他引文章数据的处理与写入数据库操作
+     *
+     * @param string $file
+     * @return void
+     */
+    public function readCitationExcel($file = "")
+    {
+        // $file = './file/论文他引.xlsx';
+        $this->load->model('file_model','file');    //载入数据库文件插入的model
+        $this->load->library("PHPExcel");
+        header('Content-Type:text/html;charset=utf-8');
+
+        $PHPReader = new PHPExcel_Reader_Excel5();
+        if(!file_exists($file) || !$PHPReader->canRead($file)){
+            $PHPReader = new PHPExcel_Reader_Excel2007();
+            if(!file_exists($file) || !$PHPReader->canRead($file))
+            {
+                exit(JsonEcho('1','file no exist!'));
+            }
+        }
+        $objPHPExcel = $PHPReader->load($file);
+
+        $sheet = $objPHPExcel->setActiveSheetIndex(0); // 设置只读取第一个sheet
+        $allColumn = $sheet->getHighestColumn();
+        $allRow = $sheet->getHighestRow();
+        
+        $redis = new redis();
+        $redis->connect('127.0.0.1','6379') or exit(JsonEcho('1','服务器出现错误，请联系技术人员！'));
+        $redis->select(2);
+        $redis->flushDB();
+
+        // 循环 遍历，读取表格数据
+        for($row = 3; $row<=$allRow; $row++)
+        {
+            for($col='A'; $col<= $allColumn; $col++)
+            {
+                $address = $col.$row;
+                if($col == 'L'){
+                    $time = PHPExcel_Shared_Date::ExcelToPHP(intval($sheet->getCell($address)->getValue()));
+                    $data[$col] = date("Y-m-d",$time);
+                }else{
+                    $data[$col] = $sheet->getCell($address)->getValue();
+                }
+            }
+            
+            $wosNumber = $data['A'];
+            if($wosNumber == '') continue;  // 如果判断检测到某行的wos号码为空，直接跳过
+           if($this->file->citationExist(['citation_number'=>$wosNumber])== 0)
+           {
+               $redis->lPush('articleLink',$wosNumber);
+           }
+
+            // 在这里可以对某些数据进行处理然后在进行存储，入库
+            for($col1='A'; $col1<=$allColumn; $col1++)
+            {
+                $redis->set('article:'.$wosNumber.':'.$col1,$data[$col1]);
+                $redis->pExpire('article:'.$wosNumber.':'.$col1,86400000);
+            }
+           
+        }
+        $articleLen = $redis->lLen('articleLink');
     
+        $data_all = [];
+        for($i=0; $i<$articleLen; $i++)
+        {
+            $wosCur = $redis->rPop('articleLink');
+
+            $accession_number = $redis->get('article:'.$wosCur.':A');
+            $title = $redis->get('article:'.$wosCur.':B');
+            $data_one = array(
+                'citation_number'  => $redis->get('article:'.$wosCur.':A'),
+                'author'           => $redis->get('article:'.$wosCur.':B'),
+                'title'            => $redis->get('article:'.$wosCur.':C'),
+                'source'           => $redis->get('article:'.$wosCur.':D'),
+                'type'             => $redis->get('article:'.$wosCur.':E'),
+                'organization'     => $redis->get('article:'.$wosCur.':F'),
+                'reprint_author'   => $redis->get('article:'.$wosCur.':G'),
+                'email'            => $redis->get('article:'.$wosCur.':H'),
+                'quote_time'       => $redis->get('article:'.$wosCur.':I'),
+                'publication_number' => $redis->get('article:'.$wosCur.':J'),
+                'source_shorthand' => $redis->get('article:'.$wosCur.':K'),
+                'date'             => $redis->get('article:'.$wosCur.':L'),
+                'year'             => $redis->get('article:'.$wosCur.':M'),
+                'roll'             => $redis->get('article:'.$wosCur.':N'),
+                'period'           => $redis->get('article:'.$wosCur.':O'),
+                'page'             => $redis->get('article:'.$wosCur.':P').'--'.$redis->get('article:'.$wosCur.':Q'),
+                'is_first_inst'    => $redis->get('article:'.$wosCur.':R'),
+                'impact_factor'    => $redis->get('article:'.$wosCur.':S'),
+                'subject'          => $redis->get('article:'.$wosCur.':T'),
+                'zk_type'          => $redis->get('article:'.$wosCur.':U'),
+                'is_top'           => $redis->get('article:'.$wosCur.':V'),
+                'citation_time'         => '2018:'.$redis->get('article:'.$wosCur.':W').'-2019:'.$redis->get('article:'.$wosCur.':X').'-',
+                'other_info'       => $redis->get('article:'.$wosCur.':Y'),
+                'add_method'       => 0,
+                'claim_author'     => $this->searchFullSpell($redis->get('article:'.$wosCur.':G'),$redis->get('article:'.$wosCur.':B'))
+            );
+            
+            array_push($data_all,$data_one);
+            // 每300条数据，插入数据库一次
+           if(count($data_all) >= 300 || $i==$articleLen-1)
+           {
+               $status  = 0;
+               $status = $this->file->insertCitation($data_all);
+
+               $data_all = [];
+               if($status <= 0)
+               {
+                   exit(JsonEcho('1','数据插入错误！'));
+               }
+           }
+        }
+        
+        exit(JsonEcho('0','数据导入成功！'));
+    }
+
+
     /**
      * 根据通讯作者中的简写，在所有作者中查找出来所有通讯作者的全拼
      *

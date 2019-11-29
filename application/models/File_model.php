@@ -28,4 +28,29 @@ class File_model extends CI_Model
         return $this->db->insert_batch('subject',$data_arr);
     }
 
+    // ======================= 他引文章的数据库操作====================================
+
+    /**
+     * 数据库导入文件整个表
+     *
+     * @param [type] $data_arr
+     * @return void
+     */
+    public function insertCitation($data_arr){
+        return $this->db->insert_batch('citation',$data_arr);
+    }
+
+    /**
+     * 判断某一篇文章是否存在
+     *
+     * @param [type] $where
+     * @return void
+     */
+    public function citationExist($where)
+    {
+        $this->db->where($where);
+        $this->db->from('citation');
+        return $this->db->count_all_results();
+    }
+
 }

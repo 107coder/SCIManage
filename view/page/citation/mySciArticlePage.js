@@ -13,17 +13,6 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
     //用于同步编辑器内容到textarea
     layedit.sync(editIndex);
 
-    //上传缩略图
-    upload.render({
-        elem: '.thumbBox',
-        url: '../../json/userface.json',
-        method : "get",  //此处是为了演示之用，实际使用中请将此删除，默认用post方式提交
-        done: function(res, index, upload){
-            var num = parseInt(4*Math.random());  //生成0-4的随机数，随机显示一个头像信息
-            $('.thumbImg').attr('src',res.data[num].src);
-            $('.thumbBox').css("background","#fff");
-        }
-    });
 
     //格式化时间
     function filterTime(val){
@@ -33,27 +22,8 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
             return val;
         }
     }
-    //定时发布
-    var time = new Date();
-    var submitTime = time.getFullYear()+'-'+filterTime(time.getMonth()+1)+'-'+filterTime(time.getDate())+' '+filterTime(time.getHours())+':'+filterTime(time.getMinutes())+':'+filterTime(time.getSeconds());
-    laydate.render({
-        elem: '#release',
-        type: 'datetime',
-        trigger : "click",
-        done : function(value, date, endDate){
-            submitTime = value;
-        }
-    });
-    form.on("radio(release)",function(data){
-        if(data.elem.title == "定时发布"){
-            $(".releaseDate").removeClass("layui-hide");
-            $(".releaseDate #release").attr("lay-verify","required");
-        }else{
-            $(".releaseDate").addClass("layui-hide");
-            $(".releaseDate #release").removeAttr("lay-verify");
-            submitTime = time.getFullYear()+'-'+(time.getMonth()+1)+'-'+time.getDate()+' '+time.getHours()+':'+time.getMinutes()+':'+time.getSeconds();
-        }
-    });
+
+    
 
     form.verify({
         newsName : function(val){
@@ -69,8 +39,31 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
     })
 
 
+    $.ajax({
+        url:rootUrl+'/Article/getTypeForAdd',
+        type:'post',
+        dataType:'json',
+        success:function(res){
+            var data = res.data;
+            var html = '';
+            if (data.length == 0){
+                html += "<option value=''>请添加数据</option>";
+                $("#subject").empty().append(html);
+            }else{
+                $.each(data,function (k,v) {
+                    html += "<option value='"+v.subject_name+"'>"+v.subject_name+"</option>"
+                })
+                $("#subject").empty().append(html);
+            }
+            form.render();
+        },
+        error: function (res) {
+            layer.error(res.msg);
+        }
+    });
 
     form.on("submit(articleAdd)",function(data){
+        layer.msg('test');
         //截取文章内容中的一部分文字放入文章摘要
         // var abstract = layedit.getText(editIndex).substring(0,50);
         //弹出loading
@@ -120,7 +113,7 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
 
 
     // 加载下面添加人员信息的部分
-    var load = layer.load(1,{shade:[0.2,'#000']});
+
         //监听地址选择操作
         form.on('select(selectDemo)', function (obj) {
             layer.tips(obj.elem.getAttribute('name') + '：'+obj.value + ' ' + obj.elem.getAttribute('dataId') , obj.othis);
@@ -134,15 +127,16 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
         //执行一个 table 实例
         var userTable = table.render({
             elem: '#tableDemo'
-            , height: 500
-            , url: rootUrl+'/Author/userInfo' //数据接口
+            , height: 400
+            , url: rootUrl+'/Author/getAuthorClaimArticle' //数据接口
             , type:'post'
             , where: {accession_number:accession_number}
             // , page: true //开启分页
             , cols: [[ //表头
+
                 {field: 'full_spell', title: '姓名全拼', width: 120, fixed: 'left'}
                 ,{field: 'aId', title: '作者ID', width: 20}
-                , {field: 'authorType', title: '作者类型', width: 160, templet: '#selectType', unresize: true}
+                , {field: 'authorType', title: '作者类型', width: 150, templet: '#selectType', unresize: true}
                 , {field: 'number', title: '作者职工号', edit: 'text',width: 150}
                 , {field: 'name', title: '作者姓名', edit:'text', width: 150}
                 , {field: 'sex', title: '性别', width: 85, templet: '#selectSex', unresize: true }
@@ -154,59 +148,8 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
             ,done:function(res){
                 authorCount = res.count;
                 $("[data-field='aId']").css('display','none');
-                layer.close(load);
-                
             }
         });
-
-        // 根据工号和行索引向服务器请求数据  
-        function getOneAuthor(index,job_number,authorType){
-            $.ajax({
-                url:rootUrl+"/User/getOneTeacher"
-                ,type:'post'
-                ,data:{
-                    job_number:job_number,
-                    authorType:authorType
-                }
-                ,dataType:'json'
-                ,success:function(res){
-                    
-                    if(res.code==0)
-                    {
-                        updateAuthor(index,res.data);
-                    }else
-                    {
-                        data = new Array();
-                        data['name'] = '';
-                        data['edu_background'] = '';
-                        data['job_title'] = '';
-                        data['academy'] = '';
-                        data['gender'] = '男';
-                        updateAuthor(index,data);
-                    }
-                },error:function()
-                {
-                    layer.msg('服务器错误，请联系系统管理员');
-                }
-            });
-        }
-
-         // 当填入工号 学号时自动填充信息的方法
-         function updateAuthor(index,data)
-         {
-             $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
-             // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
-             $("[data-index="+index+"]").find("[data-field='xueli']").find('div').text(data['edu_background']);
-             $("[data-index="+index+"]").find("[data-field='title']").find('div').text(data['job_title']);
-             $("[data-index="+index+"]").find("[data-field='unit']").find('div').text(data['academy']);
-             // $("[data-index="+index+"]").find("[data-field='sex']").find('find').val(data['gender']);
-             $("[data-index="+index+"]").find("dd[lay-value="+data['gender']+"]").click();
-             // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
-             // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
-         }   
-
-
-
         //监听单元格编辑
         table.on('edit(tableDemo)', function(obj){
             var value = obj.value //得到修改后的值
@@ -214,65 +157,56 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
                 ,tr = obj.tr  // 获取tr的dom对象
                 ,field = obj.field; //得到字段
                 // 控制如果不是修改的工号，就不会给整行填写数据
-                
+
+                // console.log(field);
                 if(field != 'number'){
                     return false;
                 }
-                
-                // 获取对应的单元格的 索引 index
+                // console.log(data);
                 var index = data.LAY_TABLE_INDEX;
-                // 获取到作者的类型
-                var authorType = $("[data-index="+index+"]").find("[data-field='authorType']").find('input').val();
-                
-                if(authorType=='本校教师' || authorType=='本校研究生'){
-                    getOneAuthor(index,data.number,authorType);
-                }else{
-                    data = new Array();
-                    data['name'] = '';
-                    data['edu_background'] = '';
-                    data['job_title'] = '';
-                    data['academy'] = '';
-                    data['gender'] = '男';
-                    updateAuthor(index,data);
-                }
-                
+                $.ajax({
+                    url:rootUrl+"/User/getOneTeacher"
+                    ,type:'post'
+                    ,data:{job_number:data.number}
+                    ,dataType:'json'
+                    ,success:function(res){
+                        // console.log(res.data);
+                        if(res.code==0)
+                        {
+                            updateAuthor(index,res.data);
+                        }else
+                        {
+                            data = [];
+                            updateAuthor(index,data);
+                        }
+                    },error:function()
+                    {
+                        // layer.msg('err');
+                    }
+                });
+                // updateAuthor(index);
+               
+
+            // layer.msg('[ID: '+ data.full_spell +'] ' + field + ' 字段更改为：'+ value);
         });
 
-       
-
-        // 选择教师类型，相应对应的事件
-        form.on("select(selectType)",function(data){
-            // console.log(data.elem); //得到select原始DOM对象
-            // console.log(data.value); //得到被选中的值
-            
-            // 获取对应的教师类型的值
-            var authorType = data.value;
-            // 获取对应的行的索引index
-            var index = $(data.elem).parent().parent().parent().attr('data-index');
-            // 获取此时的工号
-            var job_number = $("[data-index="+index+"]").find("[data-field='number']").find('div').text();
-            // 请求数据，填充数据
-            if(authorType=='本校教师' || authorType=='本校研究生'){
-                getOneAuthor(index,job_number,authorType);
-            }else{
-                data = new Array();
-                data['name'] = '';
-                data['edu_background'] = '';
-                data['job_title'] = '';
-                data['academy'] = '';
-                data['gender'] = '男';
-                updateAuthor(index,data);
-
-                $("[data-index="+index+"]").find("[data-field='name']").attr('data-edit','text');
-            }
-            
-          });
+        function updateAuthor(index,data)
+        {
+            $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+            $("[data-index="+index+"]").find("[data-field='xueli']").find('div').text(data['edu_background']);
+            $("[data-index="+index+"]").find("[data-field='title']").find('div').text(data['job_title']);
+            $("[data-index="+index+"]").find("[data-field='unit']").find('div').text(data['academy']);
+            // $("[data-index="+index+"]").find("[data-field='sex']").find('find').val(data['gender']);
+            $("[data-index="+index+"]").find("[data-field='sex']").find('find').val('女');
+            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+            // $("[data-index="+index+"]").find("[data-field='name']").find('div').text(data['name']);
+        }
 
 
-/**
- * 使用jquery获取页面中对应序号的作者的信息
- * @param {author 的序号} index 
- */
+
+
+
 function getAuthor(index)
 {
     var full_spell = $("[data-index="+index+"]").find("[data-field='full_spell']").find('div').html();
@@ -291,9 +225,8 @@ function getAuthor(index)
 }
 
 
-
-// 监听按钮点击事件
-form.on('submit(claimArticle)',function() {
+// 更新文章信息
+function updateAuthorInfo() {
     var accession_number = $('#accession_number').text();
     
     // 获取所有表格的数据 
@@ -303,16 +236,14 @@ form.on('submit(claimArticle)',function() {
         tableData.push(getAuthor(i));
     }
     
-    // return false;
     var flag = true;
     tableData.forEach(element => {
-        if(element[4]=='' || element[7]==''){
-            layer.msg('所有作者的 中文姓名 和 工作单位 必须填写完整，请将信息填写完整！');
+        if(element[0]=='' || element[4]=='' || element[7]==''){
+            layer.msg('请将信息填写完整');
             flag = false;
         }
     });
     if(!flag){return false;}
-    
     $.ajax({
         url:rootUrl+"/Article/claimArticle",
         type:'post',
@@ -323,15 +254,10 @@ form.on('submit(claimArticle)',function() {
         dataType: 'json',
         success:function(res)
         {
-            
+            layer.msg("填写信息已完整");
             if(res.code == 0)
             {
                 layer.msg(res.msg);
-                setTimeout(() => {
-                    layer.closeAll("iframe");
-                    //刷新父页面
-                    parent.location.reload();
-                }, 1000);
             }
             else
             {
@@ -339,14 +265,102 @@ form.on('submit(claimArticle)',function() {
                 return false;
             }
 
-            
+            // console.log(res);
         },error:function (res) {
             layer.msg("服务器出现错误，请联系系统管理员！");
         }
     });
     
+}
+
+// 文章退回
+
+form.on('submit(backArticle)',function()
+{
+    var accession_number = $('#accession_number').text();
+    layer.confirm('您确定要退回这篇文章吗？', {
+        btn: ['确定','取消'] //按钮
+      }, function(){
+        $.ajax({
+            url:rootUrl+"/Article/backArticle",
+            type:'post',
+            data:{
+                accession_number:accession_number,
+            },
+            dataType: 'json',
+            success:function(res)
+            {
+                
+                if(res.code == 0)
+                {
+                    
+                    layer.msg(res.msg); 
+                    setTimeout(() => {
+                        layer.closeAll("iframe");
+                        //刷新父页面
+                        parent.location.reload();
+                    }, 1000);
+                }
+                else
+                {
+                    layer.msg(res.msg);
+                    return false;
+                }
+    
+                
+            },error:function (res) {
+                layer.msg("服务器出现错误，请联系系统管理员！");
+            }
+        });
+      }, function(){
+        layer.msg('您已取消', {
+          time: 1000, //1s后自动关闭
+        });
+      });
+
 });
 
+// function backArticle()
+// {
+//     var accession_number = $('#accession_number').text();
+//     layer.confirm('您确定要退回这篇文章吗？', {
+//         btn: ['确定','取消'] //按钮
+//       }, function(){
+//         $.ajax({
+//             url:rootUrl+"/Article/backArticle",
+//             type:'post',
+//             data:{
+//                 accession_number:accession_number,
+//             },
+//             dataType: 'json',
+//             success:function(res)
+//             {
+                
+//                 if(res.code == 0)
+//                 {
+//                     top.layer.close(index);
+//                     layer.msg(res.msg); 
+//                     layer.closeAll("iframe");
+//                     //刷新父页面
+//                     parent.location.reload();
+//                 }
+//                 else
+//                 {
+//                     layer.msg(res.msg);
+//                     return false;
+//                 }
+    
+                
+//             },error:function (res) {
+//                 layer.msg("服务器出现错误，请联系系统管理员！");
+//             }
+//         });
+//       }, function(){
+//         layer.msg('您已取消', {
+//           time: 1000, //1s后自动关闭
+//         });
+//       });
 
+// }
 
 })

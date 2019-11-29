@@ -874,5 +874,15 @@ if ( ! function_exists('function_usable'))
         echo "<pre>";
         print_r($data);
         echo '</pre>';
-    }
+	}
+	
+
+	/**
+	 * 返回当前年份，用来匹配当年的引用次数
+	 *
+	 * @return void
+	 */
+	function _year(){
+		return '2019';
+	}
 }

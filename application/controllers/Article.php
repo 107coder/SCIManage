@@ -43,14 +43,6 @@ class Article extends MY_Controller {
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-     * 获取当前登录着的姓名全拼，填写的搜索框中
-     *
-     * @return void
-     */
-    public function getFullSpell(){
-
-    }
 
     // 获取文章分类
     public function getTypeApi()
@@ -77,38 +69,7 @@ class Article extends MY_Controller {
         );
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
-    /**
-     * 添加文章
-     *
-     * @return json 添加成功或者失败
-     */
-    public function insertArticleApi()
-    {   
-        $data = $this->input->post('data');
-        $dataArt = json_decode($data,true);
-        $dataArt['page'] = $dataArt['startPage'].'--'.$dataArt['endPage'];
-        unset($dataArt['startPage'],$dataArt['endPage']);
-        $dataArt['is_first_inst'] = !empty($dataArt['is_first_inst'])?'是':'不是';
-        $dataArt['is_cover'] = !empty($dataArt['is_cover'])?'是':'不是';
-        $dataArt['is_top'] = !empty($dataArt['is_top'])?'是':'不是';
-        $dataArt['add_method'] = 1;
-        if($this->article->checkArticleExist($dataArt['accession_number']))
-        {
-            $status = $this->article->insertArticle($dataArt);
-            if($status){
-                echo JsonEcho(0,'添加成功');
-            }
-            else 
-            {
-                exit(JsonEcho(2,'添加失败'));
-            }
-        }
-        else
-        {
-            exit(JsonEcho(1,'文章已存在，请检查wos号'));
-        }
-    }
-
+   
    
     
 
@@ -162,6 +123,7 @@ class Article extends MY_Controller {
             $data_article = array(
                 'owner' => $this->session->job_number,
                 "owner_name"=> $this->session->name,
+                'claimer_unit' => $this->session->academy,
                 'articleStatus' => 1,
                 'claim_time' => time()
             );
@@ -242,6 +204,7 @@ class Article extends MY_Controller {
         $data = [
             'owner' => null,
             'owner_name' => null,
+            'claimer_unit' => null,
             'articleStatus' => 0
         ];
         // 重置论文的认领信息
@@ -263,101 +226,4 @@ class Article extends MY_Controller {
     }
 
 
-    /**
-     * 根据通讯作者中的简写，在所有作者中查找出来所有通讯作者的全拼
-     *
-     * @param [type] $address
-     * @param [type] $author
-     * @return void
-     */    
-    function searchFullSpell($address,$author){
-        
-        //把作者中的姓名全拼分为数组   这里涉及到两种格式，判断姓名的分类中是否有 ','分割，
-        if(strpos($author,',') == false){
-            $author=str_replace('-', '', $author);
-            $authorArray=explode('; ', $author);
-            foreach($authorArray as &$author){
-                $author=str_replace(', ', ',', $author);
-                $author=str_replace(' ', ',', $author);
-            }
-        }else{
-            $author=str_replace(' ', '', $author);
-            $author=str_replace('-', '', $author);
-            $authorArray=explode(';', $author);
-        }
-
-       
-       
-
-        //把地址中的姓名简写分为数组  先根据';'分成数组，然后判断是否含有(reprintauthor)如果有截取前面的字符
-        $address=str_replace(' ', '', $address);
-        $addressArray=explode(';', $address);
-        $addressArrayLen=count($addressArray);
-        for ($i=0; $i < $addressArrayLen; $i++) 
-        { 
-            if(strstr($addressArray[$i], "(reprintauthor)")!=false)
-            {
-                $pos=strpos($addressArray[$i],"(reprintauthor)");
-                $addressArray[$i]=substr($addressArray[$i], 0,$pos);
-            }
-                
-        }
-        // $fullSpellArray  = [];
-        //对每个简写查找它的全拼以数组形式返回
-        foreach ($addressArray as $value)
-        {
-            $short=$value;
-            $short=strtolower($short);
-            $shortLowerArray=explode(',', $short);
-            foreach ($authorArray as $author)
-            {
-                $fullSpell=strtolower($author);
-                $authorLowerArray=explode(',', $fullSpell);
-                $bool=true;
-                //判断二者逗号前是否相同
-                if(strstr($authorLowerArray[0], $shortLowerArray[0])==false)
-                    $bool=false;
-                //判断缩写逗号后的字母是否都在全拼逗号后的字符里
-                if(strpos($fullSpell,',') != false)
-                {
-                    $length=strlen($shortLowerArray[1]);
-                    for ($i=0; $i <$length ; $i++)
-                    { 
-                        if(strstr($authorLowerArray[1], $shortLowerArray[1][$i])==false)
-                            $bool=false;
-                    }
-                }
-                if($bool)
-                {
-                    $fullSpellArray[]=$author;
-                }
-            }
-        }
-        if(isset($fullSpellArray))
-            $claim_author = $fullSpellArray;
-        else
-            $claim_author = array();
-        
-        if(!in_array($first_author,$claim_author)){
-            array_push($claim_author,$first_author);
-        }
-        $claim_author = implode(';',$claim_author);
-        return $claim_author; return $fullSpellArray;
-
-        
-    }
-
-
-    public function test(){
-        $author = 'Xu, Dang-Dang; Zheng, Bei; Song, Chong-Yang; Lin, Yi; Pang, Dai-Wen; Tang, Hong-Wu';
-        $author=str_replace('-', '', $author);
-        $authorArray=explode('; ', $author);
-        foreach($authorArray as &$author){
-            $author=str_replace(', ', ',', $author);
-            $author=str_replace(' ', ',', $author);
-            p($author);
-        }
-
-        p($authorArray);
-    }
 }
