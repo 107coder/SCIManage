@@ -13,6 +13,7 @@ application/config/*
 
 file/*
 !file/index.html
+view/layui/layui.js
 
 composer.lock
 
