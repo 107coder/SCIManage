@@ -106,7 +106,7 @@ class Main extends MY_Controller {
 				{
 					"title":"他引认领",
 					"icon": "&#xe609;",
-					"href":"page/article/sciArticleList.html",
+					"href":"page/citation/citationList.html",
 					"spread":false
 				},
 				{
@@ -124,9 +124,9 @@ class Main extends MY_Controller {
 						{
 							"title": "他引论文",
 							"icon": "&#xe609;",
-							"href": "page/login/login.html",
+							"href": "page/citation/myCitationList.html",
 							"spread": false,
-							"target": "_blank"
+							"target": ""
 						}
 					]
 				}

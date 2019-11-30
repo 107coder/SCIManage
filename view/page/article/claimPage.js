@@ -154,6 +154,9 @@ layui.use(['form','layer','layedit','laydate','upload','element','table'],functi
             ,done:function(res){
                 authorCount = res.count;
                 $("[data-field='aId']").css('display','none');
+                $('.layui-table-body').css('overflow','visible');
+                $('.layui-table-view').css('overflow','visible');
+                $('.layui-table-box').css('overflow','visible');
                 layer.close(load);
                 
             }
