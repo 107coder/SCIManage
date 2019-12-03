@@ -71,6 +71,19 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
         }
     });
 
+    // 内容选择查看
+    form.on('select(articleType)', function(data){
+        console.log(data.value); //得到被选中的值
+        table.reload("newsListTable",{
+            page: {
+                curr: 1 //重新从第 1 页开始
+            },
+            where: {
+                selectType:'articleStatus',
+                key: data.value  //搜索的关键字
+            }
+        })
+    });  
 
     //添加文章
     function addNews(edit){
@@ -172,6 +185,41 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
             layer.msg("导入错误");
         //请求异常回调
         }
+    });
+
+  
+
+    // 数据导出
+    $('#export_data').click(function(){
+        layer.load(1,{shade:[0.2,"#000"]}); //上传loading
+        location.href = rootUrl+'/ExcelAction/sciExport';
+        console.log('d');
+        layer.closeAll('loading'); //关闭loading
+        // $.ajax({
+        //     type:'get',
+        //     url:rootUrl+'/ExcelAction/sciExport',
+        //     data:{},
+        //     // dataType:'json',
+        //     success:function(res){
+        //         console.log();
+        //             //     // 创建a标签，设置属性，并触发点击下载
+        //             // var $a = $("<a>");
+        //             // $a.attr("href", res.data.file);
+        //             // $a.attr("download", res.data.filename);
+        //             // $("body").append($a);
+        //             // $a[0].click();
+        //             // $a.remove();
+        //         layer.closeAll('loading'); //关闭loading
+        //         if(res.code == 0)
+        //         {
+        //             layer.msg(res.msg);
+        //         }
+        //     },error:function(){
+        //         console.log('error');
+        //         layer.closeAll('loading'); //关闭loading
+        //         layer.msg("导出错误");
+        //     }
+        // });
     });
 
 })

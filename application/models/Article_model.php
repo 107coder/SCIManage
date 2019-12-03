@@ -69,6 +69,43 @@ class Article_model extends CI_Model{
             ->order_by('accession_number')
             ->count_all_results();
     }
+
+    /**
+     * 根据状态搜索文章，管理员操作
+     *
+     * @param [type] $page
+     * @param [type] $limit
+     * @param [type] $key
+     * @return void
+     */
+    public function selectStatus($page,$limit,$key){
+        if($key != '-1')
+        {
+            $where=array('articleStatus'=>$key);
+        }
+        else{
+            $where=array();
+        }
+        return $this->db
+                    ->from('article')
+                    ->where($where)
+                    ->order_by('accession_number')
+                    ->limit($limit,$page)
+                    ->get()->result_array();
+    }
+    public function selectStatusCount($key){
+        if($key != '-1')
+        {
+            $where=['articleStatus'=>$key];
+        }
+        else{
+            $where=array();
+        }
+        return $this->db
+            ->from('article')
+            ->where($where)
+            ->count_all_results();
+    }
     /**
      * 判断所添加的文章是否存在 存在返回false 不存在返回true
      *

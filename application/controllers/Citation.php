@@ -14,12 +14,14 @@ class Citation extends MY_Controller {
         $limit = $this->input->get('limit');
         $page = $this->input->get('page')-1;
         $key = $this->input->get('key');
+        $type = $this->input->get('selectType');
 
-        $data = $this->citation->getCitation($limit,$page,$key);
-        if(empty($key)){
-            $count = $this->db->count_all('citation');
+        if(empty($type)){
+            $data = $this->citation->getCitation($limit,$page,$key);
+            $count = $this->citation->getCitationCount($key);
         }else{
-            $count = count($data);
+            $data = $this->citation->selectStatus($page,$limit,$key);
+            $count = $this->citation->selectStatusCount($key);
         }
         // 年份处理
         $data = $this->deal_citation_time($data,_year());

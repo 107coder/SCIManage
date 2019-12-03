@@ -26,13 +26,17 @@ class Article extends MY_Controller {
         $limit = $this->input->get('limit');
 
         $key = $this->input->get('key');
-        
-        if(empty($key)){
+        $type = $this->input->get('selectType');
+      
+        if(empty($key) && empty($type)){
             $data = $this->article->getArticle($page,$limit);
             $count = $this->db->count_all('article');
-        }else{
+        }else if(empty($type)){
             $data = $this->article->searchArticle($page,$limit,$key);
             $count = $this->article->searchArticleCount($key);
+        }else{
+            $data = $this->article->selectStatus($page,$limit,$key);
+            $count = $this->article->selectStatusCount($key);
         }
         $resdata = array(
             'code' => '0',
@@ -146,7 +150,7 @@ class Article extends MY_Controller {
                 $data_arr[$key]['aJobNumber'] = $value[7];
                 $data_arr[$key]['aisAddress'] = $value[8];
                 $data_arr[$key]['aArticleNumber'] = $accession_number;
-                $data_arr[$key]['aIsCliam'] = $value[7]==$this->session->job_number?1:0;
+                $data_arr[$key]['aIsClaim'] = $value[7]==$this->session->job_number?1:0;
                 if($value[9] != -1){
                     $data_arr[$key]['aId'] = $value[9];
                 }

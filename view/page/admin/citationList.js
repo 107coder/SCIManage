@@ -60,6 +60,20 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
         }
   });
 
+      // 内容选择查看
+      form.on('select(articleType)', function(data){
+        console.log(data.value); //得到被选中的值
+        table.reload("newsListTable",{
+            page: {
+                curr: 1 //重新从第 1 页开始
+            },
+            where: {
+                selectType:'articleStatus',
+                key: data.value  //搜索的关键字
+            }
+        })
+    });  
+
 
   
     //添加文章

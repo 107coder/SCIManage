@@ -687,4 +687,149 @@ class ExcelAction extends MY_Controller {
     }
 
 
+
+    // ========================== 数据导出 =============================
+
+    /**
+     * sci数据导出
+     *
+     * @param string $fileName
+     * @return void
+     */
+    public function sciExport($fileName=''){
+        $this->load->model('file_model','file');    //载入数据库文件插入的model
+        $this->load->library("PHPExcel");
+
+        $title = array('入藏号','论文名称','中文作者全拼','来源期刊','文章类型','单位','通讯作者','电子邮箱','引用次数',
+        '来源期刊简写','月日','年','卷','期','开始页码','结束页码','是否第一机构','影响因子','所属大类','中科院大类分区',
+        '是否TOP期刊','是否封面论文','奖励文件论文分类','奖励分值','备注','论文状态','第一作者','第一作者工号','通讯作者','其他作者',
+        '认领人','认领人所属单位');
+        $cellName = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF');
+        $articleStatus = ['未认领','学院审核中','学院不通过','学校未审核','学校不通过','审核通过'];// 论文的状态
+
+        $data = $this->file->getAllSciArticleToExport();
+      
+        $obj = new PHPExcel();
+        $obj->getActiveSheet(0)->setTitle('sheet');   //设置sheet名称
+        $_row = 1;   //设置纵向单元格标识
+
+        if($title){
+            $i = 0;
+            foreach($title AS $v){   //设置列标题
+                $obj->setActiveSheetIndex(0)->setCellValue($cellName[$i].$_row, $v);
+                $i++;
+            }
+            $_row++;
+        }
+
+         //设置表格宽度
+         $obj->getActiveSheet()->getColumnDimension('A')->setWidth(21);
+         $obj->getActiveSheet()->getColumnDimension('B')->setWidth(21);
+         $obj->getActiveSheet()->getColumnDimension('C')->setWidth(21);
+         $obj->getActiveSheet()->getColumnDimension('D')->setWidth(21);
+         $obj->getActiveSheet()->getColumnDimension('E')->setWidth(10);
+         $obj->getActiveSheet()->getColumnDimension('F')->setWidth(21);
+         $obj->getActiveSheet()->getColumnDimension('G')->setWidth(21);
+         $obj->getActiveSheet()->getColumnDimension('H')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('I')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('J')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('K')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('L')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('M')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('N')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('O')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('P')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('Q')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('R')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('S')->setWidth(15);
+         $obj->getActiveSheet()->getColumnDimension('T')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('U')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('V')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('W')->setWidth(15);
+         $obj->getActiveSheet()->getColumnDimension('X')->setWidth(9);
+         $obj->getActiveSheet()->getColumnDimension('Y')->setWidth(15);
+         $obj->getActiveSheet()->getColumnDimension('Z')->setWidth(15);
+         $obj->getActiveSheet()->getColumnDimension('AA')->setWidth(15);
+         $obj->getActiveSheet()->getColumnDimension('AB')->setWidth(15);
+         $obj->getActiveSheet()->getColumnDimension('AC')->setWidth(15);
+         $obj->getActiveSheet()->getColumnDimension('AD')->setWidth(15);
+         $obj->getActiveSheet()->getColumnDimension('AE')->setWidth(15);
+         $obj->getActiveSheet()->getColumnDimension('AF')->setWidth(15);
+         
+        if($data){
+            $i = 0;
+            foreach($data AS $v){
+                $obj->getActiveSheet(0)->setCellValue($cellName[0].($i+$_row),$v['accession_number']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[1].($i+$_row),$v['title']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[2].($i+$_row),$v['author']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[3].($i+$_row),$v['source']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[4].($i+$_row),$v['article_type']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[5].($i+$_row),$v['organization']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[6].($i+$_row),$v['address']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[7].($i+$_row),$v['email']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[8].($i+$_row),$v['quite_time']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[9].($i+$_row),$v['source_shorthand']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[10].($i+$_row),$v['date']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[11].($i+$_row),$v['year']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[12].($i+$_row),$v['roll']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[13].($i+$_row),$v['period']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[14].($i+$_row),$v['startPage']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[15].($i+$_row),$v['endPage']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[16].($i+$_row),$v['is_first_inst']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[17].($i+$_row),$v['impact_factor']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[18].($i+$_row),$v['subject']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[19].($i+$_row),$v['zk_type']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[20].($i+$_row),$v['is_top']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[21].($i+$_row),$v['is_cover']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[22].($i+$_row),$v['sci_type']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[23].($i+$_row),$v['reward_point']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[24].($i+$_row),$v['other_info']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[25].($i+$_row),$articleStatus[$v['articleStatus']]);
+                $obj->getActiveSheet(0)->setCellValue($cellName[26].($i+$_row),$v['first_author']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[27].($i+$_row),$v['first_author_number']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[28].($i+$_row),$v['reprint_author']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[29].($i+$_row),$v['other_author']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[30].($i+$_row),$v['owner_name']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[31].($i+$_row),$v['claimer_unit']);
+            
+                $i++;
+            }
+        }
+
+        // 设置文件名称
+        if(!$fileName){
+           $fileName = time();
+        }
+        $objWrite = PHPExcel_IOFactory::createWriter($obj, 'Excel5');
+        
+        header('pragma:public');
+        header('Content-type:application/vnd.ms-excel;charset=utf-8;name="'.$fileName.'.xls"');
+        header("Content-Disposition:attachment;filename=$fileName.xls");
+        ob_start();
+        $objWrite->save('php://output');
+        $xlsData = ob_get_contents();
+        ob_end_clean();
+        $res = array(
+            'code' => 0,
+            'msg' => '请求数据成功',
+            'data' => ['filename' => $filename, 'file' => "data:application/vnd.ms-excel;base64," . base64_encode($xlsData)]
+        );
+        // return $res;
+        // return JsonEcho(0,'导出成功',['filename' => $filename, 'file' => "data:application/vnd.ms-excel;base64," . base64_encode($xlsData)]);
+    }
+
+    public function citationExport(){
+
+    }
+
+    private function browser_export($type,$filename)
+    {
+        if($type == "Excel5"){
+            header('Content-Type: application/vnd.ms-excel');   //告诉浏览器要输出Excel03文件
+        }else{
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');	//告诉浏览器要输出Excel07文件
+        }
+        header('Content-Disposition: attachment;filename="'.$filename.'"'); //告诉浏览器输出文件的名称
+        header('Cache-Control: max-age=0');  // 禁止缓存 
+    }
 }
