@@ -13,7 +13,11 @@ application/config/*
 
 file/*
 !file/index.html
+
 view/layui/layui.js
+
+application/libraries/CAS
+application/libraries/phpCAS.php
 
 composer.lock
 

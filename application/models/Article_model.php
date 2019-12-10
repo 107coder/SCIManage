@@ -171,4 +171,30 @@ class Article_model extends CI_Model{
     }
 
 
+    /**
+     * 管理员认领功能的 文章加载
+     *
+     * @param [type] $limit
+     * @param [type] $page
+     * @param [type] $where
+     * @param array $like
+     * @return void
+     */
+    public function getArticleByAcademy($limit,$page,$where,$like=[]){
+        $res['data'] = $this->db->from('article')
+                                ->where($where)
+                                ->like($like)
+                                ->limit($limit,$page)
+                                ->order_by("accession_number")
+                                ->get()
+                                ->result_array();
+        $res['count'] = $this->db
+                            ->from('article')
+                            ->where($where)
+                            ->like($like)
+                            ->count_all_results();
+        return $res;
+    }
+
+    
 }

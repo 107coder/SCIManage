@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>文章列表--layui后台管理模板 2.0</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" href="../../layui/css/layui.css" media="all" />
+	<link rel="stylesheet" href="../../css/public.css" media="all" />
+
+	<style type="text/css">
+		/* 防止下拉框的下拉列表被隐藏---必须设置--- */
+		.layui-table-cell {
+			overflow: visible !important;
+		}
+		/* 设置下拉框的高度与表格单元相同 */
+		.layui-input, .layui-select, .layui-textarea{
+			height: 30px !important;
+		}
+	</style>
+</head>
+
+<body class="childrenBody">
+		<div class="layui-col-lg12 layui-col-md12">
+			<blockquote class="layui-elem-quote title">论文基本参数</blockquote>
+			<table class="layui-table magt0" lay-size="sm">
+				<colgroup>
+					<col width="150">
+					<col>
+					<col width="150">
+					<col>
+				</colgroup>
+				<tbody>
+					<tr style="display: none">
+						<td>论文wos号码</td>
+						<td id="accession_number" colspan="3"></td>
+
+					</tr>
+					<tr>
+						<td>论文题目</td>
+						<td id="article_title" colspan="3"></td>
+
+					</tr>
+					<tr>
+						<td>论文类型</td>
+						<td class="article_type" colspan="3"></td>
+					</tr>
+					<tr>
+						<td>通信地址</td>
+						<td class="address" colspan="3"></td>
+					</tr>
+					<tr>
+						<td>作者单位</td>
+						<td class="organization" colspan="3"></td>
+					</tr>
+					<tr>
+						<td>第一作者</td>
+						<td class="claim_author"></td>
+						<td>其他作者</td>
+						<td class="other_author"></td>
+					</tr>
+					<tr>
+						<td>发表/出版时间</td>
+						<td class="date"></td>
+						<td>发表刊物/论文集</td>
+						<td class="source"></td>
+					</tr>
+					<tr>
+						<td>期刊类型</td>
+						<td class="zk_type"></td>
+						<td>SCI分区</td>
+						<td class="sci_type"></td>
+					</tr>
+					<tr>
+						<td>学科门类</td>
+						<td class="subject"></td>
+						<td>引用次数</td>
+						<td class="claim_time"></td>
+					</tr>
+					<tr>
+						<td>卷号</td>
+						<td class="roll"></td>
+						<td>期号</td>
+						<td class="period"></td>
+					</tr>
+					<tr>
+						<td>页码范围</td>
+						<td class="page"></td>
+						<td>字数</td>
+						<td class="word"></td>
+					</tr>
+					<tr>
+						<td>是否为地址机构</td>
+						<td class="is_first_inst"></td>
+						<td>是否为封面</td>
+						<td class="is_cover"></td>
+					</tr>
+					<tr>
+						<td>是否为置顶</td>
+						<td class="is_top"></td>
+						<td>影响因子</td>
+						<td class="impact_factor"></td>
+					</tr>
+
+					<tr>
+						<td>其他信息</td>
+						<td class="other_info" colspan="3"></td>
+						
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	<form class="layui-form layui-row layui-col-space10">
+		<div class="layui-col-lg12 layui-col-md12">
+			<blockquote class="layui-elem-quote title">作者信息</blockquote>
+			<table class="layui-hide layui-form" id="tableDemo" lay-filter="tableDemo"></table>
+
+
+		</div>
+
+		<button type="button" style="margin: 10px 10px" class="layui-btn" lay-submit lay-filter="pass">审核通过</button>
+		<button type="button" style="margin: 10px 10px" class="layui-btn layui-btn-danger" lay-submit lay-filter="back" >审核不通过</button>
+		<button type="button" style="margin: 10px 10px" class="layui-btn layui-btn-danger" lay-submit lay-filter="cancal">取消通过</button>
+	</form>
+
+	<script type="text/javascript">
+	
+		var sexArr = ['男','女'];
+		var typeArr = ['本校教师','本校研究生','本校本科生','其他人员'];
+	</script>
+
+		<!--定义性别的工具-->
+	<script type="text/html" id="selectSex" desc="定义性别选择器" intro="用到了layui模板（不能设置lay-ignore,否则监听不到事件）">
+		<select name="sex" dataId="{{d.sex}}" lay-filter="selectSex">
+			{{# layui.each(sexArr, function(index, item){ }}
+			<option {{ (d.sex==item)?'selected' : '' }}>{{ item }}</option>
+			{{# }); }}
+		</select>
+	</script>
+
+	<!--定义作者类型的工具-->
+	<script type="text/html" id="selectType" desc="定义的教师类别" intro="用到了layui模板（不能设置lay-ignore,否则监听不到事件）">
+		<select name="type" dataId="{{d.authorType}}" lay-filter="selectType">
+			{{# layui.each(typeArr, function(index, item){ }}
+			<option {{ (d.authorType==item)?'selected' : '' }}>{{ item }}</option>
+			{{# }); }}
+		</select>
+	</script>
+
+	<script type="text/html" id="switchTpl" desc="切换开关" intro="layui表单空间">
+		<input type="checkbox" name="tongxun" value="{{d.tongxun}}" lay-skin="switch"
+			   lay-text="是|否" lay-filter="tongxun" {{ (d.tongxun=='是')?'checked' : '' }}>
+	</script>
+
+	<script type="text/javascript" src="../../layui/layui.js"></script>
+	<script type="text/javascript" src="SciArticlePage.js"></script>
+
+
+</body>
+
+</html>

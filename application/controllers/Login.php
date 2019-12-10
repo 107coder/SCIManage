@@ -22,7 +22,30 @@ class Login extends CI_Controller {
         }
     }
 
+    public function ids(){
+        header("Content-Type: text/html; charset=utf-8");
+        $this->load->library('phpCAS');
+        phpCAS::client(CAS_VERSION_2_0,'ids.henu.edu.cn',80,'authserver',false);
+       
+        phpCAS::setNoCasServerValidation();
+        phpCAS::handleLogoutRequests();
+        phpCAS::forceAuthentication();
 
+        echo "<pre>";
+        echo "user:".phpCAS::getUser();
+        echo "<br/>";
+        echo "*******************";
+        echo "<br/>";
+        echo "attributes:";
+        echo "<br/>";
+        var_dump(phpCAS::getAttributes());
+    }
+
+    public function idsLoginOut(){
+        $param = array('service'=>'http://ssodemo.test.com/cas/index.php');
+        phpCAS::logout($param);
+        exit;
+    }
     public function checkLogin()
     {
         $username = $this->input->post('username');

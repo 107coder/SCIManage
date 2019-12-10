@@ -47,6 +47,51 @@ class Article extends MY_Controller {
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
 
+     /**
+     * 根据学院获取文章的内容
+     *
+     * @return void
+     */
+    public function getArticleByAcademyApi()
+    {
+        $page = $this->input->get('page')-1;
+        $limit = $this->input->get('limit');
+
+        $key = $this->input->get('key');
+        $type = $this->input->get('selectType');
+        if(!isset($this->session->identity)){
+            exit(JsonEcho(4,'请先登录'));
+        }
+        if($this->session->identity == 2){
+            $where = [];
+        }else{
+            $where = ['claimer_unit'=>$this->session->academy];
+        }
+        
+        if($type == 'articleStatus'){
+            if($key!=-1)
+                $where['articleStatus']=$key;
+            $like = [];
+        }else{
+            $like=array(
+                'accession_number' => $key,
+                'title'            => $key,
+                'author'           => $key,
+                'claim_author'     => $key
+            );
+        }
+        $res = $this->article->getArticleByAcademy($limit,$page,$where,$like);
+        $data = $res['data'];
+        $count = $res['count'];
+
+        $resdata = array(
+            'code' => '0',
+            'msg'  => '请求数据正常',
+            'count'=> $count,
+            'data' => $data
+        );
+        echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
+    }
 
     // 获取文章分类
     public function getTypeApi()

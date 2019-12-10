@@ -20,8 +20,10 @@ $.ajax({
 			
 			if(res.data['identity']==0){
 				$('.admin-li').remove();
-			}else{
+			}else if(res.data['identity']==2){
 				$('.admin-li').removeClass('layui-hide');
+			}else {
+				$('.admin-li-admin').removeClass('layui-hide');
 			}
 			
 		}

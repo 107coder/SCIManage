@@ -61,6 +61,8 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
                 body.find(".gender input[value="+data.gender+"]").next(".layui-form-radio").find('i').click();  //找到目标单选框的临近i标签,然后触发它的click事件
                 body.find(".academy").val(data.academy);  
                 body.find(".layui-anim-upbit dd[lay-value="+data.identity+"]").click();     //找到目标下拉框的临近i标签,然后触发它的click事件
+                var iden = data.identity==2?'校级管理员':(data.undefined==1?'院级管理员':'普通用户');
+                body.find(".identity-input").val(iden);
                 $.ajax({
                     url : rootUrl+"/user/checkTeacher",
                     dataType:"JSON",
@@ -192,6 +194,30 @@ layui.use(['form','layer','table','laytpl','laypage','upload'],function(){
             layer.closeAll('loading'); //关闭loading
             layer.msg("导入错误");
         //请求异常回调
+        }
+    });
+
+    // 通过不同身份验证，判断不同身份的用户显示的按钮不同
+    $.ajax({
+        url:rootUrl+'/Login/isLogin',
+        type:'post',
+        dataType:'json',
+        success:function (res) {
+            if(res.code == 4)
+            {
+                location.href = webRoot + '/page/login/login.html';
+                layer.msg("请先登录");
+                return ;
+            }else if(res.code == 0){
+                if(res.data['identity']==2){
+                    $('#import_data').removeClass('layui-hide');
+                }else {
+                    $('#import_data').remove();
+                }
+            }
+        },error:function()
+        {
+            console.log('error');
         }
     });
 })

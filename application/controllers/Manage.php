@@ -46,8 +46,75 @@ class Manage extends MY_Controller {
             exit(JsonEcho(1,'文章已存在，请检查wos号'));
         }
     }
-
-
+    /**
+     * 管理员 执行审核论文通过操作
+     *
+     * @return void
+     */
+    public function passArticle(){
+        $accession_number = $this->input->post('accession_number');
+        $where = $this->where;
+        $where['accession_number']=$accession_number;
+        if($this->session->identity==2){
+            $data_arr = ['articleStatus'=>5];
+        }else if($this->session->identity == 1){
+            $data_arr = ['articleStatus'=>3];
+        }else{
+            exit(JsonEcho(1,'没有操作权限'));
+        }
+        $res = $this->article->updateArticle($data_arr,$where);
+        if(!$res){
+            exit(JsonEcho(1,'审核通过失败，请稍后重试'));
+        }else{
+            exit(JsonEcho(0,'审核通过成功'));
+        }
+    }
+    /**
+     * 管理员执行论文不通过操作
+     *
+     * @return void
+     */
+    public function backArticle(){
+        $accession_number = $this->input->post('accession_number');
+        $where = $this->where;
+        $where['accession_number']=$accession_number;
+        if($this->session->identity==2){
+            $data_arr = ['articleStatus'=>4];
+        }else if($this->session->identity == 1){
+            $data_arr = ['articleStatus'=>2];
+        }else{
+            exit(JsonEcho(1,'没有操作权限'));
+        }
+        $res = $this->article->updateArticle($data_arr,$where);
+        if(!$res){
+            exit(JsonEcho(1,'审核操作失败，请稍后重试'));
+        }else{
+            exit(JsonEcho(0,'论文处理成功'));
+        }
+    }
+    /**
+     * 管理员执行论文不通过操作
+     *
+     * @return void
+     */
+    public function cancalArticle(){
+        $accession_number = $this->input->post('accession_number');
+        $where = $this->where;
+        $where['accession_number']=$accession_number;
+        if($this->session->identity==2){
+            $data_arr = ['articleStatus'=>3];
+        }else if($this->session->identity == 1){
+            $data_arr = ['articleStatus'=>1];
+        }else{
+            exit(JsonEcho(1,'没有操作权限'));
+        }
+        $res = $this->article->updateArticle($data_arr,$where);
+        if(!$res){
+            exit(JsonEcho(1,'审核操作失败，请稍后重试'));
+        }else{
+            exit(JsonEcho(0,'论文取消通过成功'));
+        }
+    }
 
     // ================================   论文他引管理     ==============================
     

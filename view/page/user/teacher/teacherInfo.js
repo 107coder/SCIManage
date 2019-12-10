@@ -50,25 +50,27 @@ layui.use(['form','layer'],function(){
                     data : {
                         job_number : $(".job_number").val(), 
                         birthday: $(".birthday").val(),
-                        full_spell: $(".full_spell").val()
-                        /*name : $(".name").val(),  
-                        gender : data.field.gender,  
-                        academy : $(".academy").val(),  
-                        identity : data.field.identity,*/                          
-                        /*edu_background: $(".edu_background").val(),
+                        gender : data.field.gender,                    
+                        edu_background: $(".edu_background").val(),
                         degree: $(".degree").val(),
                         job_title: $(".job_title").val(), 
                         job_title_rank: $(".job_title_rank").val(),
-                        job_title_series: $(".job_title_series").val(),*/                       
+                        job_title_series: $(".job_title_series").val(),    
+
+                        // full_spell: $(".full_spell").val(),
+                        // name : $(".name").val(),   
+                        // identity : data.field.identity,        
+                        // academy : $(".academy").val(),                    
                     },
                     async : false,
                     success : function(res,status)
                     {
-                        if(status=="success"){
+                        console.log(res);
+                        if(status=="success" || res.code == 0){
                             top.layer.close(index);
                             top.layer.msg("用户修改成功！");
-                            layer.closeAll("iframe");
-                            parent.location.reload();
+                            // layer.closeAll("iframe");
+                            // parent.location.reload();
                         }else{
                             top.layer.close(index);
                             top.layer.msg("用户修改失败！");

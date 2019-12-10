@@ -76,6 +76,11 @@ class User extends MY_Controller
             'identity' => $this->input->post('identity'),
             'password' => md5('a'.$this->input->post('job_number'))
         );
+        // 如果不是校级管理员添加的用户，权限只能为普通用户，并且只能添加本院的用户
+        if($this->session->identity != 2){
+            $data['identity'] = 0;
+            $data['academy'] = $this->session->academy;
+        }
         $this->user->addTeacher($data);   
     }
     public function addStudent()
@@ -149,20 +154,36 @@ class User extends MY_Controller
     public function editTeacher()
     {
         $job_number=$this->input->post('job_number');
-        $data=array
-        (
-            'name' => $this->input->post('name'),
-            'gender' => $this->input->post('gender'),
-            'academy' => $this->input->post('academy'),
-            'birthday' => $this->input->post('birthday'),
-            'edu_background' => $this->input->post('edu_background'),
-            'degree' => $this->input->post('degree'),
-            'job_title' => $this->input->post('job_title'),
-            'job_title_rank' => $this->input->post('job_title_rank'),
-            'job_title_series'=> $this->input->post('job_title_series'),
-            'full_spell' => $this->input->post('full_spell'),  
-            'identity' => $this->input->post('identity')   
-        );
+        if($this->session->identity==2){
+            $data=array
+            (
+                'name' => $this->input->post('name'),
+                'gender' => $this->input->post('gender'),
+                'academy' => $this->input->post('academy'),
+                'birthday' => $this->input->post('birthday'),
+                'edu_background' => $this->input->post('edu_background'),
+                'degree' => $this->input->post('degree'),
+                'job_title' => $this->input->post('job_title'),
+                'job_title_rank' => $this->input->post('job_title_rank'),
+                'job_title_series'=> $this->input->post('job_title_series'),
+                'full_spell' => $this->input->post('full_spell'),  
+                'identity' => $this->input->post('identity')   
+            );
+        }else{
+            $data=array
+            (
+                'name' => $this->input->post('name'),
+                'gender' => $this->input->post('gender'),
+                'birthday' => $this->input->post('birthday'),
+                'edu_background' => $this->input->post('edu_background'),
+                'degree' => $this->input->post('degree'),
+                'job_title' => $this->input->post('job_title'),
+                'job_title_rank' => $this->input->post('job_title_rank'),
+                'job_title_series'=> $this->input->post('job_title_series'),
+                'full_spell' => $this->input->post('full_spell'),   
+            );
+        }
+        
         $this->user->editTeacher($job_number,$data);   
     }
     //用户修改资料
@@ -172,20 +193,21 @@ class User extends MY_Controller
         $data=array
         (
             'birthday' => $this->input->post('birthday'),
-            'full_spell' => $this->input->post('full_spell'),
-            /*'name' => $this->input->post('name'),
-            'gender' => $this->input->post('gender'),
-            'academy' => $this->input->post('academy'),           
+            'gender' => $this->input->post('gender'),         
             'edu_background' => $this->input->post('edu_background'),
             'degree' => $this->input->post('degree'),
             'job_title' => $this->input->post('job_title'),
             'job_title_rank' => $this->input->post('job_title_rank'),
-            'job_title_series'=> $this->input->post('job_title_series'),             
-            'identity' => $this->input->post('identity') */  
+            'job_title_series'=> $this->input->post('job_title_series')      
         );
-        $this->user->editTeacher($job_number,$data);   
+        $status = $this->user->editTeacher($job_number,$data);
+        if($status){
+            echo JsonEcho(0,'修改成功');
+        }else{
+            exit(JsonEcho(1,'修改失败！'));
+        }
         // 修改完姓名全拼之后需要更新session中的姓名全拼的值
-        $this->session->full_spell = $this->input->post('full_spell');
+        // $this->session->full_spell = $this->input->post('full_spell');
     }
     public function editStudent()
     {
@@ -251,5 +273,10 @@ class User extends MY_Controller
         );
         $this->user->editTeacher($job_number,$data);    
     }      
-
+    // 重置密码
+    public function resetPwd(){
+        $job_number = $this->input->post("job_number");
+        $data = ['password'=>md5('a'.$job_number)];
+        $this->user->editTeacher($job_number,$data);
+    }
 }

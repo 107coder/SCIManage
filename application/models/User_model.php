@@ -11,21 +11,30 @@ class User_model extends CI_Model
 {
     public function getAllTeacher($perPage,$offest,$key,$identity)
     {
+        if(isset($this->session->identity) && $this->session->identity != 2){
+            $where = ['academy'=>$this->session->academy];
+        }else{
+            $where = [];
+        }
         return $this->db
+                    ->where($where)
                     ->limit($perPage,$offest)
                     ->select('job_number,name,gender,academy,identity')
                     ->from('user')
-                    ->like('job_number' ,$key)
-                    ->or_like('name' ,$key)
-                    ->or_like('academy' ,$key)
-                    ->or_like('gender' ,$key)
-                    ->or_like('identity' ,$identity)
+                    ->group_start()
+                        ->like('job_number' ,$key)
+                        ->or_like('name' ,$key)
+                        ->or_like('academy' ,$key)
+                        ->or_like('gender' ,$key)
+                        ->or_like('identity' ,$identity)
+                    ->group_end()
                     ->order_by('identity desc')
                     ->order_by('job_number')
                     ->get()->result_array();
     }
     public function getAllStudent($perPage,$offest,$key)
     {
+
         return $this->db
                     ->limit($perPage,$offest)
                     ->select('sno,name,gender,academy,profession')
@@ -41,14 +50,22 @@ class User_model extends CI_Model
     //返回查询的总数量
     public function getTeacherNums($key,$identity)
     {
+        if(isset($this->session->identity) && $this->session->identity!=2){
+            $where = ['academy'=>$this->session->academy];
+        }else{
+            $where = [];
+        }
         return $this->db
                     ->select('job_number,name,gender,academy,identity')
+                    ->where($where)
                     ->from('user')
-                    ->like('job_number' ,$key)
-                    ->or_like('name' ,$key)
-                    ->or_like('academy' ,$key)
-                    ->or_like('gender' ,$key)
-                    ->or_like('identity' ,$identity)
+                    ->group_start()  // 同时使用where条件和or_like去查询，需要在查询的条件上使用group_start()加上括号
+                        ->like('job_number' ,$key)
+                        ->or_like('name' ,$key)
+                        ->or_like('academy' ,$key)
+                        ->or_like('gender' ,$key)
+                        ->or_like('identity' ,$identity)
+                    ->group_end()
                     ->count_all_results();
     }
     public function getStudentNums($key)
@@ -89,7 +106,7 @@ class User_model extends CI_Model
     }
     //修改用户
     public function editTeacher($job_number,$data){
-       $this->db->update('user',$data,array('job_number'=>$job_number));
+       return $this->db->update('user',$data,array('job_number'=>$job_number));
     }
     public function editStudent($sno,$data){
        $this->db->update('student',$data,array('sno'=>$sno));

@@ -21,12 +21,10 @@
 				<div class="layui-input-block" style="width: 150px;margin-left: 100px;">
 					<select lay-filter="articleType">
 						<option value="-1">全部论文</option>
-						<option value="0">未认领</option>
-						<option value="1">学院审核中</option>
-						<option value="2">学院不通过</option>
-						<option value="3">学校未审核</option>
-						<option value="4">学校不通过</option>
-						<option value="5">审核通过</option>
+						<option value="1">测试</option>
+						<option value="3">待审核</option>
+						<option value="4">不通过</option>
+						<option value="5">已审核</option>
 					</select>
 				</div>
 			</div>
@@ -36,47 +34,31 @@
 				</div>
 				<a class="layui-btn search_btn" data-type="reload">搜索</a>
 			</div>
-			<div class="layui-inline">
-				<a class="layui-btn layui-btn-normal addNews_btn">添加文章</a>
-			</div>
-			<div class="layui-inline">
-				<a class="layui-btn layui-btn-danger layui-btn-normal delAll_btn">批量删除</a>
-			</div>
-			<button type="button" class="layui-btn" id="import_data"  >
-				<i class="layui-icon">&#xe67c;</i>导入数据
-			</button>
-			<button type="button" class="layui-btn layui-btn-warm" id="export_data">
-					<i class="layui-icon"></i>导出数据
-			</button>
 		</form>
 	</blockquote>
 	<table id="newsList" lay-filter="newsList"></table>
 	<!--审核状态-->
 	<script type="text/html" id="articleStatus">
-		{{#  if(d.articleStatus == "0"){ }}
-		<span class="layui-red">未认领</span>
-		{{#  } else if(d.articleStatus == "1"){ }}
-		<span class="layui-blue">学院未审核</span>
-		{{#  } else if(d.articleStatus == "2"){ }}
-		<span class="layui-blue">学院不通过</span>
-		{{#  } else if(d.articleStatus == "3"){ }}
-		<span class="layui-blue">学校未审核</span>
+		{{#  if(d.articleStatus == "3"){ }}
+		<span class="layui-red">待审核</span>
 		{{#  } else if(d.articleStatus == "4"){ }}
-		<span class="layui-blue">学校不通过</span>
+		<span class="layui-blue">不通过</span>
+		{{#  } else if(d.articleStatus == "5"){ }}
+		<span class="" style="color:#009688;">已审核</span>
 		{{#  } else { }}
-			审核通过
+			其他状态
 		{{#  }}}
 	</script>
 
 	<!--操作-->
 	<script type="text/html" id="newsListBar">
-		<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-		<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
-		<a class="layui-btn layui-btn-xs layui-btn-primary" lay-event="look">预览</a>
+		<a class="layui-btn layui-btn-xs" lay-event="pass">通过</a>
+		<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="back">退回</a>
+		<a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="look_root">查看</a>
 	</script>
 </form>
 <script type="text/javascript" src="../../layui/layui.js"></script>
-<script type="text/javascript" src="sciAtricleList.js"></script>
+<script type="text/javascript" src="paperReviewList.js"></script>
 
 </body>
 </html>

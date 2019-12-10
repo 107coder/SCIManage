@@ -37,5 +37,33 @@ layui.use(['form','layer'],function(){
                     }
             });
     })
-
+    // 通过不同身份验证，判断不同身份的用户显示的按钮不同
+    $.ajax({
+        url:rootUrl+'/Login/isLogin',
+        type:'post',
+        dataType:'json',
+        success:function (res) {
+            if(res.code == 4)
+            {
+                location.href = webRoot + '/page/login/login.html';
+                layer.msg("请先登录");
+                return ;
+            }else if(res.code == 0){
+                if(res.data['identity']==2){
+                    // 校级管理员 可以更改用户权限
+                }else if(res.data['identity']==1){
+                    $('.tips-rm').remove();
+                    $('.academy').attr('disabled','disabled');
+                    $('.academy').val(res.data['academy']);
+                    $("dd[lay-value='1']").remove();
+                    $("dd[lay-value='2']").remove();
+                }else{
+                    return false;
+                }
+            }
+        },error:function()
+        {
+            console.log('error');
+        }
+    });
 })

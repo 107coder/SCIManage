@@ -805,15 +805,15 @@ class ExcelAction extends MY_Controller {
         header('pragma:public');
         header('Content-type:application/vnd.ms-excel;charset=utf-8;name="'.$fileName.'.xls"');
         header("Content-Disposition:attachment;filename=$fileName.xls");
-        ob_start();
+        // ob_start();
         $objWrite->save('php://output');
-        $xlsData = ob_get_contents();
-        ob_end_clean();
-        $res = array(
-            'code' => 0,
-            'msg' => '请求数据成功',
-            'data' => ['filename' => $filename, 'file' => "data:application/vnd.ms-excel;base64," . base64_encode($xlsData)]
-        );
+        // $xlsData = ob_get_contents();
+        // ob_end_clean();
+        // $res = array(
+        //     'code' => 0,
+        //     'msg' => '请求数据成功',
+        //     'data' => ['filename' => $filename, 'file' => "data:application/vnd.ms-excel;base64," . base64_encode($xlsData)]
+        // );
         // return $res;
         // return JsonEcho(0,'导出成功',['filename' => $filename, 'file' => "data:application/vnd.ms-excel;base64," . base64_encode($xlsData)]);
     }

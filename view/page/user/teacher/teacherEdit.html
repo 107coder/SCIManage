@@ -25,7 +25,7 @@
 	<div class="layui-form-item layui-row layui-col-xs12">
 		<label class="layui-form-label">工号</label>
 		<div class="layui-input-block">
-			<input type="text" disabled="disabled" class="layui-input job_number" lay-verify="number" placeholder="请输入工号"  /><span class="tips">*必填项</span>
+			<input type="text" disabled="disabled" class="layui-input job_number" lay-verify="number" placeholder="请输入工号"  /><span class="tips tips-rm">*必填项</span>
 		</div>
 	</div>
 	<div class="layui-form-item layui-row layui-col-xs12">
@@ -46,7 +46,7 @@
 	<div class="layui-form-item layui-row layui-col-xs12">
 		<label class="layui-form-label">学院</label>
 		<div class="layui-input-block">
-			<input type="text" class="layui-input academy" lay-verify="required" placeholder="请输入学院名称"><span class="tips">*必填项</span>
+			<input type="text" class="layui-input academy" lay-verify="required" placeholder="请输入学院名称"><span class="tips tips-rm">*必填项</span>
 		</div>
 	</div>
 	<div class="layui-form-item layui-row layui-col-xs12">
@@ -93,17 +93,21 @@
 	</div>
 	<div class="magb15 layui-col-md6 layui-col-xs12">
 			<label class="layui-form-label">用户等级</label>
-			<div class="layui-input-block">
+			<div class="layui-input-block user-input">
+					<input type="text" disabled="disabled" class="layui-input identity-input">
+			</div>
+			<div class="layui-input-block user-lavel layui-hide">
 				<select name="identity" class="identity" lay-filter="identity">
 					<option value="0">普通用户</option>
 					<option value="1">院级管理员</option>
 					<option value="2">校级管理员</option>
 				</select>
-			</div><span class="tips">*必填项</span>
+			</div><span class="tips tips-rm">*必填项</span>
 	</div>
 	<div class="layui-form-item layui-row layui-col-xs12">
 		<div class="layui-input-block">
 			<button class="layui-btn layui-btn-sm" lay-submit="" lay-filter="editTeacher">立即修改</button>
+			<button class="layui-btn layui-btn-normal layui-btn-sm" lay-submit="" lay-filter="resetPassword">重置密码</button>
 			<button type="reset" class="layui-btn layui-btn-sm layui-btn-primary">取消</button>
 		</div>
 	</div>

@@ -15,8 +15,8 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
         cellMinWidth : 95,
         page : true,
         height : "full-105",
-        limit : 20,
-        limits : [10,20,30,40,50],
+        limit : 30,
+        limits : [10,20,30,40,50,100],
         loding : true,
         id : "newsListTable",
         cols : [[
@@ -192,34 +192,78 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
     // 数据导出
     $('#export_data').click(function(){
         layer.load(1,{shade:[0.2,"#000"]}); //上传loading
-        location.href = rootUrl+'/ExcelAction/sciExport';
-        console.log('d');
-        layer.closeAll('loading'); //关闭loading
-        // $.ajax({
-        //     type:'get',
-        //     url:rootUrl+'/ExcelAction/sciExport',
-        //     data:{},
-        //     // dataType:'json',
-        //     success:function(res){
-        //         console.log();
-        //             //     // 创建a标签，设置属性，并触发点击下载
-        //             // var $a = $("<a>");
-        //             // $a.attr("href", res.data.file);
-        //             // $a.attr("download", res.data.filename);
-        //             // $("body").append($a);
-        //             // $a[0].click();
-        //             // $a.remove();
-        //         layer.closeAll('loading'); //关闭loading
-        //         if(res.code == 0)
-        //         {
-        //             layer.msg(res.msg);
-        //         }
-        //     },error:function(){
-        //         console.log('error');
-        //         layer.closeAll('loading'); //关闭loading
-        //         layer.msg("导出错误");
-        //     }
-        // });
+        // location.href = rootUrl+'/ExcelAction/sciExport';
+        // console.log('d');
+        // layer.closeAll('loading'); //关闭loading
+        $.ajax({
+            type:'post',
+            url:rootUrl+'/ExcelAction/sciExport',
+            data:{},
+            // dataType:'arraybuffer',
+            responseType:'arraybuffer',
+            success:function(res){
+                // console.log(res);
+                // download(res);
+                downloadFile(res,'test.xls');
+                layer.closeAll('loading'); //关闭loading
+                // if(res.code == 0)
+                // {
+                //     layer.msg(res.msg);
+                // }
+            },error:function(){
+                console.log('error');
+                layer.closeAll('loading'); //关闭loading
+                layer.msg("导出错误");
+            }
+        });
+        // download();
     });
+    function download() {
+        var url = rootUrl+'/ExcelAction/sciExport';
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);        // 也可以使用POST方式，根据接口
+        xhr.responseType = "blob";    // 返回类型blob
+        // 定义请求完成的处理函数，请求前也可以增加加载框/禁用下载按钮逻辑
+        xhr.onload = function () {
+            // 请求完成
+            if (this.status === 200) {
+                // 返回200
+                var blob = this.response;
+                var reader = new FileReader();
+                reader.readAsDataURL(blob);    // 转换为base64，可以直接放入a表情href
+                reader.onload = function (e) {
+                    // 转换完成，创建一个a标签用于下载
+                    var a = document.createElement('a');
+                    a.download = 'data.xlsx';
+                    a.href = e.target.result;
+                    $("body").append(a);    // 修复firefox中无法触发click
+                    a.click();
+                    $(a).remove();
+                }
+            }
+        };
+        // 发送ajax请求
+        xhr.send()
+        console.log('seccess');
+     }
+
+     /**
+       * 使用文件数据流下载文件
+       * @param {String} content 文件的数据流
+       * @param {String} fileName 保存的文件全名（文件名 + 后缀）
+       */
+       function downloadFile(content, fileName) {
+        const blob = new Blob([content], { type: 'application/vnd.ms-excel;charset=utf-8;name="1575463799.xls"' });
+        const link = document.createElement('a');
+        const url = window.URL || window.webkitURL || window.moxURL;
+
+        link.href = url.createObjectURL(blob); // 将文件流转化为文件地址
+        link.download = fileName;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        URL.revokeObjectURL(link.href); // 释放URL 对象
+        document.body.removeChild(link);
+      }
 
 })
