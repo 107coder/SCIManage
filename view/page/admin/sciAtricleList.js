@@ -20,17 +20,18 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
         loding : true,
         id : "newsListTable",
         cols : [[
-            {type: "checkbox", fixed:"left", width:50},
+            // {type: "checkbox", fixed:"left", width:50},
             // {field: 'newsId', title: 'ID', width:60, align:"center"},
             {field: 'title', title: '文章标题', width:250},
-            {field: 'author', title: '发布者', align:'center'},
+            {field: 'author', title: '发布者', align:'center', width:200},
             {field: 'source', title: '文章来源', align:'center'},
             {field: 'address', title: '通讯作者地址', align:'center'},
-            {field: 'quite_time', title: '引用次数', align:'center'},
-            {field: 'is_top', title: '是否置顶', align:'center'},
-            {field: 'roll', title: '卷', align:'center'},
-            {field: 'period', title: '期', align:'center'},
-            {field: 'page', title: '页码', align:'center'},
+            // {field: 'quite_time', title: '引用次数', align:'center'},
+            {field: 'is_top', title: '是否顶级期刊', align:'center', width:100},
+            // {field: 'roll', title: '卷', align:'center'},
+            // {field: 'period', title: '期', align:'center'},
+            {field: 'owner_name', title: '认领人', align:'center'},
+            // {field: 'page', title: '页码', align:'center'},
             {field: 'articleStatus', title: '论文状态', width:110, align:'center',templet:"#articleStatus"},
             // {field: 'newsTop', title: '是否置顶', align:'center', templet:function(d){
             //     return '<input type="checkbox" name="newsTop" lay-filter="newsTop" lay-skin="switch" lay-text="是|否" '+d.newsTop+'>'
@@ -38,13 +39,13 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
             // {field: 'newsTime', title: '发布时间', align:'center', minWidth:110, templet:function(d){
             //     return d.newsTime.substring(0,10);
             // }},
-            {field: 'is_first_inst', title: '是否为第一机构', align:'center'},
-            {field: 'impact_factor', title: '影响因子', align:'center'},
+            // {field: 'is_first_inst', title: '是否为第一机构', align:'center'},
+            // {field: 'impact_factor', title: '影响因子', align:'center'},
             {field: 'subject', title: '学科分类', align:'center'},
             {field: 'sci_type', title: 'SCI类型', align:'center'},
-            {field: 'other_info', title: '其他信息', align:'center'},
+            // {field: 'other_info', title: '其他信息', align:'center'},
 
-            {title: '操作', width:170, templet:'#newsListBar',fixed:"right",align:"center"}
+            {title: '操作', width:100, templet:'#newsListBar',fixed:"right",align:"center"}
         ]]
     });
 
@@ -73,7 +74,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
 
     // 内容选择查看
     form.on('select(articleType)', function(data){
-        console.log(data.value); //得到被选中的值
+        // console.log(data.value); //得到被选中的值
         table.reload("newsListTable",{
             page: {
                 curr: 1 //重新从第 1 页开始
@@ -159,9 +160,88 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
                 // })
             });
         } else if(layEvent === 'look'){ //预览
-            layer.alert("此功能需要前台展示，实际开发中传入对应的必要参数进行文章内容页面访问")
+            look(data);
         }
     });
+    
+     // 预览文章时候  填写论文的基本信息信息
+     function fillParameter(body,data){
+        //判断字段数据是否存在
+        function nullData(data){
+            if(data == '' || data == "undefined"){
+                return "未填写";
+            }else{
+
+                return data;
+            }
+        }
+        body.find("#accession_number").text(nullData(data.accession_number));
+        body.find("#article_title").text(nullData(data.title));  
+        body.find(".article_type").text(nullData(data.article_type));        
+        body.find(".claim_author").text(nullData(data.claim_author));
+        body.find(".other_author").text(nullData(data.other_author));     
+        body.find(".date").text(nullData(data.date));    
+        body.find(".source").text(nullData(data.source));    
+        body.find(".zk_type").text(nullData(data.zk_type));
+        body.find(".sci_type").text(nullData(data.sci_type));
+        body.find(".subject").text(nullData(data.subject));
+        body.find(".address").text(nullData(data.address));
+        body.find(".roll").text(nullData(data.roll));
+        body.find(".period").text(nullData(data.period));
+        body.find(".page").text(nullData(data.page));
+        body.find(".is_first_inst").text(nullData(data.is_first_inst));
+        body.find(".is_cover").text(nullData(data.is_cover));
+        body.find(".is_top").text(nullData(data.is_top));
+        body.find(".other_info").text(nullData(data.other_info));
+        body.find(".organization").text(nullData(data.organization));
+        body.find(".claim_time").text(nullData(data.claim_time));
+        body.find(".impact_factor").text(nullData(data.impact_factor));
+   }
+
+     /**
+      * 
+      * @param 查看文章的内容 学校管理员 edit 
+      */
+     function look(edit){
+        var accession_number = edit.accession_number;
+        var index = layui.layer.open({
+            title : "论文审核页",
+            type : 2,
+            content : "SciArticlePage.html",
+            success : function(layero, index){
+                var body = layui.layer.getChildFrame('body', index);
+                if(edit){
+                    
+                    fillParameter(body,edit);
+                    // 这里控制不同的论文状态的按钮
+                    var articleStatus = edit.articleStatus;
+                    if(articleStatus == 3){
+                        body.find('[lay-filter="cancal"]').css('display','none');
+                    }else if(articleStatus==5){
+                        body.find('[lay-filter="pass"]').css('display','none');
+                        body.find('[lay-filter="back"]').css('display','none');
+                    }else if(articleStatus==4){
+                        body.find('[lay-filter="pass"]').css('display','none');
+                    }else{
+                        body.find('[lay-filter="pass"]').css('display','none');
+                        body.find('[lay-filter="back"]').css('display','none');
+                        body.find('[lay-filter="cancal"]').css('display','none');
+                    }
+                }
+                setTimeout(function(){
+                    layui.layer.tips('点击此处返回文章列表', '.layui-layer-setwin .layui-layer-close', {
+                        tips: 3,time: 40000
+                    });
+                },500)
+            }
+        })
+        layui.layer.full(index);
+        //改变窗口大小时，重置弹窗的宽高，防止超出可视区域（如F12调出debug的操作）
+        $(window).on("resize",function(){
+            layui.layer.full(index);
+        })
+    }
+
 
     //数据导入
     var uploadInst = upload.render({

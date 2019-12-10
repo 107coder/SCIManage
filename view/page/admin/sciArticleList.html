@@ -39,9 +39,9 @@
 			<div class="layui-inline">
 				<a class="layui-btn layui-btn-normal addNews_btn">添加文章</a>
 			</div>
-			<div class="layui-inline">
+			<!-- <div class="layui-inline">
 				<a class="layui-btn layui-btn-danger layui-btn-normal delAll_btn">批量删除</a>
-			</div>
+			</div> -->
 			<button type="button" class="layui-btn" id="import_data"  >
 				<i class="layui-icon">&#xe67c;</i>导入数据
 			</button>
@@ -56,23 +56,23 @@
 		{{#  if(d.articleStatus == "0"){ }}
 		<span class="layui-red">未认领</span>
 		{{#  } else if(d.articleStatus == "1"){ }}
-		<span class="layui-blue">学院未审核</span>
+		<span class="" style="color:#393D49;">学院未审核</span>
 		{{#  } else if(d.articleStatus == "2"){ }}
 		<span class="layui-blue">学院不通过</span>
 		{{#  } else if(d.articleStatus == "3"){ }}
-		<span class="layui-blue">学校未审核</span>
+		<span class="" style="color:#FF5722;">学校未审核</span>
 		{{#  } else if(d.articleStatus == "4"){ }}
-		<span class="layui-blue">学校不通过</span>
+		<span class="" style="color:#1E9FFF;">学校不通过</span>
 		{{#  } else { }}
-			审核通过
+		<span class="" style="color:#009688;">审核通过</span>
 		{{#  }}}
 	</script>
 
 	<!--操作-->
 	<script type="text/html" id="newsListBar">
-		<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-		<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
-		<a class="layui-btn layui-btn-xs layui-btn-primary" lay-event="look">预览</a>
+		<!-- <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+		<a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del">删除</a> -->
+		<a class="layui-btn layui-btn-sm layui-btn" lay-event="look">预览</a>
 	</script>
 </form>
 <script type="text/javascript" src="../../layui/layui.js"></script>
