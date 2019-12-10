@@ -8,9 +8,11 @@ var iconUrl = "https://at.alicdn.com/t/font_400842_q6tk84n9ywvu0udi.css";
 
 //定义请求路径的根URL
 // 崔少峰
-window.rootUrl = "http://localhost/a/107/SCIManage/index.php";
+// window.rootUrl = "http://localhost/107/SCIManage/index.php";
 // window.rootUrl = "http://10.12.27.134/a/107/SCIManage/index.php";
-window.webRoot = "http://localhost/a/107/SCIManage/view";
+window.rootUrl = "http://www.cuisf.top/index.php";
+window.webRoot = "http://www.cuisf.top";
+// window.webRoot = "http://localhost/107/SCIManage/view";
 /*window.rootUrl = "http://127.0.0.1/107/SCIManage/index.php";*/
 // 赵士顺
 // window.rootUrl = "http://localhost:88/SCIManage/index.php";

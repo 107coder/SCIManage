@@ -59,7 +59,7 @@ class Login extends CI_Controller {
             );
             $userInfo = $this->user->checkLogin($where);
 //            print_r($userInfo);
-            if(!empty($userInfo) && $password==('a'.$username))
+            if(!empty($userInfo))
             {
                 $this->session->set_userdata($userInfo[0]);
                 echo JsonEcho('0','登录成功',['username'=>$username,'password'=>$password]);

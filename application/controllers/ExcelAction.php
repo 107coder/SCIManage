@@ -690,6 +690,9 @@ class ExcelAction extends MY_Controller {
 
     // ========================== 数据导出 =============================
 
+    public function getSession(){
+        p($_SESSION);
+    }
     /**
      * sci数据导出
      *
@@ -800,13 +803,15 @@ class ExcelAction extends MY_Controller {
         if(!$fileName){
            $fileName = time();
         }
+        $filePath = '/var/www/SCIManage/file/download/'.$fileName.'.xls';
         $objWrite = PHPExcel_IOFactory::createWriter($obj, 'Excel5');
         
-        header('pragma:public');
-        header('Content-type:application/vnd.ms-excel;charset=utf-8;name="'.$fileName.'.xls"');
-        header("Content-Disposition:attachment;filename=$fileName.xls");
+//        header('pragma:public');
+//        header('Content-type:application/vnd.ms-excel;charset=utf-8;name="'.$fileName.'.xls"');
+//        header("Content-Disposition:attachment;filename=$fileName.xls");
         // ob_start();
-        $objWrite->save('php://output');
+//        $objWrite->save('php://output');
+        $objWrite->save($filePath);
         // $xlsData = ob_get_contents();
         // ob_end_clean();
         // $res = array(
@@ -816,6 +821,9 @@ class ExcelAction extends MY_Controller {
         // );
         // return $res;
         // return JsonEcho(0,'导出成功',['filename' => $filename, 'file' => "data:application/vnd.ms-excel;base64," . base64_encode($xlsData)]);
+
+        $this->load->helper('download');
+        force_download($filePath,NULL);
     }
 
     public function citationExport(){
