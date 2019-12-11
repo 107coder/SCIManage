@@ -275,40 +275,44 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
             area: ['700px', '450px'],
             fixed: false, //不固定
             maxmin: true,
-            content: 'test/iframe.html'
+            content: '/page/admin/sciExport.html'
         });
     }
 
     // 数据导出
     $('#export_data').click(function(){
-        sciExport();
-        // layer.load(1,{shade:[0.2,"#000"]}); //上传loading
-        // // location.href = rootUrl+'/ExcelAction/sciExport';
-        // // console.log('d');
-        // // layer.closeAll('loading'); //关闭loading
-        // $.ajax({
-        //     type:'post',
-        //     url:rootUrl+'/ExcelAction/sciExport',
-        //     data:{},
-        //     // dataType:'arraybuffer',
-        //     responseType:'arraybuffer',
-        //     success:function(res){
-        //         // console.log(res);
-        //         download(res);
-        //         // downloadFile(res,'test.xls');
-        //         layer.closeAll('loading'); //关闭loading
-        //         // if(res.code == 0)
-        //         // {
-        //         //     layer.msg(res.msg);
-        //         // }
-        //     },error:function(){
-        //         console.log('error');
-        //         layer.closeAll('loading'); //关闭loading
-        //         layer.msg("导出错误");
-        //     }
-        // });
+        // 想要通过一个弹出窗口能够 对 想要导出的窗口进行选择
+        // sciExport();
+
+        layer.load(1,{shade:[0.2,"#000"]}); //上传loading
+        // location.href = rootUrl+'/ExcelAction/sciExport';
+        // console.log('d');
+        // layer.closeAll('loading'); //关闭loading
+        $.ajax({
+            type:'post',
+            url:rootUrl+'/ExcelAction/sciExport',
+            data:{},
+            dataType:'json',
+            success:function(res){
+                if(res.code == 0){
+                    console.log(rootUrl+'/ExcelAction/download?filename='+res.data['filename']);
+                    location.href = rootUrl+'/ExcelAction/downloadFile?filename='+res.data['filename'];
+                    layer.closeAll('loading'); //关闭loading
+                }else{
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                }
+
+            },error:function(){
+                console.log('error');
+                layer.closeAll('loading'); //关闭loading
+                layer.msg("导出错误");
+            }
+        });
         // download();
     });
+
+
     function download(url) {
         // var url = rootUrl+'/ExcelAction/sciExport';
         var xhr = new XMLHttpRequest();

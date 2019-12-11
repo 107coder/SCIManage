@@ -690,32 +690,68 @@ class ExcelAction extends MY_Controller {
 
     // ========================== 数据导出 =============================
 
-    public function getSession(){
-        p($_SESSION);
-    }
     /**
      * sci数据导出
      *
      * @param string $fileName
-     * @return void
+     * @return json
      */
-    public function sciExport($fileName=''){
+    public function sciExport(){
         $this->load->model('file_model','file');    //载入数据库文件插入的model
-        $this->load->library("PHPExcel");
 
+
+        $basePath = $_SERVER['DOCUMENT_ROOT'];
+        $basePath = substr($basePath,0,strlen($basePath)-5).'file/download/';
+        $dir = 'SCI论文认领结果_'.date('Ymdim',time());
+        $filePath = $basePath.$dir;
+//        $path = $this->tranEncoding($path);
+//        $dir = $this->tranEncoding($dir);
+        if(isset($dir)){
+            mkdir($filePath,'0777');
+            chmod($filePath,0777);
+        }
+        if(!is_dir($filePath)){
+            exit(JsonEcho(2,'找不到目录，无法导出'));
+        }
+        // 获取到所有的sci论文数据
+        $data = $this->file->getAllSciArticleToExport();
+        $articleData = $data['data'];
+        foreach ($articleData as $key => $val){
+//            $key = $this->tranEncoding($key);
+           $this->sciExportAction($val,$key,$dir);
+        }
+        // 使用自定义的文件压缩类
+        $this->load->library('ZipFolder');
+        $ZipFolder = new ZipFolder();
+        $zipFile = $filePath.'.zip';//生成压缩文件的路径
+        $path = $filePath;//被压缩文件夹的路径
+        $result = $ZipFolder->zip($zipFile,$path);
+
+
+        if($result){
+            $fileName = $dir.'.zip';
+            exit(JsonEcho(0,'数据导出正常',['filename'=>$fileName]));
+        }else{
+            exit(JsonEcho(1,'数据导出异常'));
+        }
+    }
+
+
+    public function sciExportAction($data,$fileName,$dir=null){
+        $this->load->library("PHPExcel");
+        // 准备表格中的要用的一些数据
         $title = array('入藏号','论文名称','中文作者全拼','来源期刊','文章类型','单位','通讯作者','电子邮箱','引用次数',
-        '来源期刊简写','月日','年','卷','期','开始页码','结束页码','是否第一机构','影响因子','所属大类','中科院大类分区',
-        '是否TOP期刊','是否封面论文','奖励文件论文分类','奖励分值','备注','论文状态','第一作者','第一作者工号','通讯作者','其他作者',
-        '认领人','认领人所属单位');
+            '来源期刊简写','月日','年','卷','期','开始页码','结束页码','是否第一机构','影响因子','所属大类','中科院大类分区',
+            '是否TOP期刊','是否封面论文','奖励文件论文分类','奖励分值','备注','论文状态','第一作者','第一作者工号','通讯作者','其他作者',
+            '认领人','认领人所属单位');
         $cellName = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF');
         $articleStatus = ['未认领','学院审核中','学院不通过','学校未审核','学校不通过','审核通过'];// 论文的状态
 
-        $data = $this->file->getAllSciArticleToExport();
-      
         $obj = new PHPExcel();
         $obj->getActiveSheet(0)->setTitle('sheet');   //设置sheet名称
         $_row = 1;   //设置纵向单元格标识
 
+        // 为表格设置标题
         if($title){
             $i = 0;
             foreach($title AS $v){   //设置列标题
@@ -725,40 +761,41 @@ class ExcelAction extends MY_Controller {
             $_row++;
         }
 
-         //设置表格宽度
-         $obj->getActiveSheet()->getColumnDimension('A')->setWidth(21);
-         $obj->getActiveSheet()->getColumnDimension('B')->setWidth(21);
-         $obj->getActiveSheet()->getColumnDimension('C')->setWidth(21);
-         $obj->getActiveSheet()->getColumnDimension('D')->setWidth(21);
-         $obj->getActiveSheet()->getColumnDimension('E')->setWidth(10);
-         $obj->getActiveSheet()->getColumnDimension('F')->setWidth(21);
-         $obj->getActiveSheet()->getColumnDimension('G')->setWidth(21);
-         $obj->getActiveSheet()->getColumnDimension('H')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('I')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('J')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('K')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('L')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('M')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('N')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('O')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('P')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('Q')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('R')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('S')->setWidth(15);
-         $obj->getActiveSheet()->getColumnDimension('T')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('U')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('V')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('W')->setWidth(15);
-         $obj->getActiveSheet()->getColumnDimension('X')->setWidth(9);
-         $obj->getActiveSheet()->getColumnDimension('Y')->setWidth(15);
-         $obj->getActiveSheet()->getColumnDimension('Z')->setWidth(15);
-         $obj->getActiveSheet()->getColumnDimension('AA')->setWidth(15);
-         $obj->getActiveSheet()->getColumnDimension('AB')->setWidth(15);
-         $obj->getActiveSheet()->getColumnDimension('AC')->setWidth(15);
-         $obj->getActiveSheet()->getColumnDimension('AD')->setWidth(15);
-         $obj->getActiveSheet()->getColumnDimension('AE')->setWidth(15);
-         $obj->getActiveSheet()->getColumnDimension('AF')->setWidth(15);
-         
+        //设置表格宽度
+        $obj->getActiveSheet()->getColumnDimension('A')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('B')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('C')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('D')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('E')->setWidth(10);
+        $obj->getActiveSheet()->getColumnDimension('F')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('G')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('H')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('I')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('J')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('K')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('L')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('M')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('N')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('O')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('P')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('Q')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('R')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('S')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('T')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('U')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('V')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('W')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('X')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('Y')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('Z')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('AA')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('AB')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('AC')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('AD')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('AE')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('AF')->setWidth(15);
+
+        // 如果数据不为空，则向所有的单元格中写入数据
         if($data){
             $i = 0;
             foreach($data AS $v){
@@ -794,50 +831,46 @@ class ExcelAction extends MY_Controller {
                 $obj->getActiveSheet(0)->setCellValue($cellName[29].($i+$_row),$v['other_author']);
                 $obj->getActiveSheet(0)->setCellValue($cellName[30].($i+$_row),$v['owner_name']);
                 $obj->getActiveSheet(0)->setCellValue($cellName[31].($i+$_row),$v['claimer_unit']);
-            
+
                 $i++;
             }
         }
 
-        // 设置文件名称
-        if(!$fileName){
-           $fileName = time();
-        }
-        $filePath = '/var/www/SCIManage/file/download/'.$fileName.'.xls';
-        $objWrite = PHPExcel_IOFactory::createWriter($obj, 'Excel5');
-        
-//        header('pragma:public');
-//        header('Content-type:application/vnd.ms-excel;charset=utf-8;name="'.$fileName.'.xls"');
-//        header("Content-Disposition:attachment;filename=$fileName.xls");
-        // ob_start();
-//        $objWrite->save('php://output');
-        $objWrite->save($filePath);
-        // $xlsData = ob_get_contents();
-        // ob_end_clean();
-        // $res = array(
-        //     'code' => 0,
-        //     'msg' => '请求数据成功',
-        //     'data' => ['filename' => $filename, 'file' => "data:application/vnd.ms-excel;base64," . base64_encode($xlsData)]
-        // );
-        // return $res;
-        // return JsonEcho(0,'导出成功',['filename' => $filename, 'file' => "data:application/vnd.ms-excel;base64," . base64_encode($xlsData)]);
 
+        // 设置文件名称   保存文件
+        if(!$fileName){
+            $fileName = date('Ymdims',time()).'.xls';
+        }else{
+            $fileName = $fileName.'.xls';
+        }
+        if($dir==null){
+            $filePath = '/var/www/SCIManage/file/download/'.$fileName;
+        }else{
+            $filePath = '/var/www/SCIManage/file/download/'.$dir.'/'.$fileName;
+        }
+        $objWrite = PHPExcel_IOFactory::createWriter($obj, 'Excel5');
+
+        if(!empty($objWrite)){
+            $objWrite->save($filePath);
+//            exit(JsonEcho(0,'数据导出正常',['filename'=>$fileName]));
+        }else{
+//            exit(JsonEcho(1,'数据导出异常'));
+        }
+    }
+
+    public function downloadFile(){
+        $filename = $this->input->get('filename');
         $this->load->helper('download');
+        // 根据项目路径指定下载文件的文件夹
+        $basePath = $_SERVER['DOCUMENT_ROOT'];
+        $basePath = substr($basePath,0,strlen($basePath)-5).'file/download/';
+        $filePath = $basePath.$filename;
+
         force_download($filePath,NULL);
     }
-
     public function citationExport(){
 
+
     }
 
-    private function browser_export($type,$filename)
-    {
-        if($type == "Excel5"){
-            header('Content-Type: application/vnd.ms-excel');   //告诉浏览器要输出Excel03文件
-        }else{
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');	//告诉浏览器要输出Excel07文件
-        }
-        header('Content-Disposition: attachment;filename="'.$filename.'"'); //告诉浏览器输出文件的名称
-        header('Cache-Control: max-age=0');  // 禁止缓存 
-    }
 }

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>文章列表--layui后台管理模板 2.0</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" href="../../layui/css/layui.css" media="all" />
+	<link rel="stylesheet" href="../../css/public.css" media="all" />
+</head>
+<body class="childrenBody">
+<form class="layui-form layui-row layui-col-space10">
+
+	<div class="layui-form-item">
+		<label class="layui-form-label">论文年份</label>
+		<div class="layui-input-block" style="width: 300px;">
+			<select name="city" lay-verify="required">
+				<option value=""></option>
+				<option value="0">北京</option>
+				<option value="1">上海</option>
+				<option value="2">广州</option>
+				<option value="3">深圳</option>
+				<option value="4">杭州</option>
+			</select>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<label class="layui-form-label">论文种类</label>
+		<div class="layui-input-block" style="width: 300px;">
+			<input type="radio" name="downloadType" value="all" title="下载所有文件">
+			<input type="radio" name="downloadType" value="every" title="分学院下载" checked>
+		</div>
+	</div>
+	<div class="layui-form-item">
+		<div class="layui-input-block">
+			<button class="layui-btn" lay-submit lay-filter="">下载</button>
+		</div>
+	</div>
+
+</form>
+
+<script type="text/javascript" src="../../layui/layui.js"></script>
+<script type="text/javascript" src="./sciExport.js"></script>
+</body>
+</html>

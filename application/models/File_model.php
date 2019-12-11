@@ -29,57 +29,149 @@ class File_model extends CI_Model
     }
 
     public function getAllSciArticleToExport($where=array()){
-        $data = $this->db->where($where)->order_by('articleStatus','DESC')->from('article')->get()->result_array();
+        $unit = $this->db
+                     ->select('academy')
+                     ->distinct()
+                     ->from('user')
+                     ->get()
+                     ->result_array();
 
-        if(empty($data)){
-            return false;
+        $resultData = [];
+        foreach ($unit as $val){
+            $where['claimer_unit'] = $val['academy'];
+            $data = $this->db
+                ->where($where)
+                ->order_by('articleStatus','DESC')
+                ->from('article')
+                ->get()
+                ->result_array();
+//            var_dump($where);
+//            exit();
+            if(empty($data)){
+                continue;
+            }
+//            $redis = new Redis();
+//            $redis->connect('127.0.0.1','6379') or exit(JsonEcho(1,'服务器异常，请联系技术人员！'));
+            foreach($data as $key => &$value){
+                /*             $curNumber = $value['accession_number'];
+                            $redis->Lpush('sciExportLink',$curNumber);
+                            $redis->set('sciExport:'.$curNumber.':title',$value['title']);
+                            $redis->set('sciExport:'.$curNumber.':author',$value['author']);
+                            $redis->set('sciExport:'.$curNumber.':source',$value['source']);
+                            $redis->set('sciExport:'.$curNumber.':article_type',$value['article_type']);
+                            $redis->set('sciExport:'.$curNumber.':address',$value['address']);
+                            $redis->set('sciExport:'.$curNumber.':email',$value['email']);
+                            $redis->set('sciExport:'.$curNumber.':organization',$value['organization']);
+                            $redis->set('sciExport:'.$curNumber.':quite_time',$value['quite_time']);
+                            $redis->set('sciExport:'.$curNumber.':source_shorthand',$value['source_shorthand']);
+                            $redis->set('sciExport:'.$curNumber.':is_top',$value['is_top']);
+                            $redis->set('sciExport:'.$curNumber.':roll',$value['roll']);
+                            $redis->set('sciExport:'.$curNumber.':period',$value['period']);
+                            $redis->set('sciExport:'.$curNumber.':date',$value['date']);
+                            $redis->set('sciExport:'.$curNumber.':year',$value['year']);
+                            // 这里的页码需要处理
+                            $page = explode($value['page'],'--');
+                            $redis->set('sciExport:'.$curNumber.':startPage',$page[0]);
+                            $redis->set('sciExport:'.$curNumber.':endPage',$page[1]);
+                            $redis->set('sciExport:'.$curNumber.':is_first_inst',$value['is_first_inst']);
+                            $redis->set('sciExport:'.$curNumber.':impact_factor',$value['impact_factor']);
+                            $redis->set('sciExport:'.$curNumber.':subject',$value['subject']);
+                            $redis->set('sciExport:'.$curNumber.':zk_type',$value['zk_type']);
+                            $redis->set('sciExport:'.$curNumber.':is_cover',$value['is_cover']==1?'是':'否');
+                            $redis->set('sciExport:'.$curNumber.':sci_type',$value['sci_type']);
+                            $redis->set('sciExport:'.$curNumber.':reward_point',$value['reward_point']);
+                            $redis->set('sciExport:'.$curNumber.':other_info',$value['other_info']);
+                            $redis->set('sciExport:'.$curNumber.':owner',$value['owner']);
+                            $redis->set('sciExport:'.$curNumber.':owner_name',$value['owner_name']);
+                            $redis->set('sciExport:'.$curNumber.':claimer_unit',$value['claimer_unit']);
+                            p($value);
+                            exit();
+                            */
+
+                $page = explode('--',$value['page']);
+                $value['startPage'] = $page[0];
+                $value['endPage'] = $page[1];
+
+                $author = $this->db->select('aName,aJobNumber,aisAddress,aUnit,aIsClaim')
+                    ->where(['aArticleNumber'=>$value['accession_number']])
+                    ->from('author')
+                    ->get()->result_array();
+                $first_author = [];
+                $first_author_number = [];
+                $reprint_author = [];
+                $other_author = [];
+                foreach($author as $k => $v){
+                    if($k == 0){
+                        array_push($first_author,$v['aName']);
+                        array_push($first_author_number,$v['aJobNumber']);
+                    }else if($v['aisAddress']=='是'){
+                        array_push($reprint_author,$v['aName']);
+                    }else{
+                        array_push($other_author,$v['aName']);
+                    }
+                }
+                $value['first_author'] = implode(',',$first_author);
+                $value['first_author_number'] = implode(',',$first_author_number);
+                $value['reprint_author'] = implode(',',$reprint_author);
+                $value['other_author'] = implode(',',$other_author);
+
+
+            }
+            $resultData[$val['academy']]=$data;
+//            p($data);
         }
-        $redis = new Redis();
-        $redis->connect('127.0.0.1','6379') or exit(JsonEcho(1,'服务器异常，请联系技术人员！'));
+        // echo $redis->rPop();
+        // 对于为认领的论文，做格式化操作
+        $data  = $this->db
+                    ->where(['claimer_unit'=>NULL])
+                    ->order_by('articleStatus','DESC')
+                    ->from('article')
+                    ->get()
+                    ->result_array();
         foreach($data as $key => &$value){
-/*             $curNumber = $value['accession_number'];
-            $redis->Lpush('sciExportLink',$curNumber);
-            $redis->set('sciExport:'.$curNumber.':title',$value['title']);
-            $redis->set('sciExport:'.$curNumber.':author',$value['author']);
-            $redis->set('sciExport:'.$curNumber.':source',$value['source']);
-            $redis->set('sciExport:'.$curNumber.':article_type',$value['article_type']);
-            $redis->set('sciExport:'.$curNumber.':address',$value['address']);
-            $redis->set('sciExport:'.$curNumber.':email',$value['email']);
-            $redis->set('sciExport:'.$curNumber.':organization',$value['organization']);
-            $redis->set('sciExport:'.$curNumber.':quite_time',$value['quite_time']);
-            $redis->set('sciExport:'.$curNumber.':source_shorthand',$value['source_shorthand']);
-            $redis->set('sciExport:'.$curNumber.':is_top',$value['is_top']);
-            $redis->set('sciExport:'.$curNumber.':roll',$value['roll']);
-            $redis->set('sciExport:'.$curNumber.':period',$value['period']);
-            $redis->set('sciExport:'.$curNumber.':date',$value['date']);
-            $redis->set('sciExport:'.$curNumber.':year',$value['year']);
-            // 这里的页码需要处理
-            $page = explode($value['page'],'--');
-            $redis->set('sciExport:'.$curNumber.':startPage',$page[0]);
-            $redis->set('sciExport:'.$curNumber.':endPage',$page[1]);
-            $redis->set('sciExport:'.$curNumber.':is_first_inst',$value['is_first_inst']);
-            $redis->set('sciExport:'.$curNumber.':impact_factor',$value['impact_factor']);
-            $redis->set('sciExport:'.$curNumber.':subject',$value['subject']);
-            $redis->set('sciExport:'.$curNumber.':zk_type',$value['zk_type']);
-            $redis->set('sciExport:'.$curNumber.':is_cover',$value['is_cover']==1?'是':'否');
-            $redis->set('sciExport:'.$curNumber.':sci_type',$value['sci_type']);
-            $redis->set('sciExport:'.$curNumber.':reward_point',$value['reward_point']);
-            $redis->set('sciExport:'.$curNumber.':other_info',$value['other_info']);
-            $redis->set('sciExport:'.$curNumber.':owner',$value['owner']);
-            $redis->set('sciExport:'.$curNumber.':owner_name',$value['owner_name']);
-            $redis->set('sciExport:'.$curNumber.':claimer_unit',$value['claimer_unit']);
-            p($value);
-            exit(); 
-            */
+            /*             $curNumber = $value['accession_number'];
+                        $redis->Lpush('sciExportLink',$curNumber);
+                        $redis->set('sciExport:'.$curNumber.':title',$value['title']);
+                        $redis->set('sciExport:'.$curNumber.':author',$value['author']);
+                        $redis->set('sciExport:'.$curNumber.':source',$value['source']);
+                        $redis->set('sciExport:'.$curNumber.':article_type',$value['article_type']);
+                        $redis->set('sciExport:'.$curNumber.':address',$value['address']);
+                        $redis->set('sciExport:'.$curNumber.':email',$value['email']);
+                        $redis->set('sciExport:'.$curNumber.':organization',$value['organization']);
+                        $redis->set('sciExport:'.$curNumber.':quite_time',$value['quite_time']);
+                        $redis->set('sciExport:'.$curNumber.':source_shorthand',$value['source_shorthand']);
+                        $redis->set('sciExport:'.$curNumber.':is_top',$value['is_top']);
+                        $redis->set('sciExport:'.$curNumber.':roll',$value['roll']);
+                        $redis->set('sciExport:'.$curNumber.':period',$value['period']);
+                        $redis->set('sciExport:'.$curNumber.':date',$value['date']);
+                        $redis->set('sciExport:'.$curNumber.':year',$value['year']);
+                        // 这里的页码需要处理
+                        $page = explode($value['page'],'--');
+                        $redis->set('sciExport:'.$curNumber.':startPage',$page[0]);
+                        $redis->set('sciExport:'.$curNumber.':endPage',$page[1]);
+                        $redis->set('sciExport:'.$curNumber.':is_first_inst',$value['is_first_inst']);
+                        $redis->set('sciExport:'.$curNumber.':impact_factor',$value['impact_factor']);
+                        $redis->set('sciExport:'.$curNumber.':subject',$value['subject']);
+                        $redis->set('sciExport:'.$curNumber.':zk_type',$value['zk_type']);
+                        $redis->set('sciExport:'.$curNumber.':is_cover',$value['is_cover']==1?'是':'否');
+                        $redis->set('sciExport:'.$curNumber.':sci_type',$value['sci_type']);
+                        $redis->set('sciExport:'.$curNumber.':reward_point',$value['reward_point']);
+                        $redis->set('sciExport:'.$curNumber.':other_info',$value['other_info']);
+                        $redis->set('sciExport:'.$curNumber.':owner',$value['owner']);
+                        $redis->set('sciExport:'.$curNumber.':owner_name',$value['owner_name']);
+                        $redis->set('sciExport:'.$curNumber.':claimer_unit',$value['claimer_unit']);
+                        p($value);
+                        exit();
+                        */
 
             $page = explode('--',$value['page']);
             $value['startPage'] = $page[0];
             $value['endPage'] = $page[1];
-          
+
             $author = $this->db->select('aName,aJobNumber,aisAddress,aUnit,aIsClaim')
-                      ->where(['aArticleNumber'=>$value['accession_number']])
-                      ->from('author')
-                      ->get()->result_array();
+                ->where(['aArticleNumber'=>$value['accession_number']])
+                ->from('author')
+                ->get()->result_array();
             $first_author = [];
             $first_author_number = [];
             $reprint_author = [];
@@ -94,20 +186,16 @@ class File_model extends CI_Model
                     array_push($other_author,$v['aName']);
                 }
             }
-
             $value['first_author'] = implode(',',$first_author);
             $value['first_author_number'] = implode(',',$first_author_number);
             $value['reprint_author'] = implode(',',$reprint_author);
             $value['other_author'] = implode(',',$other_author);
-          
-        // break;
-            // if(!empty($author)){
-            //     exit();
-            // }
         }
-        // echo $redis->rPop();
-       
-        return $data;
+
+        $resultData["未认领"] = $data;
+//        p($resultData);
+//        exit();
+        return ['data'=>$resultData,'unit'=>$unit];
     }
 
 

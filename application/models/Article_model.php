@@ -45,7 +45,7 @@ class Article_model extends CI_Model{
      * @param [type] $page
      * @param [type] $limit
      * @param [type] $key
-     * @return void
+     * @return array
      */
     public function searchArticle($page,$limit,$key)
     {
@@ -76,7 +76,7 @@ class Article_model extends CI_Model{
      * @param [type] $page
      * @param [type] $limit
      * @param [type] $key
-     * @return void
+     * @return array
      */
     public function selectStatus($page,$limit,$key){
         if($key != '-1')
@@ -151,7 +151,7 @@ class Article_model extends CI_Model{
      *
      * @param [array] $where
      * @param string $cols
-     * @return void
+     * @return array
      */
     public function getAnyArticle($where,$cols='')
     {
@@ -163,7 +163,7 @@ class Article_model extends CI_Model{
      *
      * @param [type] $data
      * @param [type] $where
-     * @return void
+     * @return array
      */
     public function backArticle($data,$where)
     {
@@ -178,7 +178,7 @@ class Article_model extends CI_Model{
      * @param [type] $page
      * @param [type] $where
      * @param array $like
-     * @return void
+     * @return array
      */
     public function getArticleByAcademy($limit,$page,$where,$like=[]){
         $res['data'] = $this->db->from('article')
