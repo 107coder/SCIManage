@@ -10,7 +10,7 @@ class ExcelAction extends MY_Controller {
      */
     public function uploadFileApi()
     {
-        $config['upload_path']      = './file/';
+        $config['upload_path']      = '../file/';
         $config['allowed_types']    = 'xls|xlsx|txt';
         $config['max_size']     = 2048;
 
@@ -171,7 +171,7 @@ class ExcelAction extends MY_Controller {
      */
     public function uploadTypeFileApi()
     {
-        $config['upload_path']      = './file/';
+        $config['upload_path']      = '../file/';
         $config['allowed_types']    = 'xls|xlsx|txt';
         $config['max_size']     = 2048;
 
@@ -244,7 +244,7 @@ class ExcelAction extends MY_Controller {
      */
     public function uploadTeacherFileApi()
     {
-        $config['upload_path']      = './file/';
+        $config['upload_path']      = '../file/';
         $config['allowed_types']    = 'xls|xlsx|txt';
         $config['max_size']     = 2048;
 
@@ -258,7 +258,6 @@ class ExcelAction extends MY_Controller {
         {
             $data = $this->upload->data();
             $this->readTeacherExcel($data['full_path']);
-
         }
     }
     /**
@@ -268,7 +267,7 @@ class ExcelAction extends MY_Controller {
      */
     public function uploadStudentFileApi()
     {
-        $config['upload_path']      = './file/';
+        $config['upload_path']      = '../file/';
         $config['allowed_types']    = 'xls|xlsx|txt';
         $config['max_size']     = 2048;
 
@@ -282,7 +281,6 @@ class ExcelAction extends MY_Controller {
         {
             $data = $this->upload->data();
             $this->readStudentExcel($data['full_path']);
-
         }
     }
     //执行用户的入库操作
@@ -290,12 +288,15 @@ class ExcelAction extends MY_Controller {
      * 教师数据的处理，并进行入库的操作
      *
      * @param string $file
-     * @return void
+     * @return json
      */
-    public function readTeacherExcel($file='')
-    {   
+    public function readTeacherExcel($file='/var/www/SCIManage/file/用户上传模板2.xlsx')
+    {
+        error_reporting(E_ALL^E_NOTICE);  // 关闭notice警告，否则返会的json数据，会造成接口错误
         $this->load->model('user_model','user');    //载入数据库文件插入的model
         $this->load->library("PHPExcel");
+        $this->load->library("PinYin");
+        $pinyin = new PinYin();
         header('Content-Type:text/html;charset=utf-8');
 
         $PHPReader = new PHPExcel_Reader_Excel5();
@@ -329,7 +330,9 @@ class ExcelAction extends MY_Controller {
             if($wosNumber == '') continue;  // 如果判断检测到某行的wos号码为空，直接跳过
             if($this->user->TeacherExist(array('job_number'=>$wosNumber)) == 0)
             {
-                $redis->lPush('userLink',$wosNumber);
+                $redis->lPush('userLink',$wosNumber);       // 表中不存在的数据，需要执行插入操作
+            }else{
+                $redis->lPush('existUserLink',$wosNumber);   // 表中已经存在的数据，需要执行更新操作
             }
 
             // 在这里可以对某些数据进行处理然后在进行存储，入库
@@ -340,8 +343,9 @@ class ExcelAction extends MY_Controller {
             }
 
         }
-        $userLen = $redis->lLen('userLink');
 
+        // 处理数据库中不存在的数据，进行插入
+        $userLen = $redis->lLen('userLink');
         $data_all = [];
         for($i=0; $i<$userLen; $i++)
         {
@@ -350,7 +354,7 @@ class ExcelAction extends MY_Controller {
                 'job_number' => $redis->get('user:'.$wosCur.':A'),
                 'name'            => $redis->get('user:'.$wosCur.':B'),
                 //取gender的第一个汉字
-                'gender'           => $redis->getRange('user:'.$wosCur.':C', 0, 3),
+                'gender'           => $redis->getRange('user:'.$wosCur.':C', 0, 2),
                 'academy'           => $redis->get('user:'.$wosCur.':D'),
                 'birthday'     => $redis->get('user:'.$wosCur.':E'),
                 'edu_background'     => $redis->get('user:'.$wosCur.':F'),
@@ -358,20 +362,49 @@ class ExcelAction extends MY_Controller {
                 'job_title'            => $redis->get('user:'.$wosCur.':H'),
                 'job_title_rank'       => $redis->get('user:'.$wosCur.':I'),
                 'job_title_series' => $redis->get('user:'.$wosCur.':J'),    
-                'full_spell'         => "",
+                'full_spell'         => $pinyin->get_name_string(''.$redis->get('user:'.$wosCur.':B')),
                 'identity'         => 0,
                 'password'         =>md5('a'.$redis->get('user:'.$wosCur.':A'))
             );
+            // 组装数据，一次性插入多条，减少mysql的打开次数
             array_push($data_all,$data_one);
             // 每300条数据，插入数据库一次
             if(count($data_all) >= 300 || $i==$userLen-1)
             {
-                $status  = 0;
                 $status = $this->user->teacherInsert($data_all);
                 $data_all = [];
                 if($status <= 0)
                 {
                     exit(JsonEcho('1','数据插入错误！'));
+                }
+            }
+        }
+
+
+        // 处理数据库中已经存在的数据，进行更新操作
+        $userLen = $redis->lLen('existUserLink');
+        $data_all = [];
+        for($i=0; $i<$userLen; $i++)
+        {
+            $wosCur = $redis->rPop('existUserLink');
+            $data_one = array(
+                'job_number' => $redis->get('user:'.$wosCur.':A'),
+                'name'            => $redis->get('user:'.$wosCur.':B'),
+                //取gender的第一个汉字
+                'gender'           => $redis->getRange('user:'.$wosCur.':C', 0, 2),
+                'academy'           => $redis->get('user:'.$wosCur.':D'),
+                'full_spell'         => $pinyin->get_name_string(''.$redis->get('user:'.$wosCur.':B')),
+            );
+            // 组装数据，一次性插入多条，减少mysql的打开次数
+            array_push($data_all,$data_one);
+            // 每300条数据，插入数据库一次
+            if(count($data_all) >= 300 || $i==$userLen-1)
+            {
+                $status = $this->user->teacherUpdate($data_all);
+                $data_all = [];
+                if($status <= 0)
+                {
+                    exit(JsonEcho(0,'数据导入成功，未更新数据！'));
                 }
             }
         }
@@ -494,7 +527,7 @@ class ExcelAction extends MY_Controller {
      */
     public function readCitationExcel($file = "")
     {
-        // $file = './file/论文他引.xlsx';
+
         $this->load->model('file_model','file');    //载入数据库文件插入的model
         $this->load->library("PHPExcel");
         header('Content-Type:text/html;charset=utf-8');
@@ -702,7 +735,7 @@ class ExcelAction extends MY_Controller {
 
         $basePath = $_SERVER['DOCUMENT_ROOT'];
         $basePath = substr($basePath,0,strlen($basePath)-5).'file/download/';
-        $dir = 'SCI论文认领结果_'.date('Ymdim',time());
+        $dir = 'SCI论文认领结果_'.date('YmdHi',time());
         $filePath = $basePath.$dir;
 //        $path = $this->tranEncoding($path);
 //        $dir = $this->tranEncoding($dir);
@@ -730,9 +763,9 @@ class ExcelAction extends MY_Controller {
 
         if($result){
             $fileName = $dir.'.zip';
-            exit(JsonEcho(0,'数据导出正常',['filename'=>$fileName]));
+            exit(JsonEcho(0,'数据导出成功',['filename'=>$fileName]));
         }else{
-            exit(JsonEcho(1,'数据导出异常'));
+            exit(JsonEcho(1,'数据导出失败'));
         }
     }
 
@@ -868,9 +901,173 @@ class ExcelAction extends MY_Controller {
 
         force_download($filePath,NULL);
     }
+
+    /**
+     * @throws 论文他引的导出
+     */
     public function citationExport(){
+        $this->load->model('file_model','file');    //载入数据库文件插入的model
+
+        // 拼接完成文件在服务器上保存的真是路径
+        $basePath = $_SERVER['DOCUMENT_ROOT'];
+        $basePath = substr($basePath,0,strlen($basePath)-5).'file/download/';
+        $dir = '文章他引统计结果_'.date('YmdHi',time());
+        $filePath = $basePath.$dir;
+
+        if(is_dir($filePath)){
+            rmdir($filePath);
+        }
+
+        if(isset($dir)){
+            mkdir($filePath,'0777');
+            chmod($filePath,0777);
+        }
+        if(!is_dir($filePath) ){
+            exit(JsonEcho(2,'文件目录错误，无法导出'));
+        }
+
+        // 获取到所有的他引论文数据
+        $data = $this->file->getAllCitationExport();
+        $articleData = $data['data'];
+//        p($data);
+//        exit();
+        foreach ($articleData as $key => $val){
+            $status = $this->citationExportAction($val,$key,$dir);
+            if(!$status){
+                exit(JsonEcho(2,'文件导出过程出错，请重试'));
+            }
+        }
+        // 使用自定义的文件压缩类
+        $this->load->library('ZipFolder');
+        $ZipFolder = new ZipFolder();
+        $zipFile = $filePath.'.zip';//生成压缩文件的路径
+        $path = $filePath;//被压缩文件夹的路径
+        $result = $ZipFolder->zip($zipFile,$path);
 
 
+        if($result){
+            $fileName = $dir.'.zip';
+            exit(JsonEcho(0,'数据导出成功',['filename'=>$fileName]));
+        }else{
+            exit(JsonEcho(1,'数据导出失败'));
+        }
     }
+
+    public function citationExportAction($data,$fileName,$dir=null){
+        $this->load->library("PHPExcel");
+        // 准备表格中的要用的一些数据
+        $title = array('入藏号','中文作者全拼','论文名称','来源期刊','文章类型','单位','通讯作者','电子邮箱','引用次数','出版号',
+            '来源期刊简写','月日','年','卷','期','开始页码','结束页码','是否第一机构','影响因子','所属大类','中科院大类分区',
+            '是否TOP期刊',_year().'年引用次数','备注','论文状态','认领人','认领人工号','认领人所属单位','认领时间');
+        $cellName = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC');
+        $articleStatus = ['未认领','已认领'];// 论文的状态
+
+        $obj = new PHPExcel();
+        $obj->getActiveSheet(0)->setTitle('sheet');   //设置sheet名称
+        $_row = 1;   //设置纵向单元格标识
+
+        // 为表格设置标题
+        if($title){
+            $i = 0;
+            foreach($title AS $v){   //设置列标题
+                $obj->setActiveSheetIndex(0)->setCellValue($cellName[$i].$_row, $v);
+                $i++;
+            }
+            $_row++;
+        }
+
+        //设置表格宽度
+        $obj->getActiveSheet()->getColumnDimension('A')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('B')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('C')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('D')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('E')->setWidth(10);
+        $obj->getActiveSheet()->getColumnDimension('F')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('G')->setWidth(21);
+        $obj->getActiveSheet()->getColumnDimension('H')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('I')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('J')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('K')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('L')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('M')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('N')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('O')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('P')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('Q')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('R')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('S')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('T')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('U')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('V')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('W')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('X')->setWidth(9);
+        $obj->getActiveSheet()->getColumnDimension('Y')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('Z')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('AA')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('AB')->setWidth(15);
+        $obj->getActiveSheet()->getColumnDimension('AC')->setWidth(15);
+
+        // 如果数据不为空，则向所有的单元格中写入数据
+        if($data){
+            $i = 0;
+            foreach($data AS $v){
+                $obj->getActiveSheet(0)->setCellValue($cellName[0].($i+$_row),$v['citation_number']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[1].($i+$_row),$v['author']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[2].($i+$_row),$v['title']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[3].($i+$_row),$v['source']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[4].($i+$_row),$v['type']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[5].($i+$_row),$v['organization']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[6].($i+$_row),$v['reprint_author']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[7].($i+$_row),$v['email']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[8].($i+$_row),$v['quote_time']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[9].($i+$_row),$v['publication_number']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[10].($i+$_row),$v['source_shorthand']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[11].($i+$_row),$v['date']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[12].($i+$_row),$v['year']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[13].($i+$_row),$v['roll']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[14].($i+$_row),$v['period']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[15].($i+$_row),$v['startPage']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[16].($i+$_row),$v['endPage']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[17].($i+$_row),$v['is_first_inst']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[18].($i+$_row),$v['impact_factor']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[19].($i+$_row),$v['subject']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[20].($i+$_row),$v['zk_type']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[21].($i+$_row),$v['is_top']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[22].($i+$_row),$v[_year().'_time']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[23].($i+$_row),$v['other_info']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[24].($i+$_row),$articleStatus[$v['status']]);
+                $obj->getActiveSheet(0)->setCellValue($cellName[25].($i+$_row),$v['claimer_name']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[26].($i+$_row),$v['claimer_number']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[27].($i+$_row),$v['claimer_unit']);
+                $obj->getActiveSheet(0)->setCellValue($cellName[28].($i+$_row),$v['claim_time']);
+
+                $i++;
+            }
+        }
+
+
+        // 设置文件名称   保存文件
+        if(!$fileName){
+            $fileName = date('Ymdims',time()).'.xls';
+        }else{
+            $fileName = $fileName.'.xls';
+        }
+        if($dir==null){
+            $filePath = '/var/www/SCIManage/file/download/'.$fileName;
+        }else{
+            $filePath = '/var/www/SCIManage/file/download/'.$dir.'/'.$fileName;
+        }
+        $objWrite = PHPExcel_IOFactory::createWriter($obj, 'Excel5');
+
+        if(!empty($objWrite)){  // 导出成功
+            $objWrite->save($filePath);
+            return true;
+        }else{                  // 导出失败
+            return false;
+        }
+    }
+
+
+
 
 }

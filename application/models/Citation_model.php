@@ -21,7 +21,7 @@ class Citation_model extends CI_Model{
      * @param [type] $limit
      * @param [type] $page
      * @param [type] $key
-     * @return void
+     * @return array
      */
     public function getCitation($limit,$page,$key=null){
         return $this->db
@@ -51,7 +51,7 @@ class Citation_model extends CI_Model{
      * @param [type] $page
      * @param [type] $limit
      * @param [type] $key
-     * @return void
+     * @return array
      */
     public function selectStatus($page,$limit,$key){
         if($key != '-1')
@@ -87,7 +87,7 @@ class Citation_model extends CI_Model{
      *
      * @param [type] $where
      * @param string $cols
-     * @return void
+     * @return array
      */
     public function getCitationByColName($where,$cols=''){
         return $this->db->select($cols)->get_where('citation',$where)->result_array();
@@ -98,7 +98,7 @@ class Citation_model extends CI_Model{
      *
      * @param [type] $where
      * @param [type] $data_arr
-     * @return void
+     * @return array
      */
     public function updateCitation($where,$data_arr){
         return $this->db->update('citation',$data_arr,$where);
@@ -108,7 +108,7 @@ class Citation_model extends CI_Model{
      * 根据where条件删除论文
      *
      * @param [type] $where
-     * @return void
+     * @return int
      */
     public function deleteCitation($where){
         return $this->db->delete('citation',$where);

@@ -28,6 +28,11 @@ class File_model extends CI_Model
         return $this->db->insert_batch('subject',$data_arr);
     }
 
+    /**
+     * 导出所有的sci论文数据，并且进行格式化
+     * @param array $where
+     * @return array
+     */
     public function getAllSciArticleToExport($where=array()){
         $unit = $this->db
                      ->select('academy')
@@ -92,7 +97,7 @@ class File_model extends CI_Model
                 $value['startPage'] = $page[0];
                 $value['endPage'] = $page[1];
 
-                $author = $this->db->select('aName,aJobNumber,aisAddress,aUnit,aIsClaim')
+                $author = $this->db->select('aName,aType,aJobNumber,aisAddress,aUnit,aIsClaim')
                     ->where(['aArticleNumber'=>$value['accession_number']])
                     ->from('author')
                     ->get()->result_array();
@@ -100,7 +105,16 @@ class File_model extends CI_Model
                 $first_author_number = [];
                 $reprint_author = [];
                 $other_author = [];
-                foreach($author as $k => $v){
+                $aType = array(
+                    '本校教师'=>'(教)',
+                    '本校本科生'=>'(本)',
+                    '本校研究生'=>'(研)',
+                    '其他人员'=> '(外)',
+                    ''=>"(错误)",
+                    NULL=>'(错误)'
+                );
+                foreach($author as $k => &$v){
+                    $v['aName'] .= $aType[$v['aType']];
                     if($k == 0){
                         array_push($first_author,$v['aName']);
                         array_push($first_author_number,$v['aJobNumber']);
@@ -121,7 +135,7 @@ class File_model extends CI_Model
 //            p($data);
         }
         // echo $redis->rPop();
-        // 对于为认领的论文，做格式化操作
+        // 对于未认领的论文，做格式化操作（因为没有学院的限制，所以单独处理，并且单独导入到一张表中）
         $data  = $this->db
                     ->where(['claimer_unit'=>NULL])
                     ->order_by('articleStatus','DESC')
@@ -129,41 +143,6 @@ class File_model extends CI_Model
                     ->get()
                     ->result_array();
         foreach($data as $key => &$value){
-            /*             $curNumber = $value['accession_number'];
-                        $redis->Lpush('sciExportLink',$curNumber);
-                        $redis->set('sciExport:'.$curNumber.':title',$value['title']);
-                        $redis->set('sciExport:'.$curNumber.':author',$value['author']);
-                        $redis->set('sciExport:'.$curNumber.':source',$value['source']);
-                        $redis->set('sciExport:'.$curNumber.':article_type',$value['article_type']);
-                        $redis->set('sciExport:'.$curNumber.':address',$value['address']);
-                        $redis->set('sciExport:'.$curNumber.':email',$value['email']);
-                        $redis->set('sciExport:'.$curNumber.':organization',$value['organization']);
-                        $redis->set('sciExport:'.$curNumber.':quite_time',$value['quite_time']);
-                        $redis->set('sciExport:'.$curNumber.':source_shorthand',$value['source_shorthand']);
-                        $redis->set('sciExport:'.$curNumber.':is_top',$value['is_top']);
-                        $redis->set('sciExport:'.$curNumber.':roll',$value['roll']);
-                        $redis->set('sciExport:'.$curNumber.':period',$value['period']);
-                        $redis->set('sciExport:'.$curNumber.':date',$value['date']);
-                        $redis->set('sciExport:'.$curNumber.':year',$value['year']);
-                        // 这里的页码需要处理
-                        $page = explode($value['page'],'--');
-                        $redis->set('sciExport:'.$curNumber.':startPage',$page[0]);
-                        $redis->set('sciExport:'.$curNumber.':endPage',$page[1]);
-                        $redis->set('sciExport:'.$curNumber.':is_first_inst',$value['is_first_inst']);
-                        $redis->set('sciExport:'.$curNumber.':impact_factor',$value['impact_factor']);
-                        $redis->set('sciExport:'.$curNumber.':subject',$value['subject']);
-                        $redis->set('sciExport:'.$curNumber.':zk_type',$value['zk_type']);
-                        $redis->set('sciExport:'.$curNumber.':is_cover',$value['is_cover']==1?'是':'否');
-                        $redis->set('sciExport:'.$curNumber.':sci_type',$value['sci_type']);
-                        $redis->set('sciExport:'.$curNumber.':reward_point',$value['reward_point']);
-                        $redis->set('sciExport:'.$curNumber.':other_info',$value['other_info']);
-                        $redis->set('sciExport:'.$curNumber.':owner',$value['owner']);
-                        $redis->set('sciExport:'.$curNumber.':owner_name',$value['owner_name']);
-                        $redis->set('sciExport:'.$curNumber.':claimer_unit',$value['claimer_unit']);
-                        p($value);
-                        exit();
-                        */
-
             $page = explode('--',$value['page']);
             $value['startPage'] = $page[0];
             $value['endPage'] = $page[1];
@@ -193,11 +172,72 @@ class File_model extends CI_Model
         }
 
         $resultData["未认领"] = $data;
-//        p($resultData);
-//        exit();
         return ['data'=>$resultData,'unit'=>$unit];
     }
 
+    public function getAllCitationExport($where=array()){
+        $unit = $this->db
+            ->select('academy')
+            ->distinct()
+            ->from('user')
+            ->get()
+            ->result_array();
+
+        $resultData = [];
+        foreach ($unit as $val){
+            $where['claimer_unit'] = $val['academy'];
+            $data = $this->db
+                ->where($where)
+                ->order_by('status','DESC')
+                ->from('citation')
+                ->get()
+                ->result_array();
+//            var_dump($where);
+//            exit();
+            if(empty($data)){
+                continue;
+            }
+//            $redis = new Redis();
+//            $redis->connect('127.0.0.1','6379') or exit(JsonEcho(1,'服务器异常，请联系技术人员！'));
+            $data = deal_citation_time($data,_year());
+            foreach($data as $key => &$value){
+
+                // 对于页数进项操作
+                $page = explode('--',$value['page']);
+                $value['startPage'] = $page[0];
+                $value['endPage'] = $page[1];
+                unset($value['page']);
+                // 格式化认领时间
+                $value['claim_time'] = date('Y-m-d h:m',$value['claim_time']);
+                // 删除认领时间的所有字段
+                unset($value['citation_time']);
+
+            }
+            $resultData[$val['academy']]=$data;
+        }
+
+        // 对于未认领的论文，做格式化操作（因为没有学院的限制，所以单独处理，并且单独导入到一张表中）
+        $data  = $this->db
+            ->where(['claimer_unit'=>NULL])
+            ->order_by('status','DESC')
+            ->from('citation')
+            ->get()
+            ->result_array();
+        $data = deal_citation_time($data,_year());
+        foreach($data as $key => &$value){
+            $page = explode('--',$value['page']);
+            $value['startPage'] = $page[0];
+            $value['endPage'] = $page[1];
+            unset($value['page']);
+            // 格式化认领时间
+            $value['claim_time'] = date('Y-m-d h:m',$value['claim_time']);
+            // 删除认领时间的所有字段
+            unset($value['citation_time']);
+        }
+
+        $resultData["未认领"] = $data;
+        return ['data'=>$resultData,'unit'=>$unit];
+    }
 
     public function formatAuthor($author){
         //把作者中的姓名全拼分为数组   这里涉及到两种格式，判断姓名的分类中是否有 ','分割，

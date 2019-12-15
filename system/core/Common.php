@@ -847,42 +847,67 @@ if ( ! function_exists('function_usable'))
 		return FALSE;
 	}
 
-	/*
-	 * function by myswelf
-	 */
-	/*
-	 * 返回json字符串
-	 */
-	function JsonEcho($code,$msg="",$data=array())
+}
+//   ====================== 自定义的函数 ==================
+/*
+ * function by myself
+ */
+/*
+ * 返回json字符串
+ */
+function JsonEcho($code,$msg="",$data=array())
+{
+    $data = array(
+        'code' => $code,
+        'msg'  => $msg,
+        'data' => $data
+    );
+    return json_encode($data,JSON_UNESCAPED_UNICODE);
+
+}
+/*
+ * 错误码定义：
+ *  0: 成功
+ *  1: 请求失败
+ *  4: 未登录，请先登录
+ */
+//formate print
+function p($data){
+    echo "<pre>";
+    print_r($data);
+    echo '</pre>';
+}
+
+
+/**
+ * 返回当前年份，用来匹配当年的引用次数
+ *
+ * @return void
+ */
+function _year(){
+    return '2019';
+}
+
+/**
+ * 格式化处理取到citation_time 的字段的值
+ * @param $article
+ * @param $update_time
+ * @return mixed
+ */
+function deal_citation_time($article,$update_time)//处理citation_time字段
+{
+    foreach ($article as &$v)      //循环处理每条记录里的citation_time
     {
-        $data = array(
-            'code' => $code,
-            'msg'  => $msg,
-            'data' => $data
-        );
-        return json_encode($data,JSON_UNESCAPED_UNICODE);
+        $increase_claim=0;
+        $claim_time=explode("-",$v['citation_time']);//将citation_time字段分解为数组
+        foreach ($claim_time as $c) {     //对数组进行查找
 
+            if(substr($c,0,strpos($c, ':'))==$update_time)// 截取数组中每个元素 “:”前的字符串，如果与查找条件$begin_time相等
+            {                                                              //则截取“:”后的字符串赋给$begin_claim
+                $increase_claim=substr($c,strpos($c, ':')+1);             // 处理字符串 $c 从冒号后面的位置开始，到最后
+            }
+        }
+        $v[$update_time.'_'.'time']=$increase_claim;
     }
-    /*
-     * 错误码定义：
-     *  0: 成功
-     *  1: 请求失败
-     *  4: 未登录，请先登录
-     */
-    //formate print
-    function p($data){
-        echo "<pre>";
-        print_r($data);
-        echo '</pre>';
-	}
-	
-
-	/**
-	 * 返回当前年份，用来匹配当年的引用次数
-	 *
-	 * @return void
-	 */
-	function _year(){
-		return '2019';
-	}
+    return $article;
 }

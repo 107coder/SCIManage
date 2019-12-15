@@ -129,6 +129,10 @@ class User_model extends CI_Model
     {
         return $this->db->insert_batch('user',$data_arr);
     }
+    //批量更新教师 用户数据
+    public function teacherUpdate($data_arr){
+        return $this->db->update_batch('user',$data_arr,'job_number');
+    }
      public function studentInsert($data_arr)
     {
         return $this->db->insert_batch('student',$data_arr);

@@ -198,4 +198,33 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
         }
     });
 
+    // 数据导出
+    $('#export_data').click(function(){
+        // 想要通过一个弹出窗口能够 对 想要导出的窗口进行选择
+        layer.load(1,{shade:[0.2,"#000"]}); //上传loading
+        $.ajax({
+            type:'post',
+            url:rootUrl+'/ExcelAction/citationExport',
+            data:{},
+            dataType:'json',
+            success:function(res){
+                if(res.code == 0){
+                    layer.msg(res.msg);
+                    location.href = rootUrl+'/ExcelAction/downloadFile?filename='+res.data['filename'];
+                    layer.closeAll('loading'); //关闭loading
+                }else{
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                }
+
+            },error:function(){
+                console.log('error');
+                layer.closeAll('loading'); //关闭loading
+                layer.msg("导出错误");
+            }
+        });
+        // download();
+    });
+
+
 })

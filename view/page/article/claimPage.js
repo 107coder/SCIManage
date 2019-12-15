@@ -288,11 +288,11 @@ function getAuthor(index)
     var sex = $("[data-index="+index+"]").find("[data-field='sex']").find('input').val();
     var number = $("[data-index="+index+"]").find("[data-field='number']").find('div').text();
     var tongxun = $("[data-index="+index+"]").find("[data-field='tongxun']").find('em').text();
-    if(authorType == "本校教师") name = name+"(教)";
-    else if(authorType == "本校本科生") name = name+"(本)";
-    else if(authorType == "本校研究生") name = name+"(研)";
-    else if(authorType == "其他人员") name = name+"(他)";
-    else name = name;
+    // if(authorType == "本校教师") name = name+"(教)";
+    // else if(authorType == "本校本科生") name = name+"(本)";
+    // else if(authorType == "本校研究生") name = name+"(研)";
+    // else if(authorType == "其他人员") name = name+"(他)";
+    // else name = name;
     var arr = new Array(name,full_spell,xueli,title,unit,authorType,sex,number,tongxun,aId);
     // 姓名 全拼 学历 职称 单位 作者类型 性别 工号 是否为通讯作者
     return arr;
@@ -308,6 +308,10 @@ form.on('submit(claimArticle)',function() {
     var tableData = new Array();    
     for(var i=0; i<authorCount; i++)
     {
+       if(getAuthor(i)[5] === '选择作者类型'){
+            layer.msg("有未选择的作者类型，请选择完整！");
+            return false;
+       }
         tableData.push(getAuthor(i));
     }
     
