@@ -53,6 +53,24 @@ class Login extends CI_Controller {
 
         if(!empty($username) && !empty($password))
         {
+            // 当系统中一个用户的都没有的额时候，使用默认的账号密码登录
+            if($this->noUser()){
+                if(md5($username)=='f10a0199d44639f8ceb6b310a4f0e8ea' && md5($password)=='38118ffccfa14989b8e60187267f9919'){
+                    $userInfo = array(
+                        'job_number' => '100000001',
+                        'name'       => 'root',
+                        'full_spell' => 'root',
+                        'gender'     => '男',
+                        'academy'    => '科学技术研究院',
+                        'identity'   =>  2
+                    );
+                    $this->session->set_userdata($userInfo);
+                    exit(JsonEcho(0,'登录成功'));
+                }
+                else{
+                    exit(JsonEcho(1,'密码错误'));
+                }
+            }
             $where = array(
                 'job_number'=>$username,
                 'password' => md5($password)
@@ -68,13 +86,20 @@ class Login extends CI_Controller {
             {
                 echo JsonEcho('1','用户名或密码错误！');
             }
-
         }
         else
         {
             echo JsonEcho('1','用户名和密码不能为空');
         }
+    }
 
+    private function noUser(){
+        $userCount = $this->db->count_all('user');
+        if($userCount == 0){
+            return true;
+        }else{
+            return false;
+        }
     }
 
 

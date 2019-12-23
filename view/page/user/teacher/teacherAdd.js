@@ -3,6 +3,18 @@ layui.use(['form','layer'],function(){
         layer = parent.layer === undefined ? layui.layer : top.layer,
         $ = layui.jquery;
 
+    //添加验证规则
+    form.verify({
+        job_number : function(value, item){
+            if(value.length < 5){
+                return "工号长度长度不能小于5位";
+            }
+            if(value.length > 18){
+                return "工号长度不能超过18位";
+            }
+        }
+    })
+
     form.on("submit(addTeacher)",function(data){
         var index = top.layer.msg('数据提交中，请稍候',{icon: 16,time:false,shade:0.8});
         $.ajax({

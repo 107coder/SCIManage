@@ -233,7 +233,6 @@ class ExcelAction extends MY_Controller {
         }else{
             exit(JsonEcho('0','数据导入成功！'));
         }
-
     }
 
     //用户的导入
@@ -502,7 +501,7 @@ class ExcelAction extends MY_Controller {
      */
     public function uploadCitationApi()
     {
-        $config['upload_path']      = './file/';
+        $config['upload_path']      = '../file/';
         $config['allowed_types']    = 'xls|xlsx|txt';
         $config['max_size']     = 2048;
 
@@ -737,8 +736,9 @@ class ExcelAction extends MY_Controller {
         $basePath = substr($basePath,0,strlen($basePath)-5).'file/download/';
         $dir = 'SCI论文认领结果_'.date('YmdHi',time());
         $filePath = $basePath.$dir;
-//        $path = $this->tranEncoding($path);
-//        $dir = $this->tranEncoding($dir);
+        if(is_dir($filePath)){
+            rmdir($filePath);
+        }
         if(isset($dir)){
             mkdir($filePath,'0777');
             chmod($filePath,0777);
@@ -749,10 +749,13 @@ class ExcelAction extends MY_Controller {
         // 获取到所有的sci论文数据
         $data = $this->file->getAllSciArticleToExport();
         $articleData = $data['data'];
+        $data_all = [];
         foreach ($articleData as $key => $val){
 //            $key = $this->tranEncoding($key);
-           $this->sciExportAction($val,$key,$dir);
+           $this->sciExportAction($val,$key,$filePath);
+           $data_all = array_merge($data_all,$val);
         }
+        $this->sciExportAction($data_all,'SCI论文认领情况总表',$filePath);
         // 使用自定义的文件压缩类
         $this->load->library('ZipFolder');
         $ZipFolder = new ZipFolder();
@@ -775,10 +778,10 @@ class ExcelAction extends MY_Controller {
         // 准备表格中的要用的一些数据
         $title = array('入藏号','论文名称','中文作者全拼','来源期刊','文章类型','单位','通讯作者','电子邮箱','引用次数',
             '来源期刊简写','月日','年','卷','期','开始页码','结束页码','是否第一机构','影响因子','所属大类','中科院大类分区',
-            '是否TOP期刊','是否封面论文','奖励文件论文分类','奖励分值','备注','论文状态','第一作者','第一作者工号','通讯作者','其他作者',
+            '是否TOP期刊','是否封面论文','奖励文件论文分类','A类分值','备注','论文状态','第一作者','第一作者工号','通讯作者','其他作者',
             '认领人','认领人所属单位');
         $cellName = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O','P','Q','R','S','T','U','V','W','X','Y','Z','AA','AB','AC','AD','AE','AF');
-        $articleStatus = ['未认领','学院审核中','学院不通过','学校未审核','学校不通过','审核通过'];// 论文的状态
+        $articleStatus = ['未认领','学院审核中','学院不通过','学校未审核','学校不通过','审核通过','审核通过(批)'];// 论文的状态
 
         $obj = new PHPExcel();
         $obj->getActiveSheet(0)->setTitle('sheet');   //设置sheet名称
@@ -876,11 +879,8 @@ class ExcelAction extends MY_Controller {
         }else{
             $fileName = $fileName.'.xls';
         }
-        if($dir==null){
-            $filePath = '/var/www/SCIManage/file/download/'.$fileName;
-        }else{
-            $filePath = '/var/www/SCIManage/file/download/'.$dir.'/'.$fileName;
-        }
+
+        $filePath = $dir.'/'.$fileName;
         $objWrite = PHPExcel_IOFactory::createWriter($obj, 'Excel5');
 
         if(!empty($objWrite)){
@@ -915,7 +915,7 @@ class ExcelAction extends MY_Controller {
         $filePath = $basePath.$dir;
 
         if(is_dir($filePath)){
-            rmdir($filePath);
+            exit(JsonEcho(1,'操作频繁，请稍后重试'));
         }
 
         if(isset($dir)){
@@ -929,14 +929,18 @@ class ExcelAction extends MY_Controller {
         // 获取到所有的他引论文数据
         $data = $this->file->getAllCitationExport();
         $articleData = $data['data'];
-//        p($data);
-//        exit();
+
+        $data_all = [];
         foreach ($articleData as $key => $val){
-            $status = $this->citationExportAction($val,$key,$dir);
+            $status = $this->citationExportAction($val,$key,$filePath);
+            $data_all = array_merge($data_all,$val);
             if(!$status){
                 exit(JsonEcho(2,'文件导出过程出错，请重试'));
             }
         }
+        $this->citationExportAction($data_all,'论文他引认领情况总表',$filePath);
+
+
         // 使用自定义的文件压缩类
         $this->load->library('ZipFolder');
         $ZipFolder = new ZipFolder();
@@ -1053,9 +1057,9 @@ class ExcelAction extends MY_Controller {
             $fileName = $fileName.'.xls';
         }
         if($dir==null){
-            $filePath = '/var/www/SCIManage/file/download/'.$fileName;
+            exit(JsonEcho(3,'找不到路径'));
         }else{
-            $filePath = '/var/www/SCIManage/file/download/'.$dir.'/'.$fileName;
+            $filePath = $dir.'/'.$fileName;
         }
         $objWrite = PHPExcel_IOFactory::createWriter($obj, 'Excel5');
 

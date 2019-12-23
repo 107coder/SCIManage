@@ -37,7 +37,7 @@ class Main extends MY_Controller {
 				"spread": false
 			},
 			{
-				"title": "论文审核",
+				"title": "SCI论文审核",
 				"icon": "&#xe634;",
 				"href": "page/admin/'.$paperReviewUrl.'",
 				"spread": false

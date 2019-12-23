@@ -69,6 +69,32 @@ class Manage extends MY_Controller {
             exit(JsonEcho(0,'审核通过成功'));
         }
     }
+
+    public function multiPassArticle(){
+        $accession_number = $this->input->post('accession_number');
+        $data_arr = [];
+        if($this->session->identity==2){
+            foreach ($accession_number as $value){
+                $data_one[0] = array(
+                    'accession_number' => $value,
+                    'articleStatus' => 6    // 用于批量审核，增加一个状态 6
+                );
+                $data_arr = array_merge($data_arr,$data_one);
+            }
+        }else if($this->session->identity == 1){
+//            $data_arr = ['articleStatus'=>3];
+            exit(JsonEcho(1,'权限不够，不能执行操作'));
+        }else{
+            exit(JsonEcho(1,'没有操作权限'));
+        }
+//        exit(JsonEcho(0,'审核成功',$data_arr));
+        $res = $this->article->multiUpdateArticle($data_arr,'accession_number');
+        if(!$res){
+            exit(JsonEcho(1,'审核通过失败，请稍后重试'));
+        }else{
+            exit(JsonEcho(0,'批量审核通过成功'));
+        }
+    }
     /**
      * 管理员执行论文不通过操作
      *

@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>文章列表--layui后台管理模板 2.0</title>
+	<title>文章列表--论文认领系统</title>
 	<meta name="renderer" content="webkit">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -21,7 +21,7 @@
 				<div class="layui-input-block" style="width: 150px;margin-left: 100px;">
 					<select lay-filter="articleType">
 						<option value="-1">全部论文</option>
-						<option value="1">测试</option>
+						<!--<option value="1">测试</option>-->
 						<option value="3">待审核</option>
 						<option value="4">不通过</option>
 						<option value="5">已审核</option>
@@ -34,6 +34,9 @@
 				</div>
 				<a class="layui-btn search_btn" data-type="reload">搜索</a>
 			</div>
+			<div class="layui-inline">
+				<a class="layui-btn layui-btn-normal claimAll_btn">批量通过</a>
+			</div>
 		</form>
 	</blockquote>
 	<table id="newsList" lay-filter="newsList"></table>
@@ -44,7 +47,9 @@
 		{{#  } else if(d.articleStatus == "4"){ }}
 		<span class="layui-blue">不通过</span>
 		{{#  } else if(d.articleStatus == "5"){ }}
-		<span class="" style="color:#009688;">已审核</span>
+		<span class="" style="color:#009688;">已通过</span>
+		{{#  } else if(d.articleStatus == "6"){ }}
+		<span class="" style="color:#009688;">已通过(批)</span>
 		{{#  } else { }}
 			其他状态
 		{{#  }}}

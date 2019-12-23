@@ -134,11 +134,21 @@ class Article_model extends CI_Model{
      *
      * @param $data_arr 传入要修改的数据
      * @param $where    修改的条件
-     * @return mixed
+     * @return bool
      */
     public function updateArticle($data_arr,$where)
     {
         return $this->db->update('article',$data_arr,$where);
+    }
+
+    /**
+     * 批量更新sci文章，主要是用于批量审核通过
+     * @param $data_arr
+     * @param $where
+     * @return mixed
+     */
+    public function multiUpdateArticle($data_arr,$where){
+        return $this->db->update_batch('article',$data_arr,$where);
     }
 
     // 检测文章是否可以认领
@@ -181,18 +191,18 @@ class Article_model extends CI_Model{
      * @return array
      */
     public function getArticleByAcademy($limit,$page,$where,$like=[]){
-        $res['data'] = $this->db->from('article')
-                                ->where($where)
-                                ->like($like)
-                                ->limit($limit,$page)
-                                ->order_by("accession_number")
-                                ->get()
-                                ->result_array();
-        $res['count'] = $this->db
-                            ->from('article')
-                            ->where($where)
-                            ->like($like)
-                            ->count_all_results();
+         $this->db->from('article');
+         $this->db->where($where);
+        if(isset($where['articleStatus']) && $where['articleStatus'] == 5)
+            $this->db->or_where('articleStatus = ',6);
+         $this->db->like($like)->limit($limit,$page)->order_by("accession_number");
+
+        $res['data'] = $this->db->get()->result_array();
+
+        $this->db->from('article')->where($where);
+        if(isset($where['articleStatus']) && $where['articleStatus'] == 5)
+            $this->db->or_where('articleStatus = ',6);
+        $res['count'] = $this->db->like($like)->count_all_results();
         return $res;
     }
 

@@ -76,7 +76,7 @@ layui.use(['form','element','layer','jquery'],function(){
 
 
 
-    $("#buttonTY").click(function(){
-        layer.msg('他引认领暂未开放');
-    });
+    // $("#buttonTY").click(function(){
+    //     layer.msg('他引认领暂未开放');
+    // });
 })

@@ -255,23 +255,38 @@ class User extends MY_Controller
         ); 
         echo json_encode($resdata,JSON_UNESCAPED_UNICODE);
     }
-    public function checkPwd()
+    public function checkPwd($oldPwd)
     {
         $job_number=$this->session->job_number;
-        $oldPwd=md5($this->input->post('oldPwd'));
+        $oldPwd=md5($oldPwd);
         $data=$this->user->checkTeacher($job_number);
-        if($oldPwd!=$data[0]['password'])
-            echo "密码错误！";
+        if($oldPwd!=$data[0]['password']){
+            return false;
+        }else{
+            return true;
+        }
+
            
     }
     public function changePwd()
     {
         $job_number=$this->session->job_number;
+        $oldPwd = $this->input->post('oldPwd');
+        $newPwd = $this->input->post('newPwd');
+        if(!$this->checkPwd($oldPwd)){
+            exit(JsonEcho(2,'密码错误'));
+        }
         $data=array
         (
-            'password' => md5($this->input->post('newPwd'))  
+            'password' => md5($newPwd)
         );
-        $this->user->editTeacher($job_number,$data);    
+        $result = $this->user->editTeacher($job_number,$data);
+        if($result){
+            exit(JsonEcho(0,'修改密码成功'));
+        }else{
+            exit(JsonEcho(1,'修改密码失败'));
+        }
+
     }      
     // 重置密码
     public function resetPwd(){

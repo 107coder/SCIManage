@@ -19,7 +19,7 @@ layui.use(['form','layer','jquery'],function(){
             type:2,
             title:"提示框",
             move:false,
-            area: ['400px', '200px'],
+            area: ['500px', '220px'],
             
             content: webRoot + '/page/login/addFullSpell.html',
             // 右上角关闭按钮的点击事件

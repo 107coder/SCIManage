@@ -9,8 +9,10 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
     //添加验证规则
     form.verify({
         newPwd : function(value, item){
-            if(value.length < 6){
+            if(value.length < 6 ) {
                 return "密码长度不能小于6位";
+            }else if(value.length > 20){
+                return "密码长度不能大于20位";
             }
         },
         confirmPwd : function(value, item){
@@ -20,49 +22,40 @@ layui.use(['form','layer','laydate','table','laytpl'],function(){
         }
     })
     $.ajax({
-            url : rootUrl+"/user/teacherInfo",
-            dataType:"JSON",
+        url : rootUrl+"/User/teacherInfo",
+        dataType:"JSON",
+        type : "post",
+        data : {},
+        async : false,
+        success : function(res)
+        {
+            $(".job_number").val(res['data'].job_number);
+            $(".name").val(res['data'].name);
+        }
+    });
+    form.on("submit(changePwd)",function(){
+
+        $.ajax({
+            url : rootUrl+"/User/changePwd",
             type : "post",
-            data : {},
-            async : false,
+            data : {
+                oldPwd: $(".oldPwd").val(),
+                newPwd: $(".newPwd").val()
+            },
+            dataType:'json',
             success : function(res)
             {
-                $(".job_number").val(res['data'].job_number);
-                $(".name").val(res['data'].name);
-            }
-        });
-    form.on("submit(changePwd)",function(data){
-        $.ajax({
-                url : rootUrl+"/user/checkPwd",
-                type : "post",
-                data : {
-                    oldPwd: $(".oldPwd").val()
-                },
-                async : false,
-                success : function(res,status)
-                {
-                    if(res!="")
-                        top.layer.msg("密码错误，请重新输入！");
-                    else
-                    {
-                        $.ajax({
-                            url : rootUrl+"/user/changePwd",
-                            type : "post",
-                            data : {
-                                newPwd: $(".newPwd").val()
-                            },
-                            async : false,
-                            success : function(res,status)
-                            {
-                                if(status=="success"){
-                                    top.layer.msg("密码修改成功，请重新登录！");
-                                }else{
-                                    top.layer.msg("密码修改失败！");
-                                }
-                            }
-                        });
-                    }
+                if(res.code == 2){
+                    layer.msg(res.msg);
+                }else if(res.code == 0){
+                    setTimeout('window.location.reload()',1000); // 刷新页面
+                    layer.msg("密码修改成功！");
+                }else{
+                    layer.msg("密码修改失败！");
                 }
+            },error:function(){
+                layer.msg("服务器错误！");
+            }
         });
     })
 

@@ -20,6 +20,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
         loding : true,
         id : "newsListTable",
         cols : [[
+            {type: "checkbox", fixed:"left", width:50},
             {field: 'accession_number', title: 'wos', width:0, align:"center"},
             {field: 'title', title: '文章标题', width:250},
             {field: 'author', title: '论文作者', align:'center',width:200},
@@ -69,9 +70,35 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
                 key: data.value  //搜索的关键字
             }
         })
-    });  
+    });
 
-  
+    //批量认领操作
+    $(".claimAll_btn").click(function(){
+        var checkStatus = table.checkStatus('newsListTable'),
+            data = checkStatus.data,
+            accession_number = [];
+        if(data.length > 0) {
+            for (var i in data) {
+                accession_number.push(data[i].accession_number);
+            }
+            layer.confirm('确定审核通过选中的文章？', {icon: 3, title: '提示信息'}, function (index) {
+                $.post(rootUrl+"/Manage/multiPassArticle",{
+                    accession_number : accession_number  //将需要删除的accession_number作为参数传入
+                },function(res){
+                    if(res.code == 0){
+                        layer.msg(res.msg);
+                        tableIns.reload();
+                        layer.close(index);
+                    }else{
+                        layer.msg(res.msg);
+                        layer.close(index);
+                    }
+                },'json')
+            })
+        }else{
+            layer.msg("请选择需要审核的文章");
+        }
+    })
 
 
        // 预览文章时候  填写论文的基本信息信息
@@ -207,9 +234,10 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
             pass(data);
         } else if(layEvent === 'back'){ //删除
             layer.confirm('确定退回文章？',{icon:3, title:'提示信息'},function(index){
-                $.get(rootUrl+"/Manage/backArticle",{
+                $.post(rootUrl+"/Manage/backArticle",{
                     accession_number:data.accession_number  //将需要删除的newsId作为参数传入
                 },function(res){
+
                     if(res.code == 0){
                         tableIns.reload();
                         layer.close(index);
@@ -217,7 +245,7 @@ layui.use(['form','layer','laydate','table','laytpl','upload'],function(){
                         layer.msg(res.msg);
                     }
                   
-                })
+                },'json')
             });
         } else if(layEvent === 'look_root'){ // 校级管理员加载审核页面 
             review(data);
